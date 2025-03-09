@@ -24,7 +24,7 @@ def last500_macd_check(macd_line, lookback_period, logger):
         logger.error(f"last500_macd_check hatası: {e}")
         return False
     
-def last500_histogram_check(histogram, lookback_period, logger, side_):
+def last500_histogram_check(histogram, lookback_period, logger):
     try:
         last10_avg = (histogram.tail(10).abs()).avg()
         histogram_last_lookback = histogram.tail(lookback_period)
