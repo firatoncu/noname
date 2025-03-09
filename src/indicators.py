@@ -26,11 +26,11 @@ def last500_macd_check(macd_line, lookback_period, logger):
     
 def last500_histogram_check(histogram, lookback_period, logger):
     try:
-        last10_avg = max(histogram.tail(10).max(), abs(histogram.tail(10).min()))
+        last10_max = max(histogram.tail(10).max(), abs(histogram.tail(10).min()))
         histogram_last_lookback = histogram.tail(lookback_period)
         histogram_variance = histogram_last_lookback.max() + abs(histogram_last_lookback.min())
         histogram_threshold = histogram_variance * 0.15
-        if abs(last10_avg) >= histogram_threshold:
+        if last10_max >= histogram_threshold:
             return True
         return False
     except Exception as e:
