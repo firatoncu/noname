@@ -7,7 +7,7 @@ This repository contains **project n0name** designed for automated futures tradi
 
 ### Prerequisites
 - Python 3.8 or higher
-- Binance API Key and Secret with futures trading enabled
+- Binance API Key and Secret with Futures Trading enabled
 
 ### Steps
 1. **Configurations**: 
@@ -29,7 +29,6 @@ This repository contains **project n0name** designed for automated futures tradi
    ```
 
 2. **Run**:
-* Run app.py 
    ```bash
-   python app.py
+  python app.py
    ```
