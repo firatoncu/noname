@@ -29,7 +29,7 @@ def last500_histogram_check(histogram, lookback_period, logger):
         last10_avg = (histogram.tail(10).abs()).mean()
         histogram_last_lookback = histogram.tail(lookback_period)
         histogram_variance = histogram_last_lookback.max() + abs(histogram_last_lookback.min())
-        histogram_threshold = histogram_variance * 0.3
+        histogram_threshold = histogram_variance * 0.15
         if abs(last10_avg) >= histogram_threshold:
             return True
         return False
