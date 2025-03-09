@@ -1,5 +1,5 @@
 
-# n0name by f0ncu
+# n0name v0.4 by f0ncu
 
 This repository contains **project n0name** designed for automated futures trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
