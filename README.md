@@ -25,7 +25,7 @@ This repository contains **project n0name** designed for automated futures tradi
 
 3. **Configurations**: 
 -   Create noname/config.yml file in a text editor.  
--   Replace the placeholder values with your own Binance credentials:
+-   Replace the placeholder values with your own Binance credentials and desired symbols:
    ```yaml
   # config.yml
   version:
@@ -43,7 +43,7 @@ This repository contains **project n0name** designed for automated futures tradi
    ```
 
 4. **Run**:
-* Navigate to the web directory: 
+* Navigate to the project directory: 
    ```bash
    cd noname
    python app.py
