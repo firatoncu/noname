@@ -1,0 +1,13 @@
+# config.yml
+version:
+  version : 0.4
+
+
+symbols:
+  symbols : ['ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'SUIUSDT']
+  leverage : 3
+  max_open_positions : 2
+
+api_keys:
+  api_key : 'QhTibgCwZjaDl01g37XpRKtro2qL7cgSunrXndfnazt9KZ0Nbcno0FPrV9Ja0hQ9'
+  secret : 'qDJAb8xpevCUjdUXrKr3XjmizCZDgNI0Oz8fkzN7qgyBqcGWrMoGLygL5iSxFhEz'
