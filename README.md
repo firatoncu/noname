@@ -7,30 +7,16 @@ This repository contains **project n0name** designed for automated futures tradi
 
 ### Prerequisites
 - Python 3.8 or higher
-- Binance API Key and Secret (obtainable from your Binance account)
-- A Binance account with futures trading enabled
+- Binance API Key and Secret with futures trading enabled
 
 ### Steps
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/firatoncu/noname.git
-   cd noname
-   ```
-
-2. **Install Dependencies**: Ensure you have pip installed, then run:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-
-3. **Configurations**: 
--   Create noname/config.yml file in a text editor.  
--   Replace the placeholder values with your own Binance credentials and desired symbols:
+1. **Configurations**: 
+*   Create noname/config.yml file in a text editor, with structure below.  
+*   Replace the placeholder values with your own Binance credentials and add desired symbols:
    ```yaml
   # config.yml
   version:
     version : 0.4
-  
   
   symbols:
     symbols : ['ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'SUIUSDT']
@@ -42,8 +28,8 @@ This repository contains **project n0name** designed for automated futures tradi
     secret : 'secret'
    ```
 
-4. **Run**:
-* Navigate to the project directory: 
+2. **Run**:
+* Run app.py 
    ```bash
-   cd noname
    python app.py
+   ```
