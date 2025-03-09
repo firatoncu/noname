@@ -30,5 +30,5 @@ This repository contains **project n0name** designed for automated futures tradi
 
 2. **Run**:
    ```bash
-  python app.py
+   python app.py
    ```
