@@ -1,1 +1,16 @@
 config.yml
+development
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.ipynb_checkpoints
+*.log
+*.csv
+*.json
+*.pkl
+*.h5
+*.npy
+*.npz
+*.ipynb
+*.txt
