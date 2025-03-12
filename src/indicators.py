@@ -36,3 +36,33 @@ def last500_histogram_check(histogram, lookback_period, logger):
     except Exception as e:
         logger.error(f"last500_histogram_check hatası: {e}")
         return False
+    
+
+def last500_fibo_check(close_prices_str, side, logger):
+    try:
+        close_prices = (close_prices_str.astype(float))
+
+        max_price = max(close_prices)
+        min_price = min(close_prices)
+
+        fibo_levels = [0.382, 0.5, 0.618]
+        fibo_values = {}
+        for level in fibo_levels:
+            fibo_values[level] = max_price - (max_price - min_price) * level
+
+        if (side == 'buy' 
+            and close_prices.iloc[-2] < fibo_values[0.618] 
+            and close_prices.iloc[-1] > fibo_values[0.618] 
+            and (fibo_values[0.5] - fibo_values[0.618])/fibo_values[0.618] > 0.006):
+            return True
+        
+        if (side == 'sell' 
+            and close_prices.iloc[-2] > fibo_values[0.382] 
+            and close_prices.iloc[-1] < fibo_values[0.382] 
+            and (fibo_values[0.382] - fibo_values[0.5])/fibo_values[0.5] > 0.006):
+            return True
+        
+        return False
+    except Exception as e:
+        logger.error(f"last500_fibo_check hatası: {e}")
+        return False

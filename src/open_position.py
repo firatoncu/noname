@@ -14,8 +14,8 @@ def open_position(max_open_positions, symbols, logger,
         for symbol in symbols:
             try:
                 # Son 201 mumu al
-                klines = client.futures_klines(symbol=symbol, interval='1m', limit=201)
-                df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
+                klines = client.futures_klines(symbol=symbol, interval='1m', limit=500)
+                df = pd.DataFrame(klines, columns=['close'])
                 df['close'] = pd.to_numeric(df['close'])
                 close_price = df['close'].iloc[-1]
 
