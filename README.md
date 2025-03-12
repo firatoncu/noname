@@ -7,6 +7,7 @@ This repository contains **project n0name** designed for automated Futures Tradi
 - Added Fibonnaci Retratement Strategy.
 - Price values made more weighted than MACD values.
 - Improvements in the code structure and execution logic.
+- Global signal management for Buy/Sell conditions
 
 ## Installation
 
