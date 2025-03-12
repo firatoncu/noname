@@ -21,8 +21,8 @@ def open_position(max_open_positions, symbols, logger,
                 close_price = df['close'].iloc[-1]
 
                 # Alış ve satış koşullarını kontrol et
-                buyAll = check_buy_conditions(df,  logger)
-                sellAll = check_sell_conditions(df, logger)
+                buyAll = check_buy_conditions(df, symbol, logger)
+                sellAll = check_sell_conditions(df, symbol, logger)
 
                 # Mevcut pozisyonu al
                 positions = client.futures_position_information(symbol=symbol)
@@ -61,7 +61,7 @@ def open_position(max_open_positions, symbols, logger,
                     logger.info(f"{symbol} için UZUN pozisyon açılıyor, miktar: {quantity_to_buy}")
                     client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=quantity_to_buy)
                     entry_price = close_price
-                    set_clean_buy_signal(False)
+                    set_clean_buy_signal(False, symbol)
                     tp_price = round(entry_price * 1.0033, price_precision)  # %0.5 kâr
                     sl_price = round(entry_price * 0.993, price_precision)  # %1.5 zarar
                     logger.info(f"{symbol} - UZUN - Miktar: {quantity_to_buy}, TP: {tp_price}, SL: {sl_price}")
@@ -81,7 +81,7 @@ def open_position(max_open_positions, symbols, logger,
                         quantity_to_sell = Q
                     logger.info(f"{symbol} için KISA pozisyon açılıyor, miktar: {quantity_to_sell}")
                     client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=quantity_to_sell)
-                    set_clean_sell_signal(False)
+                    set_clean_sell_signal(False, symbol)
                     entry_price = close_price
                     tp_price = round(entry_price * 0.9966, price_precision)  # %0.5 kâr
                     sl_price = round(entry_price * 1.007, price_precision)  # %1.5 zarar

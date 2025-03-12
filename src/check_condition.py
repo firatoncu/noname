@@ -5,14 +5,14 @@ from src.indicators import no_crossing_last_10, last500_macd_check, last500_hist
 
 
 # Alış koşulları
-def check_buy_conditions(df, logger):
+def check_buy_conditions(df, symbol, logger):
     try:
         
         macd = ta.trend.MACD(df['close'], window_slow=26, window_fast=12, window_sign=9)
         macd_line = macd.macd()
         hist_line = macd.macd_diff()
 
-        signal_cleaner(macd_line, "buy", logger)
+        signal_cleaner(macd_line, "buy", symbol, logger)
         from globals import clean_buy_signal
 
         buyCondA = hist_line.iloc[-1] > 0
@@ -26,13 +26,13 @@ def check_buy_conditions(df, logger):
         return False
 
 # Satış koşulları
-def check_sell_conditions(df, logger):
+def check_sell_conditions(df, symbol, logger):
     try:
         macd = ta.trend.MACD(df['close'], window_slow=26, window_fast=12, window_sign=9)
         macd_line = macd.macd()
         hist_line = macd.macd_diff()
 
-        signal_cleaner(macd_line, "sell", logger)
+        signal_cleaner(macd_line, "sell", symbol, logger)
         from globals import clean_sell_signal
 
         sellCondA = hist_line.iloc[-1] < 0

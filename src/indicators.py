@@ -79,13 +79,13 @@ def last500_fibo_check(close_prices_str, side, logger):
         return False
 
 # MACD sinyal temizleyici
-def signal_cleaner(macd_line, side, logger):
+def signal_cleaner(macd_line, side, symbol, logger):
     try:
         if side == "buy" and macd_line.iloc[-1] < 0 and macd_line.iloc[-2] > 0:
-            set_clean_buy_signal(True)
+            set_clean_buy_signal(True, symbol)
 
         if side == "sell" and macd_line.iloc[-1] > 0 and macd_line.iloc[-2] < 0:
-            set_clean_sell_signal(True)
+            set_clean_sell_signal(True, symbol)
     except Exception as e:
         logger.error(f"last500_fibo_check hatası: {e}")
         
