@@ -1,3 +1,5 @@
+from globals import set_clean_sell_signal, set_clean_buy_signal
+
 # Son 10 mumda çaprazlama kontrolü
 def no_crossing_last_10(macd_line, signal_line, logger):
     try:
@@ -24,6 +26,7 @@ def last500_macd_check(macd_line, lookback_period, logger):
         logger.error(f"last500_macd_check hatası: {e}")
         return False
     
+# Son 500 mumda Histogram kontrolü
 def last500_histogram_check(histogram, lookback_period, logger):
     try:
         last10_max = max(histogram.tail(10).max(), abs(histogram.tail(10).min()))
@@ -37,7 +40,9 @@ def last500_histogram_check(histogram, lookback_period, logger):
         logger.error(f"last500_histogram_check hatası: {e}")
         return False
     
+#-|-|-|-|-|-|-|-|-|-|-|-|-v0.5 indicators-|-|-|-|-|-|-|-|-|-|-|-|-
 
+# Son 500 mumda Fibonacci kontrolü
 def last500_fibo_check(close_prices_str, side, logger):
     try:
         close_prices = (close_prices_str.astype(float))
@@ -51,12 +56,18 @@ def last500_fibo_check(close_prices_str, side, logger):
             fibo_values[level] = max_price - (max_price - min_price) * level
 
         if (side == 'buy' 
+            and close_prices.iloc[-5] < fibo_values[0.618] 
+            and close_prices.iloc[-4] < fibo_values[0.618] 
+            and close_prices.iloc[-3] < fibo_values[0.618] 
             and close_prices.iloc[-2] < fibo_values[0.618] 
             and close_prices.iloc[-1] > fibo_values[0.618] 
             and (fibo_values[0.5] - fibo_values[0.618])/fibo_values[0.618] > 0.006):
             return True
         
         if (side == 'sell' 
+            and close_prices.iloc[-5] > fibo_values[0.382] 
+            and close_prices.iloc[-4] > fibo_values[0.382] 
+            and close_prices.iloc[-3] > fibo_values[0.382] 
             and close_prices.iloc[-2] > fibo_values[0.382] 
             and close_prices.iloc[-1] < fibo_values[0.382] 
             and (fibo_values[0.382] - fibo_values[0.5])/fibo_values[0.5] > 0.006):
@@ -66,3 +77,15 @@ def last500_fibo_check(close_prices_str, side, logger):
     except Exception as e:
         logger.error(f"last500_fibo_check hatası: {e}")
         return False
+
+# MACD sinyal temizleyici
+def signal_cleaner(macd_line, side, logger):
+    try:
+        if side == "buy" and macd_line.iloc[-1] < 0 and macd_line.iloc[-2] > 0:
+            set_clean_buy_signal(True)
+
+        if side == "sell" and macd_line.iloc[-1] > 0 and macd_line.iloc[-2] < 0:
+            set_clean_sell_signal(True)
+    except Exception as e:
+        logger.error(f"last500_fibo_check hatası: {e}")
+        

@@ -6,6 +6,7 @@ from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from utils.position_opt import get_open_positions_count
 from src.position_value import position_val
+from globals import set_clean_buy_signal, set_clean_sell_signal
 import pandas as pd 
 
 def open_position(max_open_positions, symbols, logger, 
@@ -13,7 +14,7 @@ def open_position(max_open_positions, symbols, logger,
     try:
         for symbol in symbols:
             try:
-                # Son 201 mumu al
+                # Son 500 mumu al
                 klines = client.futures_klines(symbol=symbol, interval='1m', limit=500)
                 df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
                 df['close'] = pd.to_numeric(df['close'])
@@ -60,6 +61,7 @@ def open_position(max_open_positions, symbols, logger,
                     logger.info(f"{symbol} için UZUN pozisyon açılıyor, miktar: {quantity_to_buy}")
                     client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=quantity_to_buy)
                     entry_price = close_price
+                    set_clean_buy_signal(False)
                     tp_price = round(entry_price * 1.0033, price_precision)  # %0.5 kâr
                     sl_price = round(entry_price * 0.993, price_precision)  # %1.5 zarar
                     logger.info(f"{symbol} - UZUN - Miktar: {quantity_to_buy}, TP: {tp_price}, SL: {sl_price}")
@@ -79,6 +81,7 @@ def open_position(max_open_positions, symbols, logger,
                         quantity_to_sell = Q
                     logger.info(f"{symbol} için KISA pozisyon açılıyor, miktar: {quantity_to_sell}")
                     client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=quantity_to_sell)
+                    set_clean_sell_signal(False)
                     entry_price = close_price
                     tp_price = round(entry_price * 0.9966, price_precision)  # %0.5 kâr
                     sl_price = round(entry_price * 1.007, price_precision)  # %1.5 zarar
