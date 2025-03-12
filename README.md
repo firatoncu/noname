@@ -1,7 +1,12 @@
 
-# n0name v0.4 by f0ncu
+# n0name v0.5 by f0ncu
 
 This repository contains **project n0name** designed for automated futures trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
+
+## Release Notes (0.5)
+- Added Fibonnaci Retratement Strategy
+- Price values made more weighted than MACD values
+- Improvementsin the code structure and execution logic
 
 ## Installation
 
@@ -16,7 +21,7 @@ This repository contains **project n0name** designed for automated futures tradi
    ```yaml
   # config.yml
   version:
-    version : 0.4
+    version : 0.5
   
   symbols:
     symbols : ['ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'SUIUSDT']
