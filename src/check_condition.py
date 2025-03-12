@@ -17,7 +17,7 @@ def check_buy_conditions(df, symbol, logger):
 
         buyCondA = hist_line.iloc[-1] > 0
         buyCondB = last500_fibo_check(df['close'], "buy", logger)
-        buyCondC = clean_buy_signal
+        buyCondC = clean_buy_signal[0]
 
 
         return buyCondA and buyCondB and buyCondC
@@ -37,7 +37,7 @@ def check_sell_conditions(df, symbol, logger):
 
         sellCondA = hist_line.iloc[-1] < 0
         sellCondB = last500_fibo_check(df['close'], "sell", logger)
-        sellCondC = clean_sell_signal
+        sellCondC = clean_sell_signal[0]
 
 
         return sellCondA and sellCondB and sellCondC
