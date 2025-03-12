@@ -91,7 +91,7 @@ def open_position(max_open_positions, symbols, logger,
                 logger.error(f"{symbol} işlenirken hata: {e}")
 
         # 2 saniye bekle
-        time.sleep(2)
+        time.sleep(1)
 
     except Exception as e:
         logger.error(f"Ana döngüde hata: {e}")
