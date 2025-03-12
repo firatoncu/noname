@@ -26,7 +26,7 @@ def check_sell_conditions(df, logger):
         macd = ta.trend.MACD(df['close'], window_slow=26, window_fast=12, window_sign=9)
         hist_line = macd.macd_diff()
 
-        sellCondA = hist_line.iloc[-1] > 0
+        sellCondA = hist_line.iloc[-1] < 0
         sellCondB = last500_fibo_check(df['close'], "sell", logger)
 
 
