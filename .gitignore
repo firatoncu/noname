@@ -1,5 +1,6 @@
 config.yml
 development
+archive_dir
 __pycache__
 *.pyc
 *.pyo
@@ -14,4 +15,4 @@ __pycache__
 *.npz
 *.ipynb
 *.txt
-archive/
+*_arc.py
