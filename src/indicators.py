@@ -84,12 +84,12 @@ def signal_cleaner(macd_line, signal_line, clean_buy_signal, clean_sell_signal, 
         if side == "buy" and macd_line.iloc[-1] < 0 and macd_line.iloc[-2] > 0:
             set_clean_buy_signal(True, symbol)
         if (clean_buy_signal[symbol] == True and
-            macd_line.iloc[-1] >= signal_line.iloc[-1] and macd_line.iloc[-2] <= signal_line.iloc[-2]):
+            macd_line.iloc[-2] >= signal_line.iloc[-2] and macd_line.iloc[-3] <= signal_line.iloc[-3]): #crossunder
             set_clean_buy_signal(False, symbol)
         if side == "sell" and macd_line.iloc[-1] > 0 and macd_line.iloc[-2] < 0:
             set_clean_sell_signal(True, symbol)
         if (clean_sell_signal[symbol] == True and
-            macd_line.iloc[-1] <= signal_line.iloc[-1] and macd_line.iloc[-2] >= signal_line.iloc[-2]):
+            macd_line.iloc[-2] <= signal_line.iloc[-2] and macd_line.iloc[-3] >= signal_line.iloc[-3]): #crossover
             set_clean_sell_signal(False, symbol)
     except Exception as e:
         logger.error(f"last500_fibo_check hatası: {e}")
