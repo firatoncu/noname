@@ -26,21 +26,27 @@ def last500_macd_check(macd_line, lookback_period, logger):
         logger.error(f"last500_macd_check hatası: {e}")
         return False
     
+
+#-|-|-|-|-|-|-|-|-|-|-|-|-v0.5 indicators-|-|-|-|-|-|-|-|-|-|-|-|-
+
 # Son 500 mumda Histogram kontrolü
-def last500_histogram_check(histogram, lookback_period, logger):
+def last500_histogram_check(histogram, side, logger):
     try:
-        last10_max = max(histogram.tail(10).max(), abs(histogram.tail(10).min()))
-        histogram_last_lookback = histogram.tail(lookback_period)
-        histogram_variance = histogram_last_lookback.max() + abs(histogram_last_lookback.min())
-        histogram_threshold = histogram_variance * 0.15
-        if last10_max >= histogram_threshold:
-            return True
+        histogram_history = histogram.tail(500)
+        if side == 'buy':
+            histogram_pos_lookback = histogram_history[histogram_history > 0]
+            last10_max = histogram_pos_lookback.quantile(0.85)
+            if histogram.iloc[-1] > last10_max:
+                return True
+        if side == 'sell':
+            histogram_neg_lookback = abs(histogram_history[histogram_history < 0])
+            last10_max = histogram_neg_lookback.quantile(0.85)
+            if histogram.iloc[-1] < -last10_max:
+                return True
         return False
     except Exception as e:
         logger.error(f"last500_histogram_check hatası: {e}")
         return False
-    
-#-|-|-|-|-|-|-|-|-|-|-|-|-v0.5 indicators-|-|-|-|-|-|-|-|-|-|-|-|-
 
 # Son 500 mumda Fibonacci kontrolü
 def last500_fibo_check(close_prices_str, side, logger):
@@ -50,27 +56,21 @@ def last500_fibo_check(close_prices_str, side, logger):
         max_price = max(close_prices)
         min_price = min(close_prices)
 
-        fibo_levels = [0.382, 0.5, 0.618]
+        fibo_levels = [0.236, 0.382, 0.5, 0.618, 0.786]
         fibo_values = {}
         for level in fibo_levels:
             fibo_values[level] = max_price - (max_price - min_price) * level
 
         if (side == 'buy' 
-            and close_prices.iloc[-5] < fibo_values[0.618] 
-            and close_prices.iloc[-4] < fibo_values[0.618] 
-            and close_prices.iloc[-3] < fibo_values[0.618] 
-            and close_prices.iloc[-2] < fibo_values[0.618] 
-            and close_prices.iloc[-1] > fibo_values[0.618] 
-            and (fibo_values[0.5] - fibo_values[0.618])/fibo_values[0.618] > 0.006):
+            and close_prices.iloc[-2] < fibo_values[0.786] 
+            and close_prices.iloc[-1] > fibo_values[0.786] 
+            and (fibo_values[0.618] - fibo_values[0.786])/fibo_values[0.786] > 0.006):
             return True
         
         if (side == 'sell' 
-            and close_prices.iloc[-5] > fibo_values[0.382] 
-            and close_prices.iloc[-4] > fibo_values[0.382] 
-            and close_prices.iloc[-3] > fibo_values[0.382] 
-            and close_prices.iloc[-2] > fibo_values[0.382] 
-            and close_prices.iloc[-1] < fibo_values[0.382] 
-            and (fibo_values[0.382] - fibo_values[0.5])/fibo_values[0.5] > 0.006):
+            and close_prices.iloc[-2] > fibo_values[0.236] 
+            and close_prices.iloc[-1] < fibo_values[0.236] 
+            and (fibo_values[0.236] - fibo_values[0.382])/fibo_values[0.382] > 0.006):
             return True
         
         return False

@@ -4,11 +4,14 @@
 This repository contains **project n0name** designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 ## Release Notes (0.5)
-- Added Fibonnaci Retratement Strategy.
-- Price values made more weighted than MACD values.
-- Improvements in the code structure and execution logic.
-- Global signal management for Buy/Sell conditions
+- Buy and Sell condition checks to utilize Histogram checker
+- Improvements on Fibonacci logic for higher accuracy
 - Adaptive MACD & Signal Line Control
+- Global signal management for Buy/Sell conditions
+- Price values made more weighted than MACD values.
+- Added Fibonnaci Retratement Strategy.
+- Improvements in the code structure and execution logic.
+
 
 ## Installation
 

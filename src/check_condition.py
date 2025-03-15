@@ -1,7 +1,7 @@
 #v0.5 Fibonacci and MACD Strategy 
 
 import ta # type: ignore
-from src.indicators import no_crossing_last_10, last500_macd_check, last500_histogram_check, last500_fibo_check, signal_cleaner
+from src.indicators import last500_histogram_check, last500_fibo_check, signal_cleaner
 
 
 # Alış koşulları
@@ -16,7 +16,7 @@ def check_buy_conditions(df, symbol, logger):
 
         signal_cleaner(macd_line, "buy", symbol, logger)
 
-        buyCondA = hist_line.iloc[-1] > 0 and hist_line.iloc[-1] > hist_line.iloc[-2]
+        buyCondA = last500_histogram_check(hist_line, "buy", logger)
         buyCondB = last500_fibo_check(df['close'], "buy", logger)
         buyCondC = clean_buy_signal[symbol]
 
@@ -37,7 +37,7 @@ def check_sell_conditions(df, symbol, logger):
 
         signal_cleaner(macd_line, "sell", symbol, logger)
 
-        sellCondA = hist_line.iloc[-1] < 0 and hist_line.iloc[-1] < hist_line.iloc[-2]
+        sellCondA = last500_histogram_check(hist_line, "sell", logger)
         sellCondB = last500_fibo_check(df['close'], "sell", logger)
         sellCondC = clean_sell_signal[symbol]
 
