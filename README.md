@@ -39,7 +39,7 @@ This repository contains **project n0name** designed for automated Futures Tradi
    python app.py
    ```
 
-## Older Releases (0.5)
+### Older Releases (0.5)
 - Adaptive MACD & Signal Line Control.
 - Global signal management for Buy/Sell conditions.
 - Price values made more weighted than MACD values.
