@@ -4,6 +4,7 @@
 This repository contains **project n0name** designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 ## Release Notes (0.6)
+- Windows Application released.
 - Enhance config loading to create new config interactively.
 - Using Market Order instead of Limit Order to avoid being traced.
 - **Asynchronous Operation**, enhancing performance and responsiveness.
@@ -13,19 +14,17 @@ This repository contains **project n0name** designed for automated Futures Tradi
 
 ## Installation
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.11 or higher
 - Binance API Key and Secret with Futures Trading enabled
 
-### Steps
-1. **Install Requirements**: 
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. **Run**:
-   ```bash
-   python app.py
-   ```
+## Installation Steps
+1. Download [**n0name Trading Bot** (v0.6)](https://github.com/firatoncu/noname/releases/download/n0name-v06/n0name-v06.exe)
 
+2. Run **n0name-v06.exe** 
+
+3. Follow the instructions and generate a config file. (you can change them later!)  
+
+   
 ### Older Releases (0.5)
 - Adaptive MACD & Signal Line Control.
 - Global signal management for Buy/Sell conditions.
