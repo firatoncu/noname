@@ -44,19 +44,26 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
         price_precision = pricePrecisions[symbol]
         Q = calculate_quantity(position_value, close_price, stepSize, qty_precision)
 
-        if get_side_info[symbol] == 'LONG' and (close_price <= get_sl_price(symbol) or close_price >= get_tp_price(symbol)):
-            await client.futures_cancel_all_open_orders(symbol=symbol)
-            await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=get_last_position_qty(symbol))
-            set_clean_buy_signal(False, symbol)
-            set_side_info('', symbol)
-            return
-        
-        if get_side_info[symbol] == 'SHORT' and (close_price >= get_sl_price(symbol) or close_price <= get_tp_price(symbol)):
-            await client.futures_cancel_all_open_orders(symbol=symbol)
-            await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=get_last_position_qty(symbol))
-            set_clean_sell_signal(False, symbol)
-            set_side_info('', symbol)
-            return
+        if current_position != 0:
+            if get_side_info(symbol) == 'LONG':
+                sl_price = get_sl_price(symbol)
+                tp_price = get_tp_price(symbol)
+                if (close_price <= sl_price or close_price >= tp_price):
+                    last_position_qty = get_last_position_qty(symbol)
+                    await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=last_position_qty)
+                    set_clean_buy_signal(False, symbol)
+                    set_side_info('', symbol)
+                    return
+                
+            if get_side_info(symbol) == 'SHORT':
+                sl_price = get_sl_price(symbol)
+                tp_price = get_tp_price(symbol)
+                if(close_price >= sl_price or close_price <= tp_price):
+                    last_position_qty = get_last_position_qty(symbol)
+                    await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=last_position_qty)
+                    set_clean_sell_signal(False, symbol)
+                    set_side_info('', symbol)
+                    return
 
         # Buy operation
         if buyAll and current_position <= 0 and open_positions_count < max_open_positions:
