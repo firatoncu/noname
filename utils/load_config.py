@@ -1,14 +1,22 @@
-import yaml # type: ignore
+import yaml  # type: ignore
+import os
+import sys
 
-# Function to load the config file
 def load_config(file_path='config.yml'):
+    # Determine the base path (script dir or executable dir)
+    if getattr(sys, 'frozen', False):  # Running as PyInstaller executable
+        base_path = os.path.dirname(sys.executable)
+    else:  # Running as a Python script
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    full_path = os.path.join(base_path, file_path)
+
     try:
-        with open(file_path, 'r') as file:
+        with open(full_path, 'r') as file:
             config = yaml.safe_load(file)
         return config
     
     except FileNotFoundError:
-        print(f"Config file '{file_path}' not found. Let's create a new one.")
+        print(f"Config file '{full_path}' not found. Let's create a new one.")
         
         # Get user inputs
         config = {
@@ -36,9 +44,9 @@ def load_config(file_path='config.yml'):
         
         # Save the new config file
         try:
-            with open(file_path, 'w') as file:
+            with open(full_path, 'w') as file:
                 yaml.safe_dump(config, file, default_flow_style=False)
-            print(f"New config file created at '{file_path}'")
+            print(f"New config file created at '{full_path}'")
             return config
         except Exception as e:
             print(f"Error saving new config file: {e}")
@@ -47,9 +55,3 @@ def load_config(file_path='config.yml'):
     except yaml.YAMLError as e:
         print(f"Error parsing YAML file: {e}")
         return None
-
-# Example usage
-if __name__ == "__main__":
-    config = load_config()
-    if config:
-        print("Config loaded successfully:", config)

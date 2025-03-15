@@ -16,3 +16,7 @@ __pycache__
 *.ipynb
 *.txt
 *_arc.py
+build/
+dist/
+*.spec
+*.bat
