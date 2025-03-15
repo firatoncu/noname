@@ -1,4 +1,5 @@
 from globals import set_clean_sell_signal, set_clean_buy_signal
+import asyncio
 
 async def initial_adjustments(leverage, symbols, client, logger):
     try:
@@ -18,7 +19,9 @@ async def initial_adjustments(leverage, symbols, client, logger):
 
           """)
         logger.info("Starting the bot...")
+        await asyncio.sleep(3)  # Prevent tight looping; adjust as needed
         logger.info("Initial adjustments completed, starting main loop...")
+        await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
         logger.info(f"Current Crypto Pairs: {symbols}")
     except Exception as e:
         logger.error(f"Initial adjustments failed: {e}")

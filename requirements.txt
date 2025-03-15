@@ -2,3 +2,4 @@ pyyaml
 python-binance
 pandas
 ta
+asyncio
