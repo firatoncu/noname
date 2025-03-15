@@ -1,5 +1,6 @@
 # Main entry point for the async trading bot application.
 import asyncio
+import os
 from binance import AsyncClient  # Replace synchronous Client with AsyncClient
 from utils.load_config import load_config
 from utils.initial_adjustments import initial_adjustments  # Must be made async
@@ -11,6 +12,8 @@ async def main():
     logger = logger_func()
     config = load_config()
 
+    os.system("cls" if os.name == "nt" else "clear") 
+
     # Extract configuration details
     api_config = config['api_keys']
     symbol_config = config['symbols']
@@ -21,7 +24,6 @@ async def main():
     # Create AsyncClient instance
     client = await AsyncClient.create(api_config['api_key'], api_config['secret'])
     
-    logger.info("Initial adjustments completed, starting main loop...")
     try:
         # Perform initial adjustments asynchronously
         await initial_adjustments(leverage, symbols, client, logger)
