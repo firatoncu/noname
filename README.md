@@ -4,7 +4,7 @@
 This repository contains **project n0name** designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 ## Release Notes (0.6)
-- Using Market Order instead of Limit Order to avoid being traced.
+- Using Market Order instead of Limit Order to avoid being traced. (TBD)
 - **Asynchronous Operation**, enhancing performance and responsiveness.
 - Update function definitions and logging for clarity.
 - Buy and Sell condition checks to utilize Histogram checker.
