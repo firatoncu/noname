@@ -1,5 +1,4 @@
-#v0.5 Fibonacci and MACD Strategy 
-
+#v0.5 Fibonacci and MACD Strategy Implementation
 import ta # type: ignore
 from src.indicators import last500_histogram_check, last500_fibo_check, signal_cleaner
 
@@ -18,7 +17,6 @@ def check_buy_conditions(df, symbol, logger):
         buyCondA = last500_histogram_check(hist_line, "buy", logger)
         buyCondB = last500_fibo_check(df['close'], "buy", logger)
         buyCondC = clean_buy_signal[symbol]
-
 
         return buyCondA and buyCondB and buyCondC
     except Exception as e:

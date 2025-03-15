@@ -1,6 +1,5 @@
 from globals import set_clean_sell_signal, set_clean_buy_signal
 
-# Son 10 mumda çaprazlama kontrolü
 def no_crossing_last_10(macd_line, signal_line, logger):
     try:
         for i in range(3, 12):
@@ -13,7 +12,6 @@ def no_crossing_last_10(macd_line, signal_line, logger):
         return False
 
 
-# Son 500 mumda MACD kontrolü
 def last500_macd_check(macd_line, lookback_period, logger):
     try:
         macd_last_500 = macd_line.tail(lookback_period)
@@ -29,7 +27,6 @@ def last500_macd_check(macd_line, lookback_period, logger):
 
 #-|-|-|-|-|-|-|-|-|-|-|-|-v0.5 indicators-|-|-|-|-|-|-|-|-|-|-|-|-
 
-# Son 500 mumda Histogram kontrolü
 def last500_histogram_check(histogram, side, logger):
     try:
         histogram_history = histogram.tail(500)
@@ -45,10 +42,9 @@ def last500_histogram_check(histogram, side, logger):
                 return True
         return False
     except Exception as e:
-        logger.error(f"last500_histogram_check hatası: {e}")
+        logger.error(f"Histogram Checker Error: {e}")
         return False
 
-# Son 500 mumda Fibonacci kontrolü
 def last500_fibo_check(close_prices_str, side, logger):
     try:
         close_prices = (close_prices_str.astype(float))
@@ -75,10 +71,9 @@ def last500_fibo_check(close_prices_str, side, logger):
         
         return False
     except Exception as e:
-        logger.error(f"last500_fibo_check hatası: {e}")
+        logger.error(f"Fibonacci Checker Error: {e}")
         return False
 
-# MACD sinyal temizleyici
 def signal_cleaner(macd_line, side, symbol, logger):
     try:
         if side == "buy" and macd_line.iloc[-1] < 0 and macd_line.iloc[-2] > 0:
@@ -86,5 +81,5 @@ def signal_cleaner(macd_line, side, symbol, logger):
         if side == "sell" and macd_line.iloc[-1] > 0 and macd_line.iloc[-2] < 0:
             set_clean_sell_signal(True, symbol)
     except Exception as e:
-        logger.error(f"last500_fibo_check hatası: {e}")
+        logger.error(f"Signal Cleaner Error: {e}")
         

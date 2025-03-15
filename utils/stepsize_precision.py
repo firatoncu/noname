@@ -1,11 +1,15 @@
 import math
 
-def stepsize_precision(client, symbols):
-# Adım büyüklükleri ve hassasiyetleri al
-    exchange_info = client.futures_exchange_info()
+async def stepsize_precision(client, symbols):
+    # Fetch exchange info asynchronously
+    exchange_info = await client.futures_exchange_info()
+    
+    # Initialize dictionaries to store step sizes and precisions
     stepSizes = {}
     quantityPrecisions = {}
     pricePrecisions = {}
+    
+    # Process the exchange info for each symbol
     for s in exchange_info['symbols']:
         if s['symbol'] in symbols:
             for f in s['filters']:

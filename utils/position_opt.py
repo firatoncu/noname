@@ -1,15 +1,15 @@
-def get_entry_price(symbol, client, logger):
+async def get_entry_price(symbol, client, logger):
     try:
-        # Sembol için pozisyon bilgilerini al
-        positions = client.futures_position_information(symbol=symbol)
+        # Fetch position information asynchronously
+        positions = await client.futures_position_information(symbol=symbol)
         
-        # Pozisyonları kontrol et
+        # Check positions
         for pos in positions:
             if pos['symbol'] == symbol:
                 position_amount = float(pos['positionAmt'])
                 entry_price = float(pos['entryPrice'])
                 
-                if position_amount != 0:  # Pozisyon açıksa
+                if position_amount != 0:  # If position is open
                     logger.info(f"{symbol} için açık pozisyon giriş fiyatı: {entry_price}")
                     return entry_price
                 else:
@@ -20,34 +20,35 @@ def get_entry_price(symbol, client, logger):
         logger.error(f"{symbol} için giriş fiyatı alınırken hata: {e}")
         return None
 
-# Bakiye bilgisini al
-def get_usdt_balance(client, logger):
+async def get_usdt_balance(client, logger):
     try:
-        account_info = client.futures_account()
+        # Fetch account info asynchronously
+        account_info = await client.futures_account()
         for asset in account_info['assets']:
             if asset['asset'] == 'USDT':
                 return float(asset['availableBalance'])
+        return 0  # Return 0 if USDT not found
     except Exception as e:
         logger.error(f"Bakiye alınırken hata: {e}")
         return 0
 
-# Açık pozisyon sayısını al
-def get_open_positions_count(client, logger):
+async def get_open_positions_count(client, logger):
     try:
-        positions = client.futures_position_information()
+        # Fetch position information asynchronously
+        positions = await client.futures_position_information()
         open_positions = [pos for pos in positions if float(pos['positionAmt']) != 0]
         return len(open_positions)
     except Exception as e:
         logger.error(f"Açık pozisyon sayısı alınırken hata: {e}")
         return 0
 
-# Pozisyon kapandığında açık emirleri iptal et
-def cancel_open_orders(symbol, client, logger):
+async def cancel_open_orders(symbol, client, logger):
     try:
-        open_orders = client.futures_get_open_orders(symbol=symbol)
-        if len(open_orders) ==1:
+        # Fetch open orders asynchronously
+        open_orders = await client.futures_get_open_orders(symbol=symbol)
+        if len(open_orders) >= 1:  # Adjusted condition to >= 1 for clarity
             for order in open_orders:
-                client.futures_cancel_order(symbol=symbol, orderId=order['orderId'])
+                await client.futures_cancel_order(symbol=symbol, orderId=order['orderId'])
                 logger.info(f"{symbol} için açık emir iptal edildi: {order['orderId']}")
     except Exception as e:
         logger.error(f"{symbol} için açık emirler iptal edilirken hata: {e}")
