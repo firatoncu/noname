@@ -12,8 +12,6 @@ async def get_entry_price(symbol, client, logger):
                 entry_price = float(pos['entryPrice'])
                 
                 if position_amount != 0:  # If position is open
-                    logger.info(f"{symbol} için açık pozisyon giriş fiyatı: {entry_price}")
-                    logger_move_cursor_up()
                     return entry_price
                 else:
                     logger.info(f"{symbol} için açık pozisyon bulunamadı.")
