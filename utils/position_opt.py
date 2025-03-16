@@ -1,4 +1,4 @@
-from utils.cursor_movement import logger_move_cursor_up
+from utils.cursor_movement import clean_line
 
 async def get_entry_price(symbol, client, logger):
     try:
@@ -14,13 +14,10 @@ async def get_entry_price(symbol, client, logger):
                 if position_amount != 0:  # If position is open
                     return entry_price
                 else:
-                    logger.info(f"{symbol} için açık pozisyon bulunamadı.")
-                    logger_move_cursor_up()
                     return None
 
     except Exception as e:
         logger.error(f"{symbol} için giriş fiyatı alınırken hata: {e}")
-        logger_move_cursor_up()
         return None
 
 async def get_usdt_balance(client, logger):
@@ -33,7 +30,6 @@ async def get_usdt_balance(client, logger):
         return 0  # Return 0 if USDT not found
     except Exception as e:
         logger.error(f"Bakiye alınırken hata: {e}")
-        logger_move_cursor_up()
         return 0
 
 async def get_open_positions_count(client, logger):
@@ -44,5 +40,4 @@ async def get_open_positions_count(client, logger):
         return len(open_positions)
     except Exception as e:
         logger.error(f"Açık pozisyon sayısı alınırken hata: {e}")
-        logger_move_cursor_up()
         return 0

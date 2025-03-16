@@ -64,5 +64,4 @@ async def current_position_monitor(p, pricePrecisions, logger):
 
     except Exception as e:
         logger.error(f"Ana döngüde hata: {e}")
-        logger_move_cursor_up()
         await asyncio.sleep(2)

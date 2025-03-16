@@ -106,7 +106,6 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
 
     except Exception as e:
         logger.error(f"{symbol} işlenirken hata: {e}")
-        logger_move_cursor_up()
 
 # Main async function
 async def open_position(max_open_positions, symbols, logger, client, leverage):

@@ -2,11 +2,14 @@ from utils.globals import set_clean_sell_signal, set_clean_buy_signal, set_capit
 import asyncio
 from colorama import Fore, Style, init
 import random
+from utils.logging import logger_func
+from utils.cursor_movement import clean_line
+logger = logger_func()
 
 # Colorama'yı başlat
 
 
-async def initial_adjustments(leverage, symbols, capital_tbu, client, logger):
+async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logger):
     try:
         init(autoreset=True)
         for symbol in symbols:
@@ -70,4 +73,4 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, logger):
 
 
     except Exception as e:
-        logger.error(f"Initial adjustments failed: {e}")
+        error_logger.error(f"Initial adjustments failed: {e}")
