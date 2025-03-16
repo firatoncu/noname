@@ -48,16 +48,3 @@ async def get_open_positions_count(client, logger):
         logger.error(f"Açık pozisyon sayısı alınırken hata: {e}")
         logger_move_cursor_up()
         return 0
-
-async def cancel_open_orders(symbol, client, logger):
-    try:
-        # Fetch open orders asynchronously
-        open_orders = await client.futures_get_open_orders(symbol=symbol)
-        if len(open_orders) >= 1:  # Adjusted condition to >= 1 for clarity
-            for order in open_orders:
-                await client.futures_cancel_order(symbol=symbol, orderId=order['orderId'])
-                logger.info(f"{symbol} için açık emir iptal edildi: {order['orderId']}")
-                logger_move_cursor_up()
-    except Exception as e:
-        logger.error(f"{symbol} için açık emirler iptal edilirken hata: {e}")
-        logger_move_cursor_up()

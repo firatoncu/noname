@@ -4,8 +4,8 @@ import sys
 def move_cursor_up(lines):
     sys.stdout.write(f"\033[{lines}A")
 
-def logger_move_cursor_up():
-    sys.stdout.write(f"\033[{1}A")
+def logger_move_cursor_up(i = 1):
+    sys.stdout.write(f"\033[{i}A")
     save_cursor_position()
     restore_cursor_position()
   
