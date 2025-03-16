@@ -37,22 +37,23 @@ async def current_status(symbols):
 
         # Alım durumu satırı
         buy_status = (
-            f"{symbol} - BuyCondition1: {Fore.GREEN if buyCondA else Fore.RED}{buyCondA}{Style.RESET_ALL}, "
-            f"BuyCondition2: {Fore.GREEN if buyCondB else Fore.RED}{buyCondB}{Style.RESET_ALL}, "
-            f"BuyCondition3: {Fore.GREEN if buyCondC else Fore.RED}{buyCondC}{Style.RESET_ALL}"
+            f"{Style.BRIGHT}{symbol}{Style.RESET_ALL}"
+            f"\nBuyCondition1: {Fore.GREEN if buyCondA else Fore.RED}{buyCondA}{Style.RESET_ALL},       "
+            f"BuyCondition2: {Fore.GREEN if buyCondB else Fore.RED}{buyCondB}{Style.RESET_ALL},     "
+            f"BuyCondition3:{Fore.GREEN if buyCondC else Fore.RED}{buyCondC}{Style.RESET_ALL}       "
         )
 
         # Satım durumu satırı
         sell_status = (
-            f"{symbol} - SellCondition1: {Fore.GREEN if sellCondA else Fore.RED}{sellCondA}{Style.RESET_ALL}, "
-            f"SellCondition2: {Fore.GREEN if sellCondB else Fore.RED}{sellCondB}{Style.RESET_ALL}, "
-            f"SellCondition3: {Fore.GREEN if sellCondC else Fore.RED}{sellCondC}{Style.RESET_ALL}"
+            f"\nSellCondition1: {Fore.GREEN if sellCondA else Fore.RED}{sellCondA}{Style.RESET_ALL},      "
+            f"SellCondition2: {Fore.GREEN if sellCondB else Fore.RED}{sellCondB}{Style.RESET_ALL},    "
+            f"SellCondition3: {Fore.GREEN if sellCondC else Fore.RED}{sellCondC}{Style.RESET_ALL}   "
             f"\n"
         )
 
         current_status[symbol] = buy_status + "\n" + sell_status
         
-    status_lines_count = (len(symbols) * 3) 
+    status_lines_count = (len(symbols) * 5) 
 
     all_status = current_status.values()
     all_status = "\n".join(all_status)

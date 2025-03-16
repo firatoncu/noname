@@ -64,7 +64,7 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, logger):
   {Style.BRIGHT}A sell signal occurs{Style.RESET_ALL} when it crosses from {Style.BRIGHT}positive to negative{Style.RESET_ALL}.
                     """)
 
-        status_lines_count = (len(symbols) * 3) + 3
+        status_lines_count = (len(symbols) * 5) + 2
         for _ in range(status_lines_count):
             print(" ") 
 
