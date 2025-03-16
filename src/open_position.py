@@ -7,7 +7,7 @@ from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
 from utils.globals import set_capital_tbu, get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal
-from utils.cursor_movement import logger_move_cursor_up
+from utils.cursor_movement import logger_move_cursor_up, clean_line
 from utils.current_status import current_position_monitor
 
 
@@ -124,8 +124,10 @@ async def open_position(max_open_positions, symbols, logger, client, leverage):
             position_monitor_text = str(position_response) + " | " + str(position_monitor_text) 
         
         if position_monitor_text == "":
+            clean_line()
             print("No Open Positions !")
         else:
+            clean_line()
             print("Open Positions: ", position_monitor_text)
         
         logger_move_cursor_up()

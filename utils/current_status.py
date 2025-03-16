@@ -49,7 +49,7 @@ async def current_status(symbols):
 
     logger_move_cursor_up(status_lines_count)
     for _ in range(status_lines_count):
-        print(" ")
+        print("                                                                                                                                                                     ")
     logger_move_cursor_up(status_lines_count)
     # Durum satırlarını yaz
     print(all_status)

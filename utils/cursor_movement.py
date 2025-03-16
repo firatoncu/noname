@@ -5,10 +5,17 @@ def move_cursor_up(lines):
     sys.stdout.write(f"\033[{lines}A")
 
 def logger_move_cursor_up(i = 1):
-    sys.stdout.write(f"\033[{i}A")
+    move_cursor_up(i)
     save_cursor_position()
     restore_cursor_position()
-  
+
+def clean_line(i = 1):
+    for line in range(i):
+        print("                                                                                                                                                                           ")
+    move_cursor_up(i)
+    save_cursor_position()
+    restore_cursor_position()
+
 
 def save_cursor_position():
     sys.stdout.write("\033[s")
