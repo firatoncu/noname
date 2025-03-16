@@ -5,6 +5,7 @@ from binance import AsyncClient  # Replace synchronous Client with AsyncClient
 from utils.load_config import load_config
 from utils.initial_adjustments import initial_adjustments  # Must be made async
 from utils.logging import logger_func
+from utils.current_status import current_status  # Assumed to be async
 from src.open_position import open_position  # Assumed to be async
 
 async def main():
@@ -32,6 +33,7 @@ async def main():
         # Run the main loop indefinitely
         while True:
             await open_position(max_open_positions, symbols, logger, client, leverage)
+            await current_status(symbols)
             await asyncio.sleep(3)  # Prevent tight looping; adjust as needed
 
     except Exception as e:
