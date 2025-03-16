@@ -12,7 +12,7 @@ This repository contains *project n0name* designed for automated Futures Trading
 - Binance API Key and Secret with Futures Trading enabled
 
 ### Steps
-1. Download [**n0name Trading Bot** (v0.6.1)](https://github.com/firatoncu/noname/releases/download/n0name-v06/n0name-v06.exe)
+1. Download [**n0name Trading Bot** (v0.6.1)](https://github.com/firatoncu/noname/releases/download/n0name-v061/app.exe)
 2. Run **n0name-v061.exe** 
 3. Follow the instructions and generate a config file. (you can change it later!)  
 
