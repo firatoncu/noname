@@ -1,27 +1,21 @@
-from utils.position_opt import get_open_positions_count, get_usdt_balance
+from utils.position_opt import get_usdt_balance
 
 import asyncio
 
-async def position_val(leverage, logger, client):
+async def position_val(leverage, capital_tbu, max_positions, logger, client):
     try:
         # Fetch current USDT balance asynchronously
-        usdt_balance = round(await get_usdt_balance(client, logger)) - 20
-        if usdt_balance + 20 <= 0:
+        if capital_tbu is not None:
+            usdt_balance = capital_tbu / max_positions
+        else:
+            usdt_balance = round(await get_usdt_balance(client, logger) / max_positions) - 1
+        if (max_positions < 2 and usdt_balance + 20 <= 0) or (max_positions >= 2 and usdt_balance <= 50):
             logger.warning("USDT bakiyesi yetersiz, işlem yapılamıyor")
-            await asyncio.sleep(60)  # Non-blocking sleep
+            await asyncio.sleep(600)  # Non-blocking sleep
             return 0  # Return early to avoid further processing
 
-        # Fetch open positions count asynchronously
-        open_positions_count = await get_open_positions_count(client, logger)
-        
-        # Calculate margin per position
-        if open_positions_count == 1:
-            margin_per_position = round(usdt_balance) - 1
-        else:
-            margin_per_position = round(usdt_balance / 2) - 1
-        
         # Calculate position value
-        POSITION_VALUE = margin_per_position * leverage
+        POSITION_VALUE = usdt_balance * leverage
 
         return POSITION_VALUE
 

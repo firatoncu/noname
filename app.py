@@ -20,18 +20,19 @@ async def main():
     leverage = symbol_config['leverage']
     max_open_positions = symbol_config['max_open_positions']
     symbols = symbol_config['symbols']
+    capital_tbu = config['capital_tbu']
     
     # Create AsyncClient instance
     client = await AsyncClient.create(api_config['api_key'], api_config['secret'])
     
     try:
         # Perform initial adjustments asynchronously
-        await initial_adjustments(leverage, symbols, client, logger)
+        await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
 
         # Run the main loop indefinitely
         while True:
             await open_position(max_open_positions, symbols, logger, client, leverage)
-            await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
+            await asyncio.sleep(5)  # Prevent tight looping; adjust as needed
 
     except Exception as e:
         logger.error(f"Error in main loop: {e}")

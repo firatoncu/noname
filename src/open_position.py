@@ -7,7 +7,7 @@ from src.check_condition import check_buy_conditions, check_sell_conditions
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
-from utils.globals import set_clean_buy_signal, set_clean_sell_signal, set_last_position_qty, set_tp_price, set_sl_price, get_tp_price, get_sl_price, set_side_info, get_side_info, get_last_position_qty
+from utils.globals import set_capital_tbu, get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, set_last_position_qty, set_tp_price, set_sl_price, get_tp_price, get_sl_price, set_side_info, get_side_info, get_last_position_qty
 
 
 # Async function to process a single symbol
@@ -84,6 +84,7 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
             set_tp_price(round(close_price * 1.0033, price_precision))  # 0.5% profit
             set_sl_price(round(close_price * 0.993, price_precision))   # 1.5% loss
             set_side_info('LONG', symbol)
+            set_capital_tbu(get_capital_tbu() + profit_percentage) 
 
             logger.info(f"{symbol} - Opened LONG - Quantity: {quantity_to_buy}, TP Price: {tp_price}, SL Price: {sl_price}")
 
@@ -106,6 +107,7 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
             set_tp_price(round(close_price * 0.9966, price_precision))
             set_sl_price(round(close_price * 1.007, price_precision))
             set_side_info('SHORT', symbol)
+            set_capital_tbu(get_capital_tbu() - profit_percentage) 
 
             logger.info(f"{symbol} - Opened SHORT - Quantity: {quantity_to_sell}, TP Price: {tp_price}, SL Price: {sl_price}")
 
@@ -117,7 +119,7 @@ async def open_position(max_open_positions, symbols, logger, client, leverage):
     try:
         # Fetch static data once
         stepSizes, quantityPrecisions, pricePrecisions = await stepsize_precision(client, symbols)
-        position_value = await position_val(leverage, logger, client)
+        position_value = await position_val(leverage, get_capital_tbu(), max_open_positions, logger, client)
 
         # Create a list of tasks for each symbol
         tasks = [

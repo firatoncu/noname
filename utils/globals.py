@@ -25,9 +25,17 @@ def set_sl_price(value: float, symbol: str):
     global sl_price
     sl_price[symbol] = value
 
+def set_capital_tbu(value: float):
+    global capital_tbu
+    capital_tbu = value
+
 def set_side_info(value: str, symbol: str):
     global side_info
     side_info[symbol] = value
+
+def get_capital_tbu():
+    global capital_tbu
+    return capital_tbu
 
 def get_clean_sell_signal(symbol: str):
     global clean_sell_signal

@@ -17,6 +17,8 @@ This repository contains *project n0name* designed for automated Futures Trading
 3. Follow the instructions and generate a config file. (you can change it later!)  
 
 ## Release Notes (0.6)
+- Enhanced position management to include Dynamic Capital Allocation.
+- User-friendly Configuration Setup Page.
 - Windows Application released.
 - Enhance config loading to create new config interactively.
 - Using Market Order instead of Limit Order to avoid being traced.

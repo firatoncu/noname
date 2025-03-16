@@ -1,11 +1,15 @@
-from utils.globals import set_clean_sell_signal, set_clean_buy_signal
+from utils.globals import set_clean_sell_signal, set_clean_buy_signal, set_capital_tbu
 import asyncio
 
-async def initial_adjustments(leverage, symbols, client, logger):
+async def initial_adjustments(leverage, symbols, capital_tbu, client, logger):
     try:
         for symbol in symbols:
             set_clean_sell_signal(False, symbol)
             set_clean_buy_signal(False, symbol)
+            if capital_tbu == -999:
+                set_capital_tbu(None)
+            else:
+                set_capital_tbu(capital_tbu)
             await client.futures_change_leverage(symbol=symbol, leverage=leverage)
         print("""
     
