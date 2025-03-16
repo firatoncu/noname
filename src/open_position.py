@@ -129,7 +129,7 @@ async def open_position(max_open_positions, symbols, logger, client, leverage):
         stepSizes, quantityPrecisions, pricePrecisions = await stepsize_precision(client, symbols)
         position_value = await position_val(leverage, get_capital_tbu(), max_open_positions, logger, client)
         all_positions = await client.futures_position_information()
-        print(" | ".join([f"{p['symbol']}: Size=${round(float(p['notional']),2)}, {Fore.GREEN if float(p['unRealizedProfit']) > 0 else Fore.RED}P&L=${float(p['unRealizedProfit']):.2f}{Style.RESET_ALL}" for p in all_positions if float(p['positionAmt']) != 0]) or "No open positions")
+        print(" | ".join([f"{p['symbol']}: Size=${round(float(p['notional']),2)}, {Fore.GREEN if float(p['unRealizedProfit']) > 0 else Fore.RED}P&L=${float(p['unRealizedProfit']):.2f}{Style.RESET_ALL}" for p in all_positions if float(p['positionAmt']) != 0]) or "No open positions!           ")
         logger_move_cursor_up()
         # Create a list of tasks for each symbol
         tasks = [
