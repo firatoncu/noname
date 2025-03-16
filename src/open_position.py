@@ -8,7 +8,10 @@ from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
 from utils.globals import set_capital_tbu, get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, set_last_position_qty, set_tp_price, set_sl_price, get_tp_price, get_sl_price, set_side_info, get_side_info, get_last_position_qty
+from utils.cursor_movement import logger_move_cursor_up
+from colorama import init, Fore, Style
 
+init()
 
 # Async function to process a single symbol
 async def process_symbol(symbol, client, logger, max_open_positions, leverage, stepSizes, quantityPrecisions, pricePrecisions, position_value):
@@ -76,17 +79,19 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
             else:
                 quantity_to_buy = Q
             logger.info(f"{symbol} için UZUN pozisyon açılıyor, miktar: {quantity_to_buy}")
+            logger_move_cursor_up()
             await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=quantity_to_buy)
 
             # Set Global Variables
             set_last_position_qty(quantity_to_buy, symbol)
             set_clean_buy_signal(False, symbol)
-            set_tp_price(round(close_price * 1.0033, price_precision))  # 0.5% profit
-            set_sl_price(round(close_price * 0.993, price_precision))   # 1.5% loss
+            set_tp_price(round(close_price * 1.0033, price_precision), symbol)  # 0.5% profit
+            set_sl_price(round(close_price * 0.993, price_precision), symbol)   # 1.5% loss
             set_side_info('LONG', symbol)
             set_capital_tbu(get_capital_tbu() + profit_percentage) 
 
             logger.info(f"{symbol} - Opened LONG - Quantity: {quantity_to_buy}, TP Price: {tp_price}, SL Price: {sl_price}")
+            logger_move_cursor_up()
 
         # Sell operation
         elif sellAll and current_position >= 0 and open_positions_count < max_open_positions:
@@ -99,20 +104,23 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
             else:
                 quantity_to_sell = Q
             logger.info(f"{symbol} için KISA pozisyon açılıyor, miktar: {quantity_to_sell}")
+            logger_move_cursor_up()
             await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=quantity_to_sell)
 
             # Set Global Variables
             set_clean_sell_signal(False, symbol)
             set_last_position_qty(quantity_to_sell, symbol)
-            set_tp_price(round(close_price * 0.9966, price_precision))
-            set_sl_price(round(close_price * 1.007, price_precision))
+            set_tp_price(round(close_price * 0.9966, price_precision), symbol)
+            set_sl_price(round(close_price * 1.007, price_precision), symbol)
             set_side_info('SHORT', symbol)
             set_capital_tbu(get_capital_tbu() - profit_percentage) 
 
             logger.info(f"{symbol} - Opened SHORT - Quantity: {quantity_to_sell}, TP Price: {tp_price}, SL Price: {sl_price}")
+            logger_move_cursor_up()
 
     except Exception as e:
         logger.error(f"{symbol} işlenirken hata: {e}")
+        logger_move_cursor_up()
 
 # Main async function
 async def open_position(max_open_positions, symbols, logger, client, leverage):
@@ -120,7 +128,9 @@ async def open_position(max_open_positions, symbols, logger, client, leverage):
         # Fetch static data once
         stepSizes, quantityPrecisions, pricePrecisions = await stepsize_precision(client, symbols)
         position_value = await position_val(leverage, get_capital_tbu(), max_open_positions, logger, client)
-
+        all_positions = await client.futures_position_information()
+        print(" | ".join([f"{p['symbol']}: Size=${round(float(p['notional']),2)}, {Fore.GREEN if float(p['unRealizedProfit']) > 0 else Fore.RED}P&L=${float(p['unRealizedProfit']):.2f}{Style.RESET_ALL}" for p in all_positions if float(p['positionAmt']) != 0]) or "No open positions")
+        logger_move_cursor_up()
         # Create a list of tasks for each symbol
         tasks = [
             process_symbol(

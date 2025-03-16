@@ -2,7 +2,7 @@
 import ta # type: ignore
 from src.indicators import last500_histogram_check, last500_fibo_check, signal_cleaner
 from utils.globals import get_clean_buy_signal, get_clean_sell_signal, set_buyconda, set_buycondb, set_buycondc, set_sellconda, set_sellcondb, set_sellcondc
-
+from utils.cursor_movement import logger_move_cursor_up
 
 # Alış koşulları
 def check_buy_conditions(df, symbol, logger):
@@ -26,6 +26,7 @@ def check_buy_conditions(df, symbol, logger):
         return buyCondA and buyCondB and buyCondC
     except Exception as e:
         logger.error(f"check_buy_conditions hatası: {e}")
+        logger_move_cursor_up()
         return False
 
 # Satış koşulları
@@ -49,4 +50,5 @@ def check_sell_conditions(df, symbol, logger):
     
     except Exception as e:
         logger.error(f"check_sell_conditions hatası: {e}")
+        logger_move_cursor_up()
         return False
