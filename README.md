@@ -1,5 +1,5 @@
 
-# n0name v0.6.2 by f0ncu
+# n0name v0.6.3 by f0ncu
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
@@ -12,11 +12,11 @@ This repository contains *project n0name* designed for automated Futures Trading
 - Binance API Key and Secret with Futures Trading enabled
 
 ### Steps
-1. Download [**n0name Trading Bot** (v0.6.2)](https://github.com/firatoncu/noname/releases/download/n0name-v061/n0name-v0-6-2.exe)
+1. Download [**n0name Trading Bot** (v0.6.3)](https://github.com/firatoncu/noname/releases/download/n0name-v063/n0name-v0-6-3.exe)
 2. Run **n0name-v062.exe** 
 3. Follow the instructions and generate a config file (you can change it later!)  
 
-## Release Notes (0.6.2)
+## Release Notes (0.6.3)
 - Now, Logger Module saves error logs on *error.log* file. 
 - Bug fixes and major improvements
 - Real-Time Strategy Tracking module & graphical updates on UI.
