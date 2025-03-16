@@ -1,6 +1,5 @@
 from utils.globals import get_buyconda, get_buycondb, get_buycondc, get_sellconda, get_sellcondb, get_sellcondc 
 from colorama import init, Fore, Style
-import sys
 from utils.cursor_movement import logger_move_cursor_up
 import asyncio
 
@@ -57,10 +56,10 @@ async def current_status(symbols):
 async def current_position_monitor(p, pricePrecisions, logger):
     try:
         if float(p['positionAmt']) > 0:
-            long_status = (f"{p['symbol']}: {Fore.GREEN}LONG{Style.RESET_ALL} Size=${abs(round(float(p['notional']),2))}, {Fore.GREEN if float(p['unRealizedProfit']) > 0 else Fore.RED}P&L=${float(p['unRealizedProfit']):.2f}{Style.RESET_ALL}, Entry Price: ${round(float(p['entryPrice']), pricePrecisions[p['symbol']])}, Current Price: ${round(float(p['markPrice']), pricePrecisions[p['symbol']])}, TP: ${round(float(p['entryPrice']) * 1.0033, pricePrecisions[p['symbol']])}, SL: ${round(float(p['entryPrice']) * 0.993 , pricePrecisions[p['symbol']])}")
+            long_status = (f"{Style.BRIGHT}{p['symbol']}: {Fore.GREEN}LONG{Style.RESET_ALL}   {Style.BRIGHT}Size: {Fore.BLUE}${abs(round(float(p['notional']),2))}{Style.RESET_ALL},    {Style.BRIGHT}P&L: {Fore.GREEN if float(p['unRealizedProfit']) > 0 else Fore.RED}${float(p['unRealizedProfit']):.2f}{Style.RESET_ALL},    {Style.BRIGHT}Entry Price: {Fore.LIGHTCYAN_EX}${round(float(p['entryPrice']), pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}Current Price: {Fore.MAGENTA}${round(float(p['markPrice']), pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}TP: {Fore.LIGHTGREEN_EX}${round(float(p['entryPrice']) * 1.0033, pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}SL: {Fore.LIGHTRED_EX}${round(float(p['entryPrice']) * 0.993 , pricePrecisions[p['symbol']])}{Style.RESET_ALL}")
             return long_status
         if float(p['positionAmt']) < 0:
-            short_status = (f"{Style.BRIGHT}{p['symbol']}: {Fore.RED}SHORT{Style.RESET_ALL}   {Style.BRIGHT}Size: {Fore.BLUE}${abs(round(float(p['notional']),2))}{Style.RESET_ALL},    {Style.BRIGHT}P&L: {Fore.GREEN if float(p['unRealizedProfit']) > 0 else Fore.RED}${float(p['unRealizedProfit']):.2f}{Style.RESET_ALL},    {Style.BRIGHT}Entry Price: {Fore.CYAN}${round(float(p['entryPrice']), pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}Current Price: {Fore.MAGENTA}${round(float(p['markPrice']), pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}TP: {Fore.LIGHTGREEN_EX}${round(float(p['entryPrice']) * 0.9966, pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}SL: {Fore.LIGHTRED_EX}${round(float(p['entryPrice']) * 1.007 , pricePrecisions[p['symbol']])}{Style.RESET_ALL}")
+            short_status = (f"{Style.BRIGHT}{p['symbol']}: {Fore.RED}SHORT{Style.RESET_ALL}   {Style.BRIGHT}Size: {Fore.BLUE}${abs(round(float(p['notional']),2))}{Style.RESET_ALL},    {Style.BRIGHT}P&L: {Fore.GREEN if float(p['unRealizedProfit']) > 0 else Fore.RED}${float(p['unRealizedProfit']):.2f}{Style.RESET_ALL},    {Style.BRIGHT}Entry Price: {Fore.LIGHTCYAN_EX}${round(float(p['entryPrice']), pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}Current Price: {Fore.MAGENTA}${round(float(p['markPrice']), pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}TP: {Fore.LIGHTGREEN_EX}${round(float(p['entryPrice']) * 0.9966, pricePrecisions[p['symbol']])}{Style.RESET_ALL},    {Style.BRIGHT}SL: {Fore.LIGHTRED_EX}${round(float(p['entryPrice']) * 1.007 , pricePrecisions[p['symbol']])}{Style.RESET_ALL}")
             return short_status
 
     except Exception as e:

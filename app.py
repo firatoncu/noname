@@ -4,13 +4,13 @@ import os
 from binance import AsyncClient  # Replace synchronous Client with AsyncClient
 from utils.load_config import load_config
 from utils.initial_adjustments import initial_adjustments  # Must be made async
-from utils.logging import logger_func
+from utils.logging import error_logger_func
 from utils.current_status import current_status  # Assumed to be async
 from src.open_position import open_position  # Assumed to be async
 
 async def main():
     # Initialize logger and config
-    logger = logger_func()
+    logger = error_logger_func()
     config = load_config()
 
     os.system("cls" if os.name == "nt" else "clear") 

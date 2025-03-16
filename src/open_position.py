@@ -116,21 +116,26 @@ async def open_position(max_open_positions, symbols, logger, client, leverage):
         position_value = await position_val(leverage, get_capital_tbu(), max_open_positions, logger, client)
         all_positions = await client.futures_position_information()
         position_monitor_text = ""
+        pos_count = 0
         for p in all_positions:
             if float(p['positionAmt']) == 0:
                 continue
             
             position_response = await current_position_monitor(p, pricePrecisions, logger)
-            position_monitor_text = str(position_response) + " | " + str(position_monitor_text) 
-        
+            if position_monitor_text == "" and position_response != None:
+                position_monitor_text = str(position_response)
+            elif position_monitor_text != "" and position_response != None:
+                position_monitor_text = str(position_response)  + "\n" + str(position_monitor_text) 
+
+            pos_count = pos_count +1
         if position_monitor_text == "":
-            clean_line()
+            clean_line(pos_count+2)
             print("No Open Positions !")
         else:
-            clean_line()
-            print("Open Positions: ", position_monitor_text)
+            clean_line(pos_count+2)
+            print("Open Positions: \n" + position_monitor_text)
         
-        logger_move_cursor_up()
+        logger_move_cursor_up(pos_count+1)
 
         # Create a list of tasks for each symbol
         tasks = [
