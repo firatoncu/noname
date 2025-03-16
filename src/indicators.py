@@ -1,4 +1,4 @@
-from globals import set_clean_sell_signal, set_clean_buy_signal
+from utils.globals import set_clean_sell_signal, set_clean_buy_signal
 
 def no_crossing_last_10(macd_line, signal_line, logger):
     try:

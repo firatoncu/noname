@@ -1,4 +1,4 @@
-from globals import set_clean_sell_signal, set_clean_buy_signal
+from utils.globals import set_clean_sell_signal, set_clean_buy_signal
 import asyncio
 
 async def initial_adjustments(leverage, symbols, client, logger):

@@ -7,7 +7,7 @@ from src.check_condition import check_buy_conditions, check_sell_conditions
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
-from globals import set_clean_buy_signal, set_clean_sell_signal, set_last_position_qty, set_tp_price, set_sl_price, get_tp_price, get_sl_price, set_side_info, get_side_info, get_last_position_qty
+from utils.globals import set_clean_buy_signal, set_clean_sell_signal, set_last_position_qty, set_tp_price, set_sl_price, get_tp_price, get_sl_price, set_side_info, get_side_info, get_last_position_qty
 
 
 # Async function to process a single symbol
