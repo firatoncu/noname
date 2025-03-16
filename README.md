@@ -13,7 +13,7 @@ This repository contains *project n0name* designed for automated Futures Trading
 
 ### Steps
 1. Download [**n0name Trading Bot** (v0.6.3)](https://github.com/firatoncu/noname/releases/download/noname-v063/n0name-v0-6-3.exe)
-2. Run **n0name-v062.exe** 
+2. Run **n0name-v063.exe** 
 3. Follow the instructions and generate a config file (you can change it later!)  
 
 ## Release Notes (0.6.3)
