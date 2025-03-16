@@ -3,20 +3,9 @@
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
-*n0name* is an automated trading bot designed for educational and informational purposes only. The use of this bot involves significant risk and may result in substantial or complete loss of funds. By using this bot, you acknowledge and agree to the following:
 
-**No Financial Advice:** The information provided by this bot is not intended to be and should not be construed as financial advice. Always conduct your own research and consult with a qualified financial advisor before making any trading decisions.
-
-**Risk of Loss:** Trading in cryptocurrencies and futures involves a high level of risk and may not be suitable for all investors. You should carefully consider your financial situation and risk tolerance before engaging in such activities.
-
-**No Guarantees:** There are no guarantees of profit or avoidance of losses when using this bot. Past performance is not indicative of future results.
-
-**Responsibility:** You are solely responsible for any trades executed using this bot. The developers and contributors of this project are not liable for any financial losses or damages that may occur as a result of using this bot.
-
-**Compliance:** Ensure that your use of this bot complies with all applicable laws and regulations in your jurisdiction. It is your responsibility to understand and adhere to any legal requirements related to cryptocurrency trading.
-
-By using *n0name*, you agree to release and hold harmless the developers and contributors from any and all liability arising from your use of this bot.
-
+*The information provided by this bot is not intended to be and should not be construed as financial advice. Always conduct your own research and consult with a qualified financial advisor before making any trading decisions.Trading in cryptocurrencies and futures involves a high level of risk and may not be suitable for all investors. You should carefully consider your financial situation and risk tolerance before engaging in such activities.There are no guarantees of profit or avoidance of losses when using this bot. Past performance is not indicative of future results.You are solely responsible for any trades executed using this bot. The developers and contributors of this project are not liable for any financial losses or damages that may occur as a result of using this bot.Ensure that your use of this bot complies with all applicable laws and regulations in your jurisdiction. It is your responsibility to understand and adhere to any legal requirements related to cryptocurrency trading.*
+#
 # Installation
 ### Prerequisites
 - Python 3.11 or higher
