@@ -70,17 +70,22 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
 
         # Buy operation
         if buyAll and current_position <= 0 and open_positions_count < max_open_positions:
-            if current_position < 0:  # Close short and open long
-                quantity_to_buy = Q - current_position
-                entry_price = await get_entry_price(symbol, client, logger)
-                profit_percentage = (close_price - entry_price) / entry_price
-                if profit_percentage <= 0.01:
+            
+            quantity_to_buy = Q - current_position
+            entry_price = await get_entry_price(symbol, client, logger)
+            profit_percentage = 0.0
+            if current_position < 0:
+                profit_percentage = (entry_price - close_price) / entry_price 
+                if profit_percentage <= 0.01:  # Close short and open long
                     return
             else:
                 quantity_to_buy = Q
             logger.info(f"{symbol} için UZUN pozisyon açılıyor, miktar: {quantity_to_buy}")
             logger_move_cursor_up()
-            await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=quantity_to_buy)
+
+            
+            if max_open_positions > await get_open_positions_count(client, logger):
+                await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=quantity_to_buy)
 
             # Set Global Variables
             set_last_position_qty(quantity_to_buy, symbol)
@@ -95,17 +100,22 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
 
         # Sell operation
         elif sellAll and current_position >= 0 and open_positions_count < max_open_positions:
+            
+            quantity_to_sell = Q + current_position
+            entry_price = await get_entry_price(symbol, client, logger)
+            profit_percentage = 0.0
+            
             if current_position > 0:  # Close long and open short
-                quantity_to_sell = Q + current_position
-                entry_price = await get_entry_price(symbol, client, logger)
-                profit_percentage = (entry_price - close_price) / entry_price
+                profit_percentage = (close_price- entry_price) / entry_price
                 if profit_percentage <= 0.01:
                     return
             else:
                 quantity_to_sell = Q
             logger.info(f"{symbol} için KISA pozisyon açılıyor, miktar: {quantity_to_sell}")
             logger_move_cursor_up()
-            await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=quantity_to_sell)
+
+            if max_open_positions > await get_open_positions_count(client, logger):
+                await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=quantity_to_sell)
 
             # Set Global Variables
             set_clean_sell_signal(False, symbol)
