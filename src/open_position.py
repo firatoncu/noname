@@ -126,7 +126,7 @@ async def open_position(max_open_positions, symbols, logger, client, leverage):
         if position_monitor_text == "":
             print("No Open Positions !")
         else:
-            print(position_monitor_text)
+            print("Open Positions: ", position_monitor_text)
         
         logger_move_cursor_up()
 
