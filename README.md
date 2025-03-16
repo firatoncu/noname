@@ -17,6 +17,7 @@ This repository contains *project n0name* designed for automated Futures Trading
 3. Follow the instructions and generate a config file (you can change it later!)  
 
 ## Release Notes (0.6.2)
+- Now, Logger Module saves error logs on *error.log* file. 
 - Bug fixes and major improvements
 - Real-Time Strategy Tracking module & graphical updates on UI.
 - Added strategy explanation to terminal UI.
