@@ -1,5 +1,5 @@
 
-# n0name v0.6.3 by f0ncu
+# n0name v0.7.0 by f0ncu
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
@@ -18,13 +18,13 @@ The bot integrates cutting-edge methodologies such as **MACD histogram analysis*
 - Binance API Key and Secret with Futures Trading enabled
 
 ### Steps
-1. Download [**n0name Trading Bot** (v0.6.3)](https://github.com/firatoncu/noname/releases/download/noname-v063/n0name-v0-6-3.exe)
-2. Run **n0name-v063.exe** 
+1. Download [**n0name Trading Bot** (v0.7.0)](https://github.com/firatoncu/noname/releases/download/noname-v063/n0name-v0-7-0.exe)
+2. Run **n0name-v070.exe** 
 3. Follow the instructions and generate a config file (you can change it later!)  
 
 # Key Features
 n0name offers a robust set of capabilities to enhance trading efficiency and precision:
-
+- **Backtesting**: Backtesting with desired symbols and timeframe. ****(easiest backtesting module ever!)****
 - **Asynchronous Processing**: Utilizes asynchronous programming to handle multiple tasks concurrently, improving operational efficiency and reducing latency.
 - **Customizable Parameters**: Empowers users to tailor trading variables, such as trading pairs (e.g., BTC/USDT), leverage settings, and the maximum number of simultaneous open positions.
 - **Advanced Trading Strategies**: Incorporates powerful methodologies, including Fibonacci retracement and MACD histogram analysis, to drive intelligent trading decisions.
@@ -32,24 +32,27 @@ n0name offers a robust set of capabilities to enhance trading efficiency and pre
 - **Robust Error Handling and Logging**: Features comprehensive mechanisms for error detection, detailed logging, and troubleshooting, enabling users to monitor performance effectively.
 
   
-# Release Notes (0.6.3) 
+# Release Notes (0.7.0) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Enhance backtesting pipeline with user-defined balance, leverage, and fee rate inputs; improve error handling and user prompts.
+- **Backtesting module** is Online!
 - Now, Logger Module saves error logs on *error.log* file. 
 - Bug fixes and major improvements
 - Real-Time Strategy Tracking module & graphical updates on UI.
 - Added strategy explanation to terminal UI.
 - Enhanced position management to include Dynamic Capital Allocation.
 - User-friendly Configuration Setup Page.
+
+##
+### Older Releases (< 0.6.3)
+- Adaptive MACD & Signal Line Control.
+- Global signal management for Buy/Sell conditions.
+- Price values made more weighted than MACD values.
+- Added Fibonnaci Retratement Strategy.
+- Improvements in the code structure and execution logic.
 - Using Market Order instead of Limit Order to avoid being traced.
 - Windows Application released.
 - **Asynchronous Operation**, enhancing performance and responsiveness.
 - Update function definitions and logging for clarity.
 - Buy and Sell condition checks to utilize Histogram checker.
 - Improvements on Fibonacci logic for higher accuracy.
-##
-### Older Releases (0.5)
-- Adaptive MACD & Signal Line Control.
-- Global signal management for Buy/Sell conditions.
-- Price values made more weighted than MACD values.
-- Added Fibonnaci Retratement Strategy.
-- Improvements in the code structure and execution logic.
