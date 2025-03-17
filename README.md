@@ -1,5 +1,5 @@
 
-# n0name v0.7.0 by f0ncu
+# n0name v0.7.1 by f0ncu
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
@@ -18,8 +18,8 @@ The bot integrates cutting-edge methodologies such as **MACD histogram analysis*
 - Binance API Key and Secret with Futures Trading enabled
 
 ### Steps
-1. Download [**n0name Trading Bot** (v0.7.0)](https://github.com/firatoncu/noname/releases/download/noname-v063/n0name-v0-7-0.exe)
-2. Run **n0name-v070.exe** 
+1. Download [**n0name Trading Bot** (v0.7.1)](https://github.com/firatoncu/noname/releases/download/noname-v071/n0name-v0-7-1.exe)
+2. Run **n0name-v071.exe** 
 3. Follow the instructions and generate a config file (you can change it later!)  
 
 # Key Features
@@ -32,8 +32,9 @@ n0name offers a robust set of capabilities to enhance trading efficiency and pre
 - **Robust Error Handling and Logging**: Features comprehensive mechanisms for error detection, detailed logging, and troubleshooting, enabling users to monitor performance effectively.
 
   
-# Release Notes (0.7.0) 
+# Release Notes (0.7.1) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Big Security Update! Implemented API keys encryption and decryption with AES-256-GCM with an encrypted password using PBKDF2 (with over 100.000 iterations.) 
 - Enhance backtesting pipeline with user-defined balance, leverage, and fee rate inputs; improve error handling and user prompts.
 - **Backtesting module** is Online!
 - Now, Logger Module saves error logs on *error.log* file. 
@@ -44,7 +45,7 @@ n0name offers a robust set of capabilities to enhance trading efficiency and pre
 - User-friendly Configuration Setup Page.
 
 ##
-### Older Releases (< 0.6.3)
+### Older Releases (< 0.7.0)
 - Adaptive MACD & Signal Line Control.
 - Global signal management for Buy/Sell conditions.
 - Price values made more weighted than MACD values.
