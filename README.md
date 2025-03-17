@@ -16,7 +16,8 @@ This repository contains *project n0name* designed for automated Futures Trading
 2. Run **n0name-v063.exe** 
 3. Follow the instructions and generate a config file (you can change it later!)  
 
-## Release Notes (0.6.3)
+## Release Notes (0.6.3) 
+##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
 - Now, Logger Module saves error logs on *error.log* file. 
 - Bug fixes and major improvements
 - Real-Time Strategy Tracking module & graphical updates on UI.
