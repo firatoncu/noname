@@ -14,3 +14,4 @@ def backtest_pipeline(client, logger):
             input("\nPress Enter to continue...")
         except Exception as e:
             logger.error(f"An error occurred: {e}")
+            input("\nPress Enter to continue...")
