@@ -1,4 +1,5 @@
 # Main entry point for the async trading bot application.
+import warnings
 import asyncio
 import os
 from binance import AsyncClient  # Replace synchronous Client with AsyncClient
@@ -7,6 +8,10 @@ from utils.initial_adjustments import initial_adjustments  # Must be made async
 from utils.logging import error_logger_func
 from utils.current_status import current_status  # Assumed to be async
 from src.open_position import open_position  # Assumed to be async
+from src.backtesting.backtest_pipeline import backtest_pipeline 
+from binance.client import Client
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 async def main():
     # Initialize logger and config
@@ -23,24 +28,35 @@ async def main():
     symbols = symbol_config['symbols']
     capital_tbu = config['capital_tbu']
     
-    # Create AsyncClient instance
-    client = await AsyncClient.create(api_config['api_key'], api_config['secret'])
+
     
-    try:
-        # Perform initial adjustments asynchronously
-        await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
+    # Ask user to choose between Backtesting and Trading
+    mode = input("Choose mode (Backtesting/Trading): ").strip().lower()
+    while mode not in ["backtesting", "trading"]:
+        print("Invalid mode. Please choose 'Backtesting' or 'Trading'.")
+        mode = input("Choose mode (Backtesting/Trading): ").strip().lower()
+    if mode == "backtesting":
+        client = Client(api_config['api_key'], api_config['secret'])
+        backtest_pipeline(client, logger)
 
-        # Run the main loop indefinitely
-        while True:
-            await open_position(max_open_positions, symbols, logger, client, leverage)
-            await current_status(symbols)
-            await asyncio.sleep(3)  # Prevent tight looping; adjust as needed
+    elif mode == "trading":
+        try:
+            # Create AsyncClient instance
+            client = await AsyncClient.create(api_config['api_key'], api_config['secret'])
+            # Perform initial adjustments asynchronously
+            await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
 
-    except Exception as e:
-        logger.error(f"Error in main loop: {e}")
-    finally:
-        # Clean up the client connection
-        await client.close_connection()
+            # Run the main loop indefinitely
+            while True:
+                await open_position(max_open_positions, symbols, logger, client, leverage)
+                await current_status(symbols)
+                await asyncio.sleep(3)  # Prevent tight looping; adjust as needed
+
+        except Exception as e:
+            logger.error(f"Error in main loop: {e}")
+        finally:
+            # Clean up the client connection
+            await client.close_connection()
 
 # Entry point to run the async application
 if __name__ == "__main__":

@@ -9,6 +9,16 @@ sellconda = {}
 sellcondb = {}
 sellcondc = {}
 
+user_time_zone = "UTC"
+
+def set_user_time_zone(value: str):
+    global user_time_zone
+    user_time_zone = value
+
+def get_user_time_zone():
+    global user_time_zone
+    return user_time_zone
+
 def set_clean_sell_signal(value: bool, symbol: str):
     global clean_sell_signal
     clean_sell_signal[symbol] = value

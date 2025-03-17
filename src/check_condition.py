@@ -2,7 +2,6 @@
 import ta # type: ignore
 from src.indicators import last500_histogram_check, last500_fibo_check, signal_cleaner
 from utils.globals import get_clean_buy_signal, get_clean_sell_signal, set_buyconda, set_buycondb, set_buycondc, set_sellconda, set_sellcondb, set_sellcondc
-from utils.cursor_movement import clean_line
 
 # Alış koşulları
 def check_buy_conditions(df, symbol, logger):
