@@ -46,20 +46,20 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
             sl_price = round(entry_price * 0.993, price_precision)
 
             if (close_price <= sl_price or close_price >= tp_price):
-                await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=current_position)
-                set_capital_tbu(get_capital_tbu() - (entry_price - close_price) * current_position ) 
+                await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
+                set_capital_tbu(get_capital_tbu() - (entry_price - close_price) * abs(current_position) ) 
                 return
                 
-            else:
-                entry_price = await get_entry_price(symbol, client, logger)
-                tp_price = round(entry_price * 0.9966, price_precision)
-                sl_price = round(entry_price * 1.007, price_precision)
+        else:
+            entry_price = await get_entry_price(symbol, client, logger)
+            tp_price = round(entry_price * 0.9966, price_precision)
+            sl_price = round(entry_price * 1.007, price_precision)
 
-                if(close_price >= sl_price or close_price <= tp_price):
-                    await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=current_position)
-                    set_capital_tbu(get_capital_tbu() + (entry_price - close_price) * current_position ) 
-                    return
-                
+            if(close_price >= sl_price or close_price <= tp_price):
+                await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
+                set_capital_tbu(get_capital_tbu() + (entry_price - close_price) * abs(current_position) ) 
+                return
+            
 
         open_positions_count = await get_open_positions_count(client, logger)
         # Buy operation
