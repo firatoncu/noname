@@ -50,7 +50,7 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
                 set_capital_tbu(get_capital_tbu() - (entry_price - close_price) * abs(current_position) ) 
                 return
                 
-        else:
+        if current_position < 0:
             entry_price = await get_entry_price(symbol, client, logger)
             tp_price = round(entry_price * 0.9966, price_precision)
             sl_price = round(entry_price * 1.007, price_precision)
