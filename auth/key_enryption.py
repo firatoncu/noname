@@ -28,7 +28,8 @@ def encrypt_api_keys():
     """)
     # Prompt user for credentials
     api_key = input("Enter your Binance API Key: ").strip()
-    api_secret = getpass.getpass(f"Enter your Binance API Secret: {Fore.LIGHTBLACK_EX}(you won't see it on screen when you paste it.){Style.RESET_ALL}").strip()
+    print(f"Enter your Binance API Secret: {Fore.LIGHTBLACK_EX}(you won't see it on screen when you paste it.){Style.RESET_ALL}")
+    api_secret = getpass.getpass("Secret: ").strip()
     password = getpass.getpass("Enter a secure password for encryption: ").strip()
 
     # Generate random salt and nonce
