@@ -5,6 +5,7 @@ import random
 from utils.logging import logger_func
 from utils.cursor_movement import clean_line
 logger = logger_func()
+import os
 
 # Colorama'yı başlat
 
@@ -30,6 +31,7 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
 
         # Choose a random color
         random_color = random.choice(colors)
+        os.system("cls" if os.name == "nt" else "clear") 
         print(f"""{random_color}{Style.BRIGHT}
     
         ______                                                _ _                _                

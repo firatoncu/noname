@@ -22,3 +22,4 @@ dist/
 *.bat
 backtesting_results
 backtest_strategies
+ENCRYPTED_FILE

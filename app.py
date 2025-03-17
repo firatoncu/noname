@@ -10,6 +10,7 @@ from utils.current_status import current_status  # Assumed to be async
 from src.open_position import open_position  # Assumed to be async
 from src.backtesting.backtest_pipeline import backtest_pipeline 
 from binance.client import Client
+from auth.key_enryption import decrypt_api_keys
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -18,31 +19,29 @@ async def main():
     logger = error_logger_func()
     config = load_config()
 
-    os.system("cls" if os.name == "nt" else "clear") 
-
     # Extract configuration details
-    api_config = config['api_keys']
     symbol_config = config['symbols']
     leverage = symbol_config['leverage']
     max_open_positions = symbol_config['max_open_positions']
     symbols = symbol_config['symbols']
     capital_tbu = config['capital_tbu']
     
-
+    
+    api_key, api_secret = decrypt_api_keys()
     
     # Ask user to choose between Backtesting and Trading
-    mode = input("Choose mode (Backtesting/Trading): ").strip().lower()
+    mode = input("\n\nChoose mode (Backtesting/Trading): ").strip().lower()
     while mode not in ["backtesting", "trading"]:
         print("Invalid mode. Please choose 'Backtesting' or 'Trading'.")
         mode = input("Choose mode (Backtesting/Trading): ").strip().lower()
     if mode == "backtesting":
-        client = Client(api_config['api_key'], api_config['secret'])
+        client = Client(api_key, api_secret)
         backtest_pipeline(client, logger)
 
     elif mode == "trading":
         try:
             # Create AsyncClient instance
-            client = await AsyncClient.create(api_config['api_key'], api_config['secret'])
+            client = await AsyncClient.create(api_key, api_secret)
             # Perform initial adjustments asynchronously
             await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
 

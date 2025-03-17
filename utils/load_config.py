@@ -23,7 +23,6 @@ def load_config(file_path='config.yml'):
         # Get user inputs
         config = {
             'symbols': {},
-            'api_keys': {},
             'capital_tbu': float  # Default to use full balance 
         }
         
@@ -58,24 +57,7 @@ def load_config(file_path='config.yml'):
             max_positions = 2
             print("Defaulting to 2 max open positions")
         config['symbols']['max_open_positions'] = max_positions
-        time.sleep(1)
-
-        # API keys configuration
-        api_key = input("\nEnter API key: ").strip()
-        time.sleep(1)
-        if not api_key:
-            print("API key is required!")
-            exit(1)
-        config['api_keys']['api_key'] = api_key
-        time.sleep(1)
-
-        secret = input("\nEnter secret key: ").strip()
-        time.sleep(1)
-        if not secret:
-            print("Secret key is required!")
-            exit(1)
-        config['api_keys']['secret'] = secret
-        
+        time.sleep(1)        
         # Save the new config file
         try:
             with open(full_path, 'w') as file:
