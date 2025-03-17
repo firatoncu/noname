@@ -50,6 +50,54 @@ def get_user_symbol():
         except ValueError:
             print("Invalid input. Please enter valid symbols.")
 
+def get_balance_info():
+    """Get the user's symbol selection."""
+    while True:
+        try:
+            balance_info = input("\nEnter the Starting Balance value (e.g., 1000): ") or -999
+            if balance_info == -999:
+                print("No balance entered, defaulting to 1000")
+                return 1000
+            elif int(balance_info) >= 50 and int(balance_info) <= 1000000:
+                print("Starting Balance set to: ", balance_info)
+                return balance_info
+            else:
+                print(f"Invalid Balance value {balance_info}. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter valid Balance value.")
+
+def get_leverage_info():
+    """Get the user's symbol selection."""
+    while True:
+        try:
+            leverage = input("\nEnter the leverage value (e.g., 5): ") or -999
+            if leverage == -999:
+                print("No leverage entered, defaulting to 5")
+                return 5
+            elif int(leverage) >= 0 and int(leverage) <= 125:
+                print("Leverage set to: ", leverage)
+                return leverage
+            else:
+                print(f"Invalid Leverage value {leverage}. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter valid leverage value.")
+
+def get_fee_rate():
+    """Get the user's symbol selection."""
+    while True:
+        try:
+            fee_rate = input("\nEnter the fee rate value (default value is 0.0002, leave empty for default): ") or -999
+            if fee_rate == -999:
+                print("No fee rate entered, defaulting to 0.0002")
+                return 0.0002
+            elif float(fee_rate) >= 0:
+                print("Fee rate set to: ", fee_rate)
+                return fee_rate
+            else:
+                print(f"Invalid fee rate value {fee_rate}. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter valid fee rate value.")
+
 def print_welcome_message():
     os.system("cls" if os.name == "nt" else "clear") 
             # List of available foreground colors (excluding RESET)
@@ -91,7 +139,9 @@ def get_user_timezone():
             choice = int(input("Enter the number of your timezone: "))
             if choice in TIMEZONES:
                 set_user_time_zone(TIMEZONES[choice][2])  # Set the timezone
-                return TIMEZONES[choice][2]  # Return the timezone name
+                print("Timezone set to: ", TIMEZONES[choice][1])
+                return TIMEZONES[choice][2]  # Return the Capital name
+                
             else:
                 print("Invalid choice. Please try again.")
         except ValueError:
@@ -149,8 +199,9 @@ def get_inputs_for_backtest():
     get_user_timezone()
     
     # Get user's datetime input
-    start_datetime = get_user_datetime("Starting Date Time : Enter in '28-10-1996 19:42:59' (DD-MM-YYYY HH:MM:SS) format: ")
-    end_datetime   = get_user_datetime("Ending Date Time   : Enter in '28-10-1996 19:42:59' (DD-MM-YYYY HH:MM:SS) format: ")
+    print("\nEnter the start and end date times for the backtest: (eg. 01-01-2021 00:00:00)")
+    start_datetime = get_user_datetime("Starting Date Time :") 
+    end_datetime   = get_user_datetime("Ending Date Time   :") 
 
     # Convert to Unix timestamp in milliseconds
     start_unix_timestamp_ms = datetime_to_unix_milliseconds(start_datetime)
@@ -159,5 +210,9 @@ def get_inputs_for_backtest():
     time_interval = get_user_intervals()
 
     symbol = get_user_symbol()
+
+    leverage = get_leverage_info()
+    balance_info = get_balance_info()
+    fee_rate = get_fee_rate()
     
-    return start_unix_timestamp_ms, end_unix_timestamp_ms, time_interval, symbol
+    return start_unix_timestamp_ms, end_unix_timestamp_ms, time_interval, symbol, balance_info, leverage, fee_rate
