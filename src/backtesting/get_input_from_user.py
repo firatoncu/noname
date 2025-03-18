@@ -56,11 +56,11 @@ def get_balance_info():
         try:
             balance_info = input("\nEnter the Starting Balance value (e.g., 1000): ") or -999
             if balance_info == -999:
-                print("No balance entered, defaulting to 1000")
+                print("No balance entered, defaulting to $1000")
                 return 1000
             elif int(balance_info) >= 50 and int(balance_info) <= 1000000:
-                print("Starting Balance set to: ", balance_info)
-                return balance_info
+                print("Starting Balance set to: " + "$" + str(balance_info))
+                return int(balance_info)
             else:
                 print(f"Invalid Balance value {balance_info}. Please try again.")
         except ValueError:
@@ -76,7 +76,7 @@ def get_leverage_info():
                 return 5
             elif int(leverage) >= 0 and int(leverage) <= 125:
                 print("Leverage set to: ", leverage)
-                return leverage
+                return int(leverage)
             else:
                 print(f"Invalid Leverage value {leverage}. Please try again.")
         except ValueError:
@@ -92,7 +92,7 @@ def get_fee_rate():
                 return 0.0002
             elif float(fee_rate) >= 0:
                 print("Fee rate set to: ", fee_rate)
-                return fee_rate
+                return float(fee_rate)
             else:
                 print(f"Invalid fee rate value {fee_rate}. Please try again.")
         except ValueError:

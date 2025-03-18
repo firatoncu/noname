@@ -47,7 +47,7 @@ def load_config(file_path='config.yml'):
         capital_tbu = float(input("\nCapital to be used (leave blank to use the full balance): ").strip() or -999) 
         time.sleep(1)
         if capital_tbu == -999:
-            print("Using full balance")
+            print("Using full balance.. ")
         config['capital_tbu'] = capital_tbu
         time.sleep(1)
 

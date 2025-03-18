@@ -29,7 +29,7 @@ def last500_macd_check(macd_line, lookback_period, logger):
 
 def last500_histogram_check(histogram, side, logger, histogram_lookback=500):
     try:
-        histogram_history = histogram.tail(500)
+        histogram_history = histogram.tail(histogram_lookback)
         if side == 'buy':
             histogram_pos_lookback = histogram_history[histogram_history > 0]
             last10_max = histogram_pos_lookback.quantile(0.85)

@@ -5,7 +5,7 @@ import asyncio
 async def position_val(leverage, capital_tbu, max_positions, logger, client):
     try:
         # Fetch current USDT balance asynchronously
-        if capital_tbu is not None:
+        if capital_tbu != -999:
             usdt_balance = capital_tbu / max_positions
         else:
             usdt_balance = round(await get_usdt_balance(client, logger) / max_positions) - 1

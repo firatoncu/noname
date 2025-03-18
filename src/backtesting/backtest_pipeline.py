@@ -8,8 +8,11 @@ def backtest_pipeline(client, logger):
     while True:
         try:
             start_unix_timestamp_ms, end_unix_timestamp_ms, time_interval, symbol, balance_info, leverage, fee_rate = get_inputs_for_backtest()
+            logger.error(f"get_inputs_for_backtest worked successfully")
             df = fetch_historical_data(client, symbol, start_unix_timestamp_ms, end_unix_timestamp_ms, time_interval)
+            logger.error(f"fetch_historical_data worked successfully")
             df = futures_strategy(df, logger, leverage, fee_rate, initial_balance=balance_info)
+            logger.error(f"futures_strategy worked successfully")
             generate_trade_log(df, log_filename='trade_log.csv')
             input("\nPress Enter to continue...")
         except Exception as e:

@@ -1,9 +1,9 @@
-from utils.globals import set_clean_sell_signal, set_clean_buy_signal, set_capital_tbu
+from utils.globals import set_capital_tbu
+from src.init_start import signal_initializer
 import asyncio
 from colorama import Fore, Style, init
 import random
 from utils.logging import logger_func
-from utils.cursor_movement import clean_line
 logger = logger_func()
 import os
 
@@ -14,8 +14,7 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
     try:
         init(autoreset=True)
         for symbol in symbols:
-            set_clean_sell_signal(False, symbol)
-            set_clean_buy_signal(False, symbol)
+            await signal_initializer(client, symbol, logger)
             if capital_tbu == -999:
                 set_capital_tbu(None)
             else:
