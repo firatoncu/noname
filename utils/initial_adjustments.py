@@ -13,12 +13,9 @@ import os
 async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logger):
     try:
         init(autoreset=True)
+        set_capital_tbu(capital_tbu)
         for symbol in symbols:
-            await signal_initializer(client, symbol, logger)
-            if capital_tbu == -999:
-                set_capital_tbu(None)
-            else:
-                set_capital_tbu(capital_tbu)
+            await signal_initializer(client, symbol, logger)               
             await client.futures_change_leverage(symbol=symbol, leverage=leverage)
 
         # List of available foreground colors (excluding RESET)
