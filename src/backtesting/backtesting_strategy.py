@@ -2,7 +2,8 @@
 import ta
 from src.check_condition import check_buy_conditions, check_sell_conditions
 import pandas as pd
-from src.backtesting.backtest_strategies.strategy01 import check_buy_conditions, check_sell_conditions 
+# from src.backtesting.backtest_strategies.strategy01 import check_buy_conditions, check_sell_conditions 
+# 
 from src.backtesting.get_input_from_user import unix_milliseconds_to_datetime
 
 

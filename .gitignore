@@ -24,3 +24,4 @@ backtesting_results
 backtest_strategies
 ENCRYPTED_FILE
 utils/config*
+venv/
