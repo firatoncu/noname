@@ -2,6 +2,7 @@ clean_sell_signal = {}
 clean_buy_signal = {}
 
 sl_price = {}
+last_timestamp = {}
 
 buyconda = {}
 buycondb = {}
@@ -10,6 +11,8 @@ buycondc = {}
 sellconda = {}
 sellcondb = {}
 sellcondc = {}
+
+db_status = False
 
 user_time_zone = "UTC"
 
@@ -100,3 +103,19 @@ def set_sl_price(value: float, symbol: str):
 def get_sl_price(symbol: str):
     global sl_price
     return sl_price[symbol]
+
+def set_last_timestamp(value: int, symbol: str):
+    global last_timestamp
+    last_timestamp[symbol] = value
+
+def get_last_timestamp(symbol: str):
+    global last_timestamp
+    return last_timestamp[symbol]
+
+def set_db_status(value: bool):
+    global db_status
+    db_status = value
+
+def get_db_status():
+    global db_status
+    return db_status

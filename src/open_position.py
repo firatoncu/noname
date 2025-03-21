@@ -6,9 +6,10 @@ from src.check_condition import check_buy_conditions, check_sell_conditions
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
-from utils.globals import get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price
+from utils.globals import get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price, get_last_timestamp, set_last_timestamp, get_db_status
 from utils.cursor_movement import logger_move_cursor_up, clean_line
 from utils.current_status import current_position_monitor
+from utils.influxdb.inf_send_data import write_live_data
 
 
 # Async function to process a single symbol
@@ -19,6 +20,17 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
         df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_asset_volume', 'number_of_trades', 'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'])
         df['close'] = pd.to_numeric(df['close'])
         close_price = df['close'].iloc[-1]
+        
+        if get_db_status() == True:
+            if get_last_timestamp(symbol) == 0:
+                set_last_timestamp(df['timestamp'].iloc[-1], symbol)
+
+            if df['timestamp'].iloc[-1] != get_last_timestamp(symbol):
+                last_candle = df[['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time']].iloc[-1]
+                await write_live_data(last_candle, symbol)
+                set_last_timestamp(df['timestamp'].iloc[-1], symbol)
+            
+
 
         # Check buy and sell conditions
         buyAll = check_buy_conditions(df, symbol, logger)

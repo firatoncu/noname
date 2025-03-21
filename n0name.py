@@ -8,9 +8,10 @@ from utils.initial_adjustments import initial_adjustments  # Must be made async
 from utils.logging import error_logger_func
 from utils.current_status import current_status  # Assumed to be async
 from src.open_position import open_position  # Assumed to be async
-from src.backtesting.backtest_pipeline import backtest_pipeline 
 from binance.client import Client
 from auth.key_enryption import decrypt_api_keys
+from utils.globals import set_db_status
+from utils.influxdb.inf_db_initializer import inf_db_init_main
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -28,6 +29,15 @@ async def main():
     
     
     api_key, api_secret = decrypt_api_keys()
+
+    db_status = input("Do you want to use the InfluxDB? (y/n): ").strip().lower()
+    if db_status == "y":
+        set_db_status(True)
+        inf_db_init_main()
+    else:
+        set_db_status(False)
+
+
     
     # Ask user to choose between Backtesting and Trading
     """mode = input("\n\nChoose mode (Backtesting/Trading): ").strip().lower()
