@@ -49,7 +49,7 @@ async def main():
             while True:
                 await open_position(max_open_positions, symbols, logger, client, leverage)
                 await current_status(symbols)
-                await asyncio.sleep(3)  # Prevent tight looping; adjust as needed
+                await asyncio.sleep(2)  # Prevent tight looping; adjust as needed
 
         except Exception as e:
             logger.error(f"Error in main loop: {e}")

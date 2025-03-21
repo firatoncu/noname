@@ -1,14 +1,13 @@
-from utils.position_opt import get_wallet_balance, check_balance_availability
+from utils.position_opt import get_wallet_balance
 import asyncio
 
 async def position_val(leverage, capital_tbu, max_positions, logger, client):
     try:
         # Fetch current USDT balance asynchronously
         if capital_tbu != -999:
-            await check_balance_availability(capital_tbu, client, logger)
             max_position_size = float(capital_tbu) / int(max_positions)
         else:
-            max_position_size = await get_wallet_balance(client, logger) / int(max_positions)
+            max_position_size = (await get_wallet_balance(client, logger)) / int(max_positions)
   
         # Calculate position value
         POSITION_VALUE = (max_position_size-1) * leverage

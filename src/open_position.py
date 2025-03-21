@@ -114,7 +114,8 @@ async def open_position(max_open_positions, symbols, logger, client, leverage):
     try:
         # Fetch static data once
         stepSizes, quantityPrecisions, pricePrecisions = await stepsize_precision(client, symbols)
-        position_value = await position_val(leverage, get_capital_tbu(), max_open_positions, logger, client)
+        capital_tbu = get_capital_tbu()
+        position_value = await position_val(leverage, capital_tbu, max_open_positions, logger, client)
         all_positions = await client.futures_position_information()
         position_monitor_text = ""
         pos_count = 0

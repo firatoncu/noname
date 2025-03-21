@@ -25,7 +25,9 @@ async def get_entry_price(symbol, client, logger):
 async def get_wallet_balance(client, logger):
     try:
         # Fetch account info asynchronously
-        return float(await client.futures_account()['totalWalletBalance'])  # Return 0 if USDT not found
+        wallet_balance = await client.futures_account() # Return 0 if USDT not found
+        wallet_balance = float(wallet_balance['totalWalletBalance'])
+        return wallet_balance
     except Exception as e:
         logger.error(f"Error in Get Wallet Balance Function: {e}")
         return 0
@@ -38,18 +40,6 @@ async def get_open_positions_count(client, logger):
         return len(open_positions)
     except Exception as e:
         logger.error(f"Error in Open Position Count Function: {e}")
-        return 0
-    
-
-async def check_balance_availability(capital_tbu, client, logger): 
-    try:
-        if capital_tbu < get_wallet_balance(client, logger):
-            print("Insufficient balance or max positions. Please adjust.")
-            time.sleep(10)
-            sys.exit("Please adjust your balance or max positions.")
-        
-    except Exception as e:
-        logger.error(f"Error while Cheching Balance Availability: {e}")
         return 0
     
 async def set_stoploss_price(buyAll, symbol, close_prices_str, price_precision, logger):
