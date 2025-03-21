@@ -6,7 +6,7 @@ from src.check_condition import check_buy_conditions, check_sell_conditions
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
-from utils.globals import set_capital_tbu, get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price
+from utils.globals import get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price
 from utils.cursor_movement import logger_move_cursor_up, clean_line
 from utils.current_status import current_position_monitor
 
@@ -81,7 +81,7 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
            
             if max_open_positions > await get_open_positions_count(client, logger):
                 await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=quantity_to_buy)
-                set_stoploss_price(buyAll, symbol, df["close"], price_precision, logger)
+                await set_stoploss_price(buyAll, symbol, df["close"], price_precision, logger)
             # Set Global Variables
             set_clean_buy_signal(False, symbol)
 
@@ -102,7 +102,7 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
 
             if max_open_positions > await get_open_positions_count(client, logger):
                 await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=quantity_to_sell)
-                set_stoploss_price(buyAll, symbol, df["close"], price_precision, logger)
+                await set_stoploss_price(buyAll, symbol, df["close"], price_precision, logger)
             # Set Global Variables
             set_clean_sell_signal(False, symbol)
             
