@@ -60,13 +60,13 @@ def last500_fibo_check(close_prices_str, side, logger):
         if (side == 'buy' 
             and close_prices.iloc[-2] < fibo_values[0.786] 
             and close_prices.iloc[-1] > fibo_values[0.786] 
-            and (fibo_values[0.618] - fibo_values[0.786])/fibo_values[0.786] > 0.006):
+            and (fibo_values[0.618] - fibo_values[0.786])/fibo_values[0.618] > 0.006):
             return True
         
         if (side == 'sell' 
             and close_prices.iloc[-2] > fibo_values[0.236] 
             and close_prices.iloc[-1] < fibo_values[0.236] 
-            and (fibo_values[0.236] - fibo_values[0.382])/fibo_values[0.382] > 0.006):
+            and (fibo_values[0.236] - fibo_values[0.382])/fibo_values[0.236] > 0.006):
             return True
         
         return False

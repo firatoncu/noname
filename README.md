@@ -34,6 +34,7 @@ n0name offers a robust set of capabilities to enhance trading efficiency and pre
   
 # Release Notes (0.7.2) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Improved position value calculations and enhance balance checking.
 - Cold Start Condition Check feature went live!
 - Enhance backtesting pipeline with logging for input retrieval and strategy execution.
 - Big Security Update! Implemented API keys encryption and decryption with AES-256-GCM with an encrypted password using PBKDF2 (with over 100.000 iterations.) 

@@ -1,4 +1,5 @@
-from utils.cursor_movement import clean_line
+import time
+import sys
 
 async def get_entry_price(symbol, client, logger):
     try:
@@ -17,19 +18,15 @@ async def get_entry_price(symbol, client, logger):
                     return None
 
     except Exception as e:
-        logger.error(f"{symbol} için giriş fiyatı alınırken hata: {e}")
+        logger.error(f"{symbol} - Error in Get Entry Price function: {e}")
         return None
 
-async def get_usdt_balance(client, logger):
+async def get_wallet_balance(client, logger):
     try:
         # Fetch account info asynchronously
-        account_info = await client.futures_account()
-        for asset in account_info['assets']:
-            if asset['asset'] == 'USDT':
-                return float(asset['availableBalance'])
-        return 0  # Return 0 if USDT not found
+        return float(await client.futures_account()['totalWalletBalance'])  # Return 0 if USDT not found
     except Exception as e:
-        logger.error(f"Bakiye alınırken hata: {e}")
+        logger.error(f"Error in Get Wallet Balance Function: {e}")
         return 0
 
 async def get_open_positions_count(client, logger):
@@ -39,5 +36,17 @@ async def get_open_positions_count(client, logger):
         open_positions = [pos for pos in positions if float(pos['positionAmt']) != 0]
         return len(open_positions)
     except Exception as e:
-        logger.error(f"Açık pozisyon sayısı alınırken hata: {e}")
+        logger.error(f"Error in Open Position Count Function: {e}")
+        return 0
+    
+
+async def check_balance_availability(capital_tbu, client, logger): 
+    try:
+        if capital_tbu < get_wallet_balance(client, logger):
+            print("Insufficient balance or max positions. Please adjust.")
+            time.sleep(10)
+            sys.exit("Please adjust your balance or max positions.")
+        
+    except Exception as e:
+        logger.error(f"Error while Cheching Balance Availability: {e}")
         return 0
