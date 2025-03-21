@@ -1,4 +1,4 @@
-from utils.globals import set_capital_tbu
+from utils.globals import set_capital_tbu, set_sl_price
 from src.init_start import signal_initializer
 import asyncio
 from colorama import Fore, Style, init
@@ -14,7 +14,9 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
     try:
         init(autoreset=True)
         set_capital_tbu(capital_tbu)
+        
         for symbol in symbols:
+            set_sl_price(0, symbol)
             await signal_initializer(client, symbol, logger)               
             await client.futures_change_leverage(symbol=symbol, leverage=leverage)
 

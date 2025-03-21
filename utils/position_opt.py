@@ -1,5 +1,6 @@
 import time
 import sys
+from utils.globals import set_sl_price
 
 async def get_entry_price(symbol, client, logger):
     try:
@@ -49,4 +50,20 @@ async def check_balance_availability(capital_tbu, client, logger):
         
     except Exception as e:
         logger.error(f"Error while Cheching Balance Availability: {e}")
+        return 0
+    
+async def set_stoploss_price(buyAll, symbol, close_prices_str, price_precision, logger):
+    try:
+        close_prices = (close_prices_str.astype(float))
+        min_price = min(close_prices)
+        max_price = max(close_prices)
+        if buyAll:
+            sl_price = round(min_price * 0.998, price_precision)
+        else:
+            sl_price = round(max_price * 1.002, price_precision)
+        
+        set_sl_price(sl_price, symbol)
+
+    except Exception as e:
+        logger.error(f"Error while Setting Stoploss Price: {e}")
         return 0

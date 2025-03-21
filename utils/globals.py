@@ -1,6 +1,8 @@
 clean_sell_signal = {}
 clean_buy_signal = {}
 
+sl_price = {}
+
 buyconda = {}
 buycondb = {}
 buycondc = {}
@@ -90,3 +92,11 @@ def get_clean_sell_signal(symbol: str):
 def get_clean_buy_signal(symbol: str):
     global clean_buy_signal
     return clean_buy_signal[symbol]
+
+def set_sl_price(value: float, symbol: str):
+    global sl_price
+    sl_price[symbol] = value
+
+def get_sl_price(symbol: str):
+    global sl_price
+    return sl_price[symbol]

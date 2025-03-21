@@ -1,12 +1,12 @@
 import asyncio
 from binance.enums import SIDE_BUY, SIDE_SELL, ORDER_TYPE_MARKET
 import pandas as pd
-from utils.position_opt import get_open_positions_count, get_entry_price
+from utils.position_opt import get_open_positions_count, get_entry_price, set_stoploss_price
 from src.check_condition import check_buy_conditions, check_sell_conditions
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
-from utils.globals import set_capital_tbu, get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal
+from utils.globals import set_capital_tbu, get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price
 from utils.cursor_movement import logger_move_cursor_up, clean_line
 from utils.current_status import current_position_monitor
 
@@ -43,21 +43,25 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
         if current_position > 0:
             entry_price = await get_entry_price(symbol, client, logger)
             tp_price = round(entry_price * 1.0033, price_precision)
-            sl_price = round(entry_price * 0.993, price_precision)
+            sl_price = get_sl_price(symbol)
+            #if position is opened manually, sl_price will be 0. In this case, set sl_price to 0.9966 of entry price
+            if sl_price == 0:
+                sl_price = round(entry_price * 0.9966, price_precision)
 
             if (close_price <= sl_price or close_price >= tp_price):
                 await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
-                set_capital_tbu(get_capital_tbu() - (entry_price - close_price) * abs(current_position) ) 
                 return
                 
         if current_position < 0:
             entry_price = await get_entry_price(symbol, client, logger)
             tp_price = round(entry_price * 0.9966, price_precision)
-            sl_price = round(entry_price * 1.007, price_precision)
+            sl_price = get_sl_price(symbol)
+            #if position is opened manually, sl_price will be 0. In this case, set sl_price to 0.9966 of entry price
+            if sl_price == 0:
+                sl_price = round(entry_price * 1.0033, price_precision)
 
             if(close_price >= sl_price or close_price <= tp_price):
                 await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
-                set_capital_tbu(get_capital_tbu() + (entry_price - close_price) * abs(current_position) ) 
                 return
             
 
@@ -77,10 +81,10 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
            
             if max_open_positions > await get_open_positions_count(client, logger):
                 await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=quantity_to_buy)
-
+                set_stoploss_price(buyAll, symbol, df["close"], price_precision, logger)
             # Set Global Variables
             set_clean_buy_signal(False, symbol)
-            set_capital_tbu(get_capital_tbu() + profit_percentage) 
+
 
         # Sell operation
         elif sellAll and current_position >= 0 and open_positions_count < max_open_positions:
@@ -98,12 +102,10 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
 
             if max_open_positions > await get_open_positions_count(client, logger):
                 await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=quantity_to_sell)
-
+                set_stoploss_price(buyAll, symbol, df["close"], price_precision, logger)
             # Set Global Variables
             set_clean_sell_signal(False, symbol)
-            set_capital_tbu(get_capital_tbu() - profit_percentage) 
-
-
+            
     except Exception as e:
         logger.error(f"{symbol} işlenirken hata: {e}")
 

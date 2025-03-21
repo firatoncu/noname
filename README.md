@@ -34,6 +34,7 @@ n0name offers a robust set of capabilities to enhance trading efficiency and pre
   
 # Release Notes (0.7.2) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Upgraded PPL(*Position Processing Logic*) to utilize Dynamic Stoploss values.
 - Improved position value calculations and enhance balance checking.
 - Cold Start Condition Check feature went live!
 - Enhance backtesting pipeline with logging for input retrieval and strategy execution.
