@@ -30,7 +30,7 @@ async def main():
     api_key, api_secret = decrypt_api_keys()
     
     # Ask user to choose between Backtesting and Trading
-    mode = input("\n\nChoose mode (Backtesting/Trading): ").strip().lower()
+    """mode = input("\n\nChoose mode (Backtesting/Trading): ").strip().lower()
     while mode not in ["backtesting", "trading"]:
         print("Invalid mode. Please choose 'Backtesting' or 'Trading'.")
         mode = input("Choose mode (Backtesting/Trading): ").strip().lower()
@@ -38,24 +38,24 @@ async def main():
         client = Client(api_key, api_secret)
         backtest_pipeline(client, logger)
 
-    elif mode == "trading":
-        try:
-            # Create AsyncClient instance
-            client = await AsyncClient.create(api_key, api_secret)
-            # Perform initial adjustments asynchronously
-            await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
+    elif mode == "trading":"""
+    try:
+        # Create AsyncClient instance
+        client = await AsyncClient.create(api_key, api_secret)
+        # Perform initial adjustments asynchronously
+        await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
 
-            # Run the main loop indefinitely
-            while True:
-                await open_position(max_open_positions, symbols, logger, client, leverage)
-                await current_status(symbols)
-                await asyncio.sleep(2)  # Prevent tight looping; adjust as needed
+        # Run the main loop indefinitely
+        while True:
+            await open_position(max_open_positions, symbols, logger, client, leverage)
+            await current_status(symbols)
+            await asyncio.sleep(2)  # Prevent tight looping; adjust as needed
 
-        except Exception as e:
-            logger.error(f"Error in main loop: {e}")
-        finally:
-            # Clean up the client connection
-            await client.close_connection()
+    except Exception as e:
+        logger.error(f"Error in main loop: {e}")
+    finally:
+        # Clean up the client connection
+        await client.close_connection()
 
 # Entry point to run the async application
 if __name__ == "__main__":

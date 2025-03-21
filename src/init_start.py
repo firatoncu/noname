@@ -19,94 +19,76 @@ async def initial_data_constructor(client, symbol):
 
 async def signal_initializer(client, symbol, logger):
     try:
+        # Verileri al (kapanış fiyatları, histogram ve MACD çizgisi)
         close_prices_str, hist_line, macd_line = await initial_data_constructor(client, symbol)
 
-        if macd_line.iloc[-1] < 0: #buy condition
-
-            for i in range(2, 500):
-
+        # MACD'nin mevcut durumunu kontrol et
+        if macd_line.iloc[-1] < 0:
+            # En yakın pozitif MACD noktasını bul
+            closest_positive_index = None
+            for i in range(2, len(macd_line)):
                 if macd_line.iloc[-i] > 0:
+                    closest_positive_index = len(macd_line) - i
+                    break
+            
+            if closest_positive_index is None:
+                # Hiç pozitif nokta yoksa sinyal True
+                set_clean_buy_signal(True, symbol)
+            else:
+                # Pozitif noktadan günümüze kadar her mum için kontrol
+                buy_signal_clean = True
+                for current_index in range(closest_positive_index, len(macd_line)):
+                    # O mumdan geriye doğru son 500 mum (veya mevcut veri kadar)
+                    start_index = max(0, current_index - 500)
+                    segment_close = close_prices_str[start_index:current_index]
+                    segment_hist = hist_line[start_index:current_index]
                     
-                    new_macd_line = macd_line.iloc[-i-500:-i]
-                    new_close_prices_str = close_prices_str[-500-i:-i]
-                    new_hist_line = hist_line[-500-i:-i]
-
-                    buyCondA = last500_fibo_check(new_close_prices_str, "buy", logger)
-                    buyCondB = last500_histogram_check(new_hist_line, "buy", logger, histogram_lookback=500)
-
+                    # Alım koşullarını kontrol et
+                    buyCondA = last500_fibo_check(segment_close, "buy", logger)
+                    buyCondB = last500_histogram_check(segment_hist, "buy", logger, histogram_lookback=500)
+                    
                     if buyCondA and buyCondB:
-                        set_clean_buy_signal(False, symbol)
-                    else:
-                        set_clean_buy_signal(True, symbol)
-
-                    for i_ in range (2, 500):
-                        if new_macd_line.iloc[-i_] < 0:
-
-                            new_macd_line = macd_line.iloc[-500-i_:-i_]
-                            new_close_prices_str = close_prices_str[-500-i_:-i_]
-                            new_hist_line = hist_line[-500-i_:-i_]
-                            
-                            sellCondA = last500_fibo_check(new_close_prices_str, "sell", logger)
-                            sellCondB = last500_histogram_check(new_hist_line, "sell", logger, histogram_lookback=500)
-
-                            if sellCondA and sellCondB:
-                                set_clean_sell_signal(False, symbol)
-                                break
-                            else:
-                                set_clean_sell_signal(True, symbol)
-                                break
-                        else:
-                            set_clean_sell_signal(False, symbol)
-                            break
-
-                else:
-                    set_clean_sell_signal(False, symbol)
-                    set_clean_buy_signal(False, symbol)
-
-
+                        buy_signal_clean = False
+                        break
+                
+                set_clean_buy_signal(buy_signal_clean, symbol)
+                set_clean_sell_signal(True, symbol)
+        
         elif macd_line.iloc[-1] > 0:
-            for i in range(2, 500):
+            # En yakın negatif MACD noktasını bul
+            closest_negative_index = None
+            for i in range(2, len(macd_line)):
                 if macd_line.iloc[-i] < 0:
-
-                    new_macd_line = macd_line.iloc[-i-500:-i]
-                    new_close_prices_str = close_prices_str[-500-i:-i]
-                    new_hist_line = hist_line[-500-i:-i]
-
-                    sellCondA = last500_fibo_check(new_close_prices_str, "sell", logger)
-                    sellCondB = last500_histogram_check(new_hist_line, "sell", logger, histogram_lookback=500)
-
+                    closest_negative_index = len(macd_line) - i
+                    break
+            
+            if closest_negative_index is None:
+                # Hiç negatif nokta yoksa sinyal True
+                set_clean_sell_signal(True, symbol)
+            else:
+                # Negatif noktadan günümüze kadar her mum için kontrol
+                sell_signal_clean = True
+                for current_index in range(closest_negative_index, len(macd_line)):
+                    # O mumdan geriye doğru son 500 mum (veya mevcut veri kadar)
+                    start_index = max(0, current_index - 500)
+                    segment_close = close_prices_str[start_index:current_index]
+                    segment_hist = hist_line[start_index:current_index]
+                    
+                    # Satım koşullarını kontrol et
+                    sellCondA = last500_fibo_check(segment_close, "sell", logger)
+                    sellCondB = last500_histogram_check(segment_hist, "sell", logger, histogram_lookback=500)
+                    
                     if sellCondA and sellCondB:
-                        set_clean_sell_signal(False, symbol)
-                    else:
-                        set_clean_sell_signal(True, symbol)
-
-                    for i_ in range (2, 500):
-                        if new_macd_line.iloc[-i_] > 0:
-
-                            new_macd_line = macd_line.iloc[-500-i_:-i_]
-                            new_close_prices_str = close_prices_str[-500-i_:-i_]
-                            new_hist_line = hist_line[-500-i_:-i_]
-
-                            buyCondA = last500_fibo_check(new_close_prices_str, "buy", logger)
-                            buyCondB = last500_histogram_check(new_hist_line, "buy", logger, histogram_lookback=500)
-
-                            if buyCondA and buyCondB:
-                                set_clean_buy_signal(False, symbol)
-                                break
-                            else:
-                                set_clean_buy_signal(True, symbol)
-                                break
-                        else:
-                            set_clean_buy_signal(False, symbol)
-                            break
-
-                else:
-                    set_clean_sell_signal(False, symbol)
-                    set_clean_buy_signal(False, symbol)
+                        sell_signal_clean = False
+                        break
+                
+                set_clean_sell_signal(sell_signal_clean, symbol)
+                set_clean_buy_signal(True, symbol)
         
         else:
-            set_clean_sell_signal(False, symbol)
-            set_clean_buy_signal(False, symbol)
+            # MACD sıfırsa her iki sinyal de True
+            set_clean_buy_signal(True, symbol)
+            set_clean_sell_signal(True, symbol)
                 
     except Exception as e:
         logger.error(f"Signal Initializer Error: {e}")
