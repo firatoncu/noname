@@ -4,7 +4,7 @@ from utils.logging import error_logger_func
 logger = error_logger_func()
 
 # InfluxDB istemcisi oluştur
-client = InfluxDBClient(host="localhost", port=8086, database="n0name")
+client = InfluxDBClient(host="localhost", port=8086, database="n0name-db")
 
 
 # Gerçek zamanlı veri yazma fonksiyonu
@@ -33,7 +33,7 @@ async def write_live_data(last_candle, symbol):
                 },
             }
         ]
-        client = InfluxDBClient(host="localhost", port=8086, database="n0name")
+        client = InfluxDBClient(host="localhost", port=8086, database="n0name-db")
         client.write_points(json_body)
 
     except Exception as e:
