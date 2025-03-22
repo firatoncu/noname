@@ -44,7 +44,7 @@ async def signal_initializer(client, symbol, logger):
                     segment_hist = hist_line[start_index:current_index]
                     
                     # Alım koşullarını kontrol et
-                    buyCondA = last500_fibo_check(segment_close, "buy", logger)
+                    buyCondA = last500_fibo_check(segment_close, segment_close, segment_close, "buy", logger)
                     buyCondB = last500_histogram_check(segment_hist, "buy", logger, histogram_lookback=500)
                     
                     if buyCondA and buyCondB:
@@ -75,7 +75,7 @@ async def signal_initializer(client, symbol, logger):
                     segment_hist = hist_line[start_index:current_index]
                     
                     # Satım koşullarını kontrol et
-                    sellCondA = last500_fibo_check(segment_close, "sell", logger)
+                    sellCondA = last500_fibo_check(segment_close, segment_close, segment_close, "sell", logger)
                     sellCondB = last500_histogram_check(segment_hist, "sell", logger, histogram_lookback=500)
                     
                     if sellCondA and sellCondB:

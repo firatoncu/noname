@@ -15,7 +15,7 @@ def check_buy_conditions(df, symbol, logger):
 
 
         buyCondA = last500_histogram_check(hist_line, "buy", logger)
-        buyCondB = last500_fibo_check(df['close'], "buy", logger)
+        buyCondB = last500_fibo_check(df['close'], df['high'], df['low'], "buy", logger)
         buyCondC = get_clean_buy_signal(symbol)
 
         set_buyconda(buyCondA, symbol)
@@ -37,7 +37,7 @@ def check_sell_conditions(df, symbol, logger):
         signal_cleaner(macd_line, "sell", symbol, logger)
 
         sellCondA = last500_histogram_check(hist_line, "sell", logger)
-        sellCondB = last500_fibo_check(df['close'], "sell", logger)
+        sellCondB = last500_fibo_check(df['close'], df['high'], df['low'], "sell", logger)
         sellCondC = get_clean_sell_signal(symbol)
 
         set_sellconda(sellCondA, symbol)

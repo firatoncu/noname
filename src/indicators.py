@@ -45,12 +45,14 @@ def last500_histogram_check(histogram, side, logger, histogram_lookback=500):
         logger.error(f"Histogram Checker Error: {e}")
         return False
 
-def last500_fibo_check(close_prices_str, side, logger):
+def last500_fibo_check(close_prices_str, high_prices_str, low_prices_str, side, logger):
     try:
         close_prices = (close_prices_str.astype(float))
+        high_prices = (high_prices_str.astype(float))
+        low_prices = (low_prices_str.astype(float))
 
-        max_price = max(close_prices)
-        min_price = min(close_prices)
+        max_price = max(high_prices)
+        min_price = min(low_prices)
 
         fibo_levels = [0.236, 0.382, 0.5, 0.618, 0.786]
         fibo_values = {}
