@@ -39,7 +39,9 @@ async def process_symbol(symbol, client, logger, max_open_positions, stepSizes, 
             sellAll = check_sell_conditions(df, symbol, logger)
         else:
             set_buyconda(False, symbol); set_buycondb(False, symbol); set_buycondc(False, symbol)
-            set_sellconda(False, symbol); set_sellcondb(False, symbol); set_sellcondc(False, symbol)   
+            set_sellconda(False, symbol); set_sellcondb(False, symbol); set_sellcondc(False, symbol) 
+            buyAll = False
+            sellAll = False  
 
         # Get current position
         positions = await client.futures_position_information(symbol=symbol)
