@@ -8,30 +8,58 @@ This repository contains *project n0name* designed for automated Futures Trading
 #
 
 # Description
-This repository contains **n0name**, a sophisticated automated trading bot designed specifically for Futures Trading on the Binance platform. Built with Python, n0name leverages the Binance API to execute trades based on highly configurable parameters and advanced trading strategies. The bot is engineered to optimize trading performance by combining technical analysis, robust risk management, and efficient operational workflows. It caters to traders who seek a reliable, customizable, and responsive tool to navigate the fast-paced and volatile futures market.
+n0name is an automated, multi-layered technical analysis system developed for traders. Thanks to its ability to monitor 12 different highly volatile cryptocurrencies on minute-based charts, numerous trades can be executed in the market and investment opportunities are continuously evaluated. The system generates both buy and sell signals by combining various technical tools such as the MACD indicator, histogram analysis, and Fibonacci levels.
 
-The bot integrates cutting-edge methodologies such as **MACD histogram analysis**, **Fibonacci retracement**, and **signal validation** to make informed trading decisions. With its asynchronous architecture, n0name ensures high performance by managing multiple tasks concurrently, while its comprehensive error-handling and logging systems provide transparency and reliability. Whether you're a seasoned trader or an enthusiast looking to automate your strategies, n0name offers a powerful and adaptable solution for trading futures on Binance.
+The system executes trades using 3x leverage and targets a 1% profit on each trade. With a success rate of approximately 88%, and by maintaining an average risk/reward ratio of 1:3 in its orders, this structure not only helps control risk but also maximizes potential profit. With all these features combined, the robot is expected to deliver a daily return of between 3-4%.
 
-# Installation
-### Prerequisites
-- Python 3.11 or higher
-- Binance API Key and Secret with Futures Trading enabled
-
-### Steps
-1. Download [**n0name Trading Bot** (v0.8.0)](https://github.com/firatoncu/noname/releases/download/noname-v080/n0name-v0-8-0.exe)
-2. Run **n0name-v080.exe** 
-3. Follow the instructions and generate a config file (you can change it later!)  
+In its trading strategy, the robot utilizes the trend and momentum data provided by the MACD. Clean signal crossovers on the MACD line filter out market noise, thereby increasing the accuracy of the trading signal. Additionally, the analysis of the last 500 data points of the histogram helps to control abrupt price movements and extreme conditions. Fibonacci levels play a critical role in identifying price retracement and reversal points. Thanks to the harmonious operation of these three methods, signals are activated only when all conditions are met, preventing erroneous buy or sell decisions.
 
 # Key Features
-n0name offers a robust set of capabilities to enhance trading efficiency and precision:
-- **Backtesting**: Backtesting with desired symbols and timeframe. ****(easiest backtesting module ever!)****
-- **Asynchronous Processing**: Utilizes asynchronous programming to handle multiple tasks concurrently, improving operational efficiency and reducing latency.
-- **Customizable Parameters**: Empowers users to tailor trading variables, such as trading pairs (e.g., BTC/USDT), leverage settings, and the maximum number of simultaneous open positions.
-- **Advanced Trading Strategies**: Incorporates powerful methodologies, including Fibonacci retracement and MACD histogram analysis, to drive intelligent trading decisions.
-- **Global Signal Coordination**: Maintains consistent buy and sell signals across all operations, ensuring coherent and unified trading logic.
-- **Robust Error Handling and Logging**: Features comprehensive mechanisms for error detection, detailed logging, and troubleshooting, enabling users to monitor performance effectively.
 
-  
+- Uses Python’s asyncio for non-blocking operations, enabling efficient handling of multiple symbols and tasks concurrently.
+- Loads settings from a config file, including trading symbols, leverage, capital allocation, and maximum open positions. Creates a default config if none exists.
+- Employs MACD (histogram breakout and signal line crossover) and Fibonacci retracement to determine trading signals.
+- Monitors open positions, calculates quantities, and sets stop-loss and take-profit levels dynamically.
+- Logs errors to a file and stops the bot after 3 errors to prevent erratic behavior.
+- Optionally stores real-time trading data in InfluxDB for analysis.
+- Displays real-time trading conditions and position statuses in the terminal using colored outputs.
+- Encrypts Binance API keys using AES-256-GCM with a user-provided password, stored in an encrypted_keys.bin file.
+
+# Strategy
+
+*The trading strategy relies on three conditions for both buying and selling, evaluated over the last 500 1-minute candles:*
+
+## Buy Conditions
+### MACD Histogram Breakout :
+The latest positive histogram value exceeds the 85th percentile of the last 500 positive histogram values, indicating strong upward momentum.
+### Fibonacci Retracement Confirmation:
+Price breaks above the 78.6% retracement level (from the lowest to highest price in the last 500 candles) with a significant gap (>1%) to the 61.8% level, confirming a bullish move.
+### MACD Signal Line Crossover:
+The MACD line crosses from negative to positive, and no premature signals occurred since the last positive-to-negative crossover (ensured by signal_initializer).
+
+**Action: Opens a long position if all conditions are true and the max open positions limit isn’t reached.**
+
+## Sell Conditions
+### MACD Histogram Breakout:
+The latest negative histogram value falls below the 85th percentile of the last 500 negative histogram values (absolute), indicating strong downward momentum.
+### Fibonacci Retracement Confirmation (last500_fibo_check):
+Price drops below the 23.6% retracement level with a significant gap (>1%) to the 38.2% level, confirming a bearish move.
+### MACD Signal Line Crossover:
+The MACD line crosses from positive to negative, with no premature signals since the last negative-to-positive crossover.
+
+**Action: Opens a short position if all conditions are true and the max open positions limit isn’t reached.**
+
+## Risk Management
+
+### Stop-Loss:
+For longs: Set to 0.99x entry price (or historical low * 0.998 if calculated).
+For shorts: Set to 1.01x entry price (or historical high * 1.002 if calculated).
+
+### Take-Profit:
+For longs: 1.0033x entry price.
+For shorts: 0.9966x entry price.
+
+
 # Release Notes (0.8.0) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
 - Added InfluxDB Integration & Setup Pipeline for real-time data logging !
