@@ -6,7 +6,7 @@ from src.check_condition import check_buy_conditions, check_sell_conditions
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
-from utils.globals import get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price, get_last_timestamp, set_last_timestamp, get_db_status
+from utils.globals import get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price, get_last_timestamp, set_last_timestamp, get_db_status, set_error_counter, get_error_counter
 from utils.cursor_movement import logger_move_cursor_up, clean_line
 from utils.current_status import current_position_monitor
 from utils.influxdb.inf_send_data import write_live_data
@@ -62,6 +62,10 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
 
             if (close_price <= sl_price or close_price >= tp_price):
                 await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
+                if close_price <= sl_price:
+                    set_error_counter(get_error_counter() + 1)
+                else:
+                    set_error_counter(0)
                 return
                 
         if current_position < 0:
@@ -74,6 +78,10 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
 
             if(close_price >= sl_price or close_price <= tp_price):
                 await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
+                if close_price >= sl_price:
+                    set_error_counter(get_error_counter() + 1)
+                else:
+                    set_error_counter(0)
                 return
             
 

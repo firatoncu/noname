@@ -10,7 +10,7 @@ from utils.current_status import current_status  # Assumed to be async
 from src.open_position import open_position  # Assumed to be async
 from binance.client import Client
 from auth.key_enryption import decrypt_api_keys
-from utils.globals import set_db_status
+from utils.globals import set_db_status, get_error_counter
 from utils.influxdb.inf_db_initializer import inf_db_init_main
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -53,13 +53,17 @@ async def main():
         # Create AsyncClient instance
         client = await AsyncClient.create(api_key, api_secret)
         # Perform initial adjustments asynchronously
+        
         await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
 
         # Run the main loop indefinitely
-        while True:
+        while get_error_counter() < 3:
             await open_position(max_open_positions, symbols, logger, client, leverage)
             await current_status(symbols)
             await asyncio.sleep(2)  # Prevent tight looping; adjust as needed
+
+        if get_error_counter >= 3:
+            logger.error("Too many errors occurred. Exiting the bot...")
 
     except Exception as e:
         logger.error(f"Error in main loop: {e}")

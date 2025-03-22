@@ -12,6 +12,8 @@ sellconda = {}
 sellcondb = {}
 sellcondc = {}
 
+error_counter = 0
+
 db_status = False
 
 user_time_zone = "UTC"
@@ -119,3 +121,11 @@ def set_db_status(value: bool):
 def get_db_status():
     global db_status
     return db_status
+
+def set_error_counter(value: int):
+    global error_counter
+    error_counter = value
+
+def get_error_counter():
+    global error_counter
+    return error_counter
