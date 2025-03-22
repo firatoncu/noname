@@ -6,14 +6,14 @@ from src.check_condition import check_buy_conditions, check_sell_conditions
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
 from src.position_value import position_val
-from utils.globals import get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price, get_last_timestamp, set_last_timestamp, get_db_status, set_error_counter, get_error_counter
+from utils.globals import get_capital_tbu, set_clean_buy_signal, set_clean_sell_signal, get_sl_price, get_last_timestamp, set_last_timestamp, get_db_status, get_funding_flag, set_error_counter, get_error_counter, set_buyconda, set_buycondb, set_buycondc, set_sellconda, set_sellcondb, set_sellcondc
 from utils.cursor_movement import logger_move_cursor_up, clean_line
 from utils.current_status import current_position_monitor
 from utils.influxdb.inf_send_data import write_live_data
-
+from utils.position_opt import funding_fee_controller
 
 # Async function to process a single symbol
-async def process_symbol(symbol, client, logger, max_open_positions, leverage, stepSizes, quantityPrecisions, pricePrecisions, position_value):
+async def process_symbol(symbol, client, logger, max_open_positions, stepSizes, quantityPrecisions, pricePrecisions, position_value):
     try:
         # Get last 500 candles
         klines = await client.futures_klines(symbol=symbol, interval='1m', limit=500)
@@ -31,11 +31,15 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
                 set_last_timestamp(df['timestamp'].iloc[-1], symbol)
             
 
-
+        await funding_fee_controller(symbol, client, logger)
+        
+        if get_funding_flag(symbol) == True:
         # Check buy and sell conditions
-        buyAll = check_buy_conditions(df, symbol, logger)
-        sellAll = check_sell_conditions(df, symbol, logger)
-
+            buyAll = check_buy_conditions(df, symbol, logger)
+            sellAll = check_sell_conditions(df, symbol, logger)
+        else:
+            set_buyconda(False, symbol); set_buycondb(False, symbol); set_buycondc(False, symbol)
+            set_sellconda(False, symbol); set_sellcondb(False, symbol); set_sellcondc(False, symbol)   
 
         # Get current position
         positions = await client.futures_position_information(symbol=symbol)
@@ -162,7 +166,7 @@ async def open_position(max_open_positions, symbols, logger, client, leverage):
         # Create a list of tasks for each symbol
         tasks = [
             process_symbol(
-                symbol, client, logger, max_open_positions, leverage,
+                symbol, client, logger, max_open_positions, 
                 stepSizes, quantityPrecisions, pricePrecisions, position_value
             )
             for symbol in symbols

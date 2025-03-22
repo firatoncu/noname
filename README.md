@@ -1,5 +1,5 @@
 
-# n0name v0.8.0 by f0ncu
+# n0name v0.8.1 by f0ncu
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
@@ -60,8 +60,9 @@ For longs: 1.0033x entry price.
 For shorts: 0.9966x entry price.
 
 
-# Release Notes (0.8.0) 
+# Release Notes (0.8.1) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Added Funding Fee management.
 - Added InfluxDB Integration & Setup Pipeline for real-time data logging !
 - Better Signal Initialization Logic for MACD conditions and clean Buy/Sell signals.
 - Upgraded PPL(*Position Processing Logic*) to utilize Dynamic Stoploss values.

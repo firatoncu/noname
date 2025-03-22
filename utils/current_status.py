@@ -1,4 +1,4 @@
-from utils.globals import get_buyconda, get_buycondb, get_buycondc, get_sellconda, get_sellcondb, get_sellcondc 
+from utils.globals import get_buyconda, get_buycondb, get_buycondc, get_sellconda, get_sellcondb, get_sellcondc, get_funding_flag
 from colorama import init, Fore, Style
 from utils.cursor_movement import logger_move_cursor_up
 import asyncio
@@ -15,6 +15,7 @@ async def current_status(symbols):
         buyCondA = get_buyconda(symbol)
         buyCondB = get_buycondb(symbol)
         buyCondC = get_buycondc(symbol)
+        funding_period = get_funding_flag(symbol)
 
         # Satım koşulları (örnek olarak tanımlandı, kendi kodunuza göre uyarlayın)
         sellCondA = get_sellconda(symbol)
@@ -23,7 +24,7 @@ async def current_status(symbols):
 
         # Alım durumu satırı
         buy_status = (
-            f"{Style.BRIGHT}{symbol}{Style.RESET_ALL}"
+            f"{Style.BRIGHT}{symbol}{Style.RESET_ALL}    -   Funding Period : {Fore.GREEN if funding_period else Fore.RED}{funding_period}{Style.RESET_ALL}"
             f"\nBuyCondition1 : {Fore.GREEN if buyCondA else Fore.RED}{buyCondA}{Style.RESET_ALL},     "
             f"BuyCondition2 : {Fore.GREEN if buyCondB else Fore.RED}{buyCondB}{Style.RESET_ALL},    "
             f"BuyCondition3 : {Fore.GREEN if buyCondC else Fore.RED}{buyCondC}{Style.RESET_ALL}       "

@@ -3,6 +3,8 @@ import ta # type: ignore
 from src.indicators import last500_histogram_check, last500_fibo_check, signal_cleaner
 from utils.globals import get_clean_buy_signal, get_clean_sell_signal, set_buyconda, set_buycondb, set_buycondc, set_sellconda, set_sellcondb, set_sellcondc
 
+
+
 # Alış koşulları
 def check_buy_conditions(df, symbol, logger):
     try:
@@ -12,7 +14,6 @@ def check_buy_conditions(df, symbol, logger):
         hist_line = macd.macd_diff()
 
         signal_cleaner(macd_line, "buy", symbol, logger)
-
 
         buyCondA = last500_histogram_check(hist_line, "buy", logger)
         buyCondB = last500_fibo_check(df['close'], df['high'], df['low'], "buy", logger)

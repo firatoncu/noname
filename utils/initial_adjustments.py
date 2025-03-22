@@ -6,6 +6,7 @@ import random
 from utils.logging import logger_func
 logger = logger_func()
 import os
+from utils.position_opt import funding_fee_controller
 
 # Colorama'yı başlat
 
@@ -20,6 +21,7 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
             set_error_counter(0)
             await signal_initializer(client, symbol, logger)               
             await client.futures_change_leverage(symbol=symbol, leverage=leverage)
+            await funding_fee_controller(symbol, client, logger)
 
         # List of available foreground colors (excluding RESET)
         colors = [

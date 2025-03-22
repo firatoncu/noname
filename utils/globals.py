@@ -12,6 +12,8 @@ sellconda = {}
 sellcondb = {}
 sellcondc = {}
 
+funding_flag = {}
+
 error_counter = 0
 
 db_status = False
@@ -129,3 +131,11 @@ def set_error_counter(value: int):
 def get_error_counter():
     global error_counter
     return error_counter
+
+def set_funding_flag(value: bool, symbol: str):
+    global funding_flag
+    funding_flag[symbol] = value
+
+def get_funding_flag(symbol: str):
+    global funding_flag
+    return funding_flag[symbol]
