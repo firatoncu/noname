@@ -58,7 +58,7 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
             sl_price = get_sl_price(symbol)
             #if position is opened manually, sl_price will be 0. In this case, set sl_price to 0.9966 of entry price
             if sl_price == 0:
-                sl_price = round(entry_price * 0.9966, price_precision)
+                sl_price = round(entry_price * 0.99, price_precision) #will be updated to real sl price
 
             if (close_price <= sl_price or close_price >= tp_price):
                 await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
@@ -74,7 +74,7 @@ async def process_symbol(symbol, client, logger, max_open_positions, leverage, s
             sl_price = get_sl_price(symbol)
             #if position is opened manually, sl_price will be 0. In this case, set sl_price to 0.9966 of entry price
             if sl_price == 0:
-                sl_price = round(entry_price * 1.0033, price_precision)
+                sl_price = round(entry_price * 1.01, price_precision) #will be updated to real sl price
 
             if(close_price >= sl_price or close_price <= tp_price):
                 await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
