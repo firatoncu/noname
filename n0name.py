@@ -1,3 +1,16 @@
+"""
+There are many things that humans are better at than computers. For example: Creativity and Art, Emotional Intelligence and Empathy, Context Understanding and Flexibility, Moral and Ethical Decisions, Intuition and Experience-Based Learning... These examples can be multiplied, but for all that, computers are fundamentally better than humans in only two areas: Processing Speed and Processing Capacity. 
+
+What if we tried to combine the ways in which these two species are superior to each other?
+
+A set of ideas grounded in human creativity, understanding of context, flexibility, intuition-based learning, and the near limitless computational power of the computer. This whole is my vision. 
+
+With the structure to be created within the framework of this whole, certain patterns can be identified on random structures. There are two fundamental problems here. Identifying the right patterns and realizing the patterns at the desired frequency. 
+
+Is absolute randomness possible? Can randomnesses differ from each other? Can certain patterns be found even within randomness? 
+
+why n0t?"""
+
 # Main entry point for the async trading bot application.
 import warnings
 import asyncio
