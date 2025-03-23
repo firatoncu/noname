@@ -14,14 +14,13 @@ why n0t?"""
 # Main entry point for the async trading bot application.
 import warnings
 import asyncio
-import os
+from datetime import datetime
 from binance import AsyncClient  # Replace synchronous Client with AsyncClient
 from utils.load_config import load_config
 from utils.initial_adjustments import initial_adjustments  # Must be made async
 from utils.logging import error_logger_func
 from utils.current_status import current_status  # Assumed to be async
 from src.open_position import open_position  # Assumed to be async
-from binance.client import Client
 from auth.key_enryption import decrypt_api_keys
 from utils.globals import set_db_status, get_error_counter
 from utils.influxdb.inf_db_initializer import inf_db_init_main
@@ -71,9 +70,10 @@ async def main():
 
         # Run the main loop indefinitely
         while get_error_counter() < 3:
-            await open_position(max_open_positions, symbols, logger, client, leverage)
-            await current_status(symbols)
-            await asyncio.sleep(2)  # Prevent tight looping; adjust as needed
+            if datetime.now().second % 2 == 0:
+                await open_position(max_open_positions, symbols, logger, client, leverage)
+                await current_status(symbols)
+                await asyncio.sleep(2)  # Prevent tight looping; adjust as needed
 
         if get_error_counter >= 3:
             logger.error("Too many errors occurred. Exiting the bot...")

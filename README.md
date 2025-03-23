@@ -62,6 +62,7 @@ For shorts: 0.9966x entry price.
 
 # Release Notes (0.8.1) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Time synchronization feature added.
 - Added Funding Fee management.
 - Added InfluxDB Integration & Setup Pipeline for real-time data logging !
 - Better Signal Initialization Logic for MACD conditions and clean Buy/Sell signals.

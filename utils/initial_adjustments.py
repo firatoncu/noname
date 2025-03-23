@@ -4,15 +4,18 @@ import asyncio
 from colorama import Fore, Style, init
 import random
 from utils.logging import logger_func
-logger = logger_func()
 import os
 from utils.position_opt import funding_fee_controller
 
-# Colorama'yı başlat
-
+logger = logger_func()
 
 async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logger):
     try:
+        # System time sync
+        os.system("net start w32time")
+        os.system("w32tm /resync")
+        
+        
         init(autoreset=True)
         set_capital_tbu(capital_tbu)
         for symbol in symbols:
