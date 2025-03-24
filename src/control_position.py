@@ -14,7 +14,7 @@ async def position_checker(client, pricePrecisions, logger):
             p = all_positions[0]
             position_response = await current_position_monitor(p, pricePrecisions, logger)
             status_printer(True, position_response)
-            await tpsl_checker(p['symbol'], p['positionAmt'], pricePrecisions, client, logger)
+            await tpsl_checker(p['symbol'], float(p['positionAmt']), pricePrecisions, client, logger)
             await asyncio.sleep(1)
         
         status_printer(False, None)
