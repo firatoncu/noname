@@ -48,6 +48,7 @@ def set_buycondc(value: bool, symbol: str):
     global buycondc
     buycondc[symbol] = value
 
+
 def get_buyconda(symbol: str):
     global buyconda
     return buyconda[symbol]
@@ -59,6 +60,7 @@ def get_buycondb(symbol: str):
 def get_buycondc(symbol: str):
     global buycondc
     return buycondc[symbol]
+
 
 def set_sellconda(value: bool, symbol: str):
     global sellconda

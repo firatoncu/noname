@@ -1,6 +1,6 @@
 from utils.globals import get_buyconda, get_buycondb, get_buycondc, get_sellconda, get_sellcondb, get_sellcondc, get_funding_flag
 from colorama import init, Fore, Style
-from utils.cursor_movement import logger_move_cursor_up
+from utils.cursor_movement import logger_move_cursor_up, clean_line
 import asyncio
 
 init()
@@ -25,16 +25,16 @@ async def current_status(symbols):
         # Alım durumu satırı
         buy_status = (
             f"{Style.BRIGHT}{symbol}{Style.RESET_ALL}    -   Funding Period : {Fore.GREEN if funding_period else Fore.RED}{funding_period}{Style.RESET_ALL}"
-            f"\nBuyCondition1 : {Fore.GREEN if buyCondA else Fore.RED}{buyCondA}{Style.RESET_ALL},     "
+            f"\n\nBuyCondition1 : {Fore.GREEN if buyCondA else Fore.RED}{buyCondA}{Style.RESET_ALL},     "
             f"BuyCondition2 : {Fore.GREEN if buyCondB else Fore.RED}{buyCondB}{Style.RESET_ALL},    "
-            f"BuyCondition3 : {Fore.GREEN if buyCondC else Fore.RED}{buyCondC}{Style.RESET_ALL}       "
+            f"BuyCondition3 : {Fore.GREEN if buyCondC else Fore.RED}{buyCondC}{Style.RESET_ALL}     "
         )
 
         # Satım durumu satırı
         sell_status = (
-            f"\nSellCondition1: {Fore.GREEN if sellCondA else Fore.RED}{sellCondA}{Style.RESET_ALL},     "
+            f"SellCondition1: {Fore.GREEN if sellCondA else Fore.RED}{sellCondA}{Style.RESET_ALL},     "
             f"SellCondition2: {Fore.GREEN if sellCondB else Fore.RED}{sellCondB}{Style.RESET_ALL},    "
-            f"SellCondition3: {Fore.GREEN if sellCondC else Fore.RED}{sellCondC}{Style.RESET_ALL}   "
+            f"SellCondition3: {Fore.GREEN if sellCondC else Fore.RED}{sellCondC}{Style.RESET_ALL}  "
             f"\n"
         )
 
@@ -51,7 +51,6 @@ async def current_status(symbols):
     for _ in range(status_lines_count):
         print("                                                                                                                                                                     ")
     logger_move_cursor_up(status_lines_count)
-    # Durum satırlarını yaz
     print(all_status)
 
 async def current_position_monitor(p, pricePrecisions, logger):
@@ -64,5 +63,15 @@ async def current_position_monitor(p, pricePrecisions, logger):
             return short_status
 
     except Exception as e:
-        logger.error(f"Ana döngüde hata: {e}")
+        logger.error(f"Position monitoring error: {e}")
         await asyncio.sleep(2)
+
+def status_printer(status, position_response):
+    if status:
+        clean_line(3)
+        print("Open Positions: \n" + position_response)
+        logger_move_cursor_up(2)
+    else:
+        clean_line(3)
+        print("No Open Positions !")
+        logger_move_cursor_up(1)

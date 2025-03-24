@@ -27,17 +27,17 @@ def last500_macd_check(macd_line, lookback_period, logger):
 
 #-|-|-|-|-|-|-|-|-|-|-|-|-v0.5 indicators-|-|-|-|-|-|-|-|-|-|-|-|-
 
-def last500_histogram_check(histogram, side, logger, histogram_lookback=500):
+def last500_histogram_check(histogram, side, logger, quantile=0.85, histogram_lookback=500):
     try:
         histogram_history = histogram.tail(histogram_lookback)
         if side == 'buy':
             histogram_pos_lookback = histogram_history[histogram_history > 0]
-            last10_max = histogram_pos_lookback.quantile(0.85)
+            last10_max = histogram_pos_lookback.quantile(quantile)
             if histogram.iloc[-1] > last10_max:
                 return True
         if side == 'sell':
             histogram_neg_lookback = abs(histogram_history[histogram_history < 0])
-            last10_max = histogram_neg_lookback.quantile(0.85)
+            last10_max = histogram_neg_lookback.quantile(quantile)
             if histogram.iloc[-1] < -last10_max:
                 return True
         return False
@@ -64,7 +64,7 @@ def last500_fibo_check(close_prices_str, high_prices_str, low_prices_str, side, 
             and close_prices.iloc[-3] < fibo_values[0.786] 
             and close_prices.iloc[-2] > fibo_values[0.786] 
             and close_prices.iloc[-1] > fibo_values[0.786]
-            and (fibo_values[0.618] - fibo_values[0.786])/fibo_values[0.618] > 0.01):
+            and (fibo_values[0.618] - fibo_values[0.786])/fibo_values[0.618] > 0.007):
             return True
         
         if (side == 'sell' 
@@ -72,13 +72,14 @@ def last500_fibo_check(close_prices_str, high_prices_str, low_prices_str, side, 
             and close_prices.iloc[-3] > fibo_values[0.236]
             and close_prices.iloc[-2] < fibo_values[0.236] 
             and close_prices.iloc[-1] < fibo_values[0.236] 
-            and (fibo_values[0.236] - fibo_values[0.382])/fibo_values[0.236] > 0.01):
+            and (fibo_values[0.236] - fibo_values[0.382])/fibo_values[0.236] > 0.007):
             return True
         
         return False
     except Exception as e:
         logger.error(f"Fibonacci Checker Error: {e}")
         return False
+    
 
 def signal_cleaner(macd_line, side, symbol, logger):
     try:

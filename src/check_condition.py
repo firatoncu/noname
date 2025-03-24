@@ -23,7 +23,9 @@ def check_buy_conditions(df, symbol, logger):
         set_buycondb(buyCondB, symbol)
         set_buycondc(buyCondC, symbol)
 
-        return buyCondA and buyCondB and buyCondC
+        buyAll = buyCondA and buyCondB and buyCondC
+        return buyAll
+    
     except Exception as e:
         logger.error(f"check_buy_conditions hatası: {e}")
         return False
@@ -45,7 +47,8 @@ def check_sell_conditions(df, symbol, logger):
         set_sellcondb(sellCondB, symbol)
         set_sellcondc(sellCondC, symbol)
 
-        return sellCondA and sellCondB and sellCondC
+        sellAll = sellCondA and sellCondB and sellCondC
+        return sellAll 
     
     except Exception as e:
         logger.error(f"check_sell_conditions hatası: {e}")

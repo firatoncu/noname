@@ -1,5 +1,5 @@
 
-# n0name v0.8.1 by f0ncu
+# n0name v0.8.2 by f0ncu
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
@@ -52,16 +52,19 @@ The MACD line crosses from positive to negative, with no premature signals since
 ## Risk Management
 
 ### Stop-Loss:
-For longs: Set to 0.99x entry price (or historical low * 0.998 if calculated).
-For shorts: Set to 1.01x entry price (or historical high * 1.002 if calculated).
+There are 2 types of Stop Loss values in new strategy.
+*Soft Stop Loss Point*: %3 (gets activated if there is an cross-side signal)
+*Hard Stop Loss Point*: %5
+
 
 ### Take-Profit:
-For longs: 1.0033x entry price.
-For shorts: 0.9966x entry price.
+Profit goal for every position is **%1**
 
 
-# Release Notes (0.8.1) 
+# Release Notes (0.8.2) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Implemented Enhanced Stop Loss strategy.
+- Streamline buy/sell condition checks while in-position status.
 - Time synchronization feature added.
 - Added Funding Fee management.
 - Added InfluxDB Integration & Setup Pipeline for real-time data logging !
