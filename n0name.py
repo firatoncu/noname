@@ -73,7 +73,7 @@ async def main():
             if datetime.now().second % 2 == 0:
                 await open_position(max_open_positions, symbols, logger, client, leverage)
                 await current_status(symbols)
-                await asyncio.sleep(2)  # Prevent tight looping; adjust as needed
+                await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
 
         if get_error_counter >= 3:
             logger.error("Too many errors occurred. Exiting the bot...")

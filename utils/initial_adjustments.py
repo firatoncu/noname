@@ -3,17 +3,14 @@ from src.init_start import signal_initializer
 import asyncio
 from colorama import Fore, Style, init
 import random
-from utils.logging import logger_func
 import os
+from utils.logging import logger_func
 from utils.position_opt import funding_fee_controller
 
 logger = logger_func()
 
 async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logger):
     try:
-        # System time sync
-        os.system("net start w32time")
-        os.system("w32tm /resync")
         
         
         init(autoreset=True)
