@@ -63,6 +63,8 @@ Profit goal for every position is **%1**
 
 # Release Notes (0.9.0) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Add wallet and historical positions data models
+- Enhance TradingConditionsCard with navigation buttons
 - Add initial web UI project setup with Tailwind CSS, Vite, and React.
 - InfluxDB integration and notification status management.
 - Positional improvements on condition table.
