@@ -2,13 +2,13 @@
 import ta # type: ignore
 from src.indicators import last500_histogram_check, last500_fibo_check, signal_cleaner
 from utils.globals import get_clean_buy_signal, get_clean_sell_signal, set_buyconda, set_buycondb, set_buycondc, set_sellconda, set_sellcondb, set_sellcondc
-
+from utils.fetch_data import binance_fetch_data
 
 
 # Alış koşulları
-def check_buy_conditions(df, symbol, logger):
+async def check_buy_conditions(lookback_period, symbol, client, logger):
     try:
-        
+        df, close_price = await binance_fetch_data(lookback_period, symbol, client)
         macd = ta.trend.MACD(df['close'], window_slow=26, window_fast=12, window_sign=9)
         macd_line = macd.macd()
         hist_line = macd.macd_diff()
@@ -31,8 +31,9 @@ def check_buy_conditions(df, symbol, logger):
         return False
 
 # Satış koşulları
-def check_sell_conditions(df, symbol, logger):
+async def check_sell_conditions(lookback_period, symbol, client, logger):
     try:
+        df, close_price = await binance_fetch_data(lookback_period, symbol, client)
         macd = ta.trend.MACD(df['close'], window_slow=26, window_fast=12, window_sign=9)
         macd_line = macd.macd()
         hist_line = macd.macd_diff()

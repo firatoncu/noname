@@ -18,7 +18,17 @@ error_counter = 0
 
 db_status = False
 
+notif_status = False
+
 user_time_zone = "UTC"
+
+def set_notif_status(value: bool):
+    global notif_status
+    notif_status = value
+
+def get_notif_status():
+    global notif_status
+    return notif_status
 
 def set_user_time_zone(value: str):
     global user_time_zone

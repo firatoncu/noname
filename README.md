@@ -63,7 +63,9 @@ Profit goal for every position is **%1**
 
 # Release Notes (0.8.2) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
-- Positional improvements on condition table 
+- Add initial web UI project setup with Tailwind CSS, Vite, and React.
+- InfluxDB integration and notification status management.
+- Positional improvements on condition table.
 - Implemented Enhanced Stop Loss strategy.
 - Streamline buy/sell condition checks while in-position status.
 - Time synchronization feature added.

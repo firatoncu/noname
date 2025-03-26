@@ -2,56 +2,62 @@ from utils.globals import get_buyconda, get_buycondb, get_buycondc, get_sellcond
 from colorama import init, Fore, Style
 from utils.cursor_movement import logger_move_cursor_up, clean_line
 import asyncio
+from utils.logging import error_logger_func
+
+logger = error_logger_func()
 
 init()
 
-async def current_status(symbols):       
-    status_lines_count = 0
-    buy_status = ""
-    sell_status = ""
-    current_status = {}
-    for symbol in symbols:
-        # Alım koşulları
-        buyCondA = get_buyconda(symbol)
-        buyCondB = get_buycondb(symbol)
-        buyCondC = get_buycondc(symbol)
-        funding_period = get_funding_flag(symbol)
-
-        # Satım koşulları (örnek olarak tanımlandı, kendi kodunuza göre uyarlayın)
-        sellCondA = get_sellconda(symbol)
-        sellCondB = get_sellcondb(symbol)
-        sellCondC = get_sellcondc(symbol)
-
-        # Alım durumu satırı
-        buy_status = (
-            f"{Style.BRIGHT}{symbol}{Style.RESET_ALL}    -   Funding Period : {Fore.GREEN if funding_period else Fore.RED}{funding_period}{Style.RESET_ALL}"
-            f"\n\nBuyCondition1 : {Fore.GREEN if buyCondA else Fore.RED}{buyCondA}{Style.RESET_ALL},     "
-            f"BuyCondition2 : {Fore.GREEN if buyCondB else Fore.RED}{buyCondB}{Style.RESET_ALL},    "
-            f"BuyCondition3 : {Fore.GREEN if buyCondC else Fore.RED}{buyCondC}{Style.RESET_ALL}     "
-        )
-
-        # Satım durumu satırı
-        sell_status = (
-            f"SellCondition1: {Fore.GREEN if sellCondA else Fore.RED}{sellCondA}{Style.RESET_ALL},     "
-            f"SellCondition2: {Fore.GREEN if sellCondB else Fore.RED}{sellCondB}{Style.RESET_ALL},    "
-            f"SellCondition3: {Fore.GREEN if sellCondC else Fore.RED}{sellCondC}{Style.RESET_ALL}  "
-            f"\n"
-        )
-
-        current_status[symbol] = buy_status + "\n" + sell_status
-        
-    status_lines_count = (len(symbols) * 5) 
-
-    all_status = current_status.values()
-    all_status = "\n".join(all_status)
+async def current_status(symbols):   
+    try:    
+        status_lines_count = 0
+        buy_status = ""
+        sell_status = ""
+        current_status = {}
+        for symbol in symbols:
+            # Alım koşulları
+            buyCondA = get_buyconda(symbol)
+            buyCondB = get_buycondb(symbol)
+            buyCondC = get_buycondc(symbol)
+            funding_period = get_funding_flag(symbol)
 
 
+            # Satım koşulları (örnek olarak tanımlandı, kendi kodunuza göre uyarlayın)
+            sellCondA = get_sellconda(symbol)
+            sellCondB = get_sellcondb(symbol)
+            sellCondC = get_sellcondc(symbol)
 
-    logger_move_cursor_up(status_lines_count)
-    for _ in range(status_lines_count):
-        print("                                                                                                                                                                     ")
-    logger_move_cursor_up(status_lines_count)
-    print(all_status)
+            # Alım durumu satırı
+            buy_status = (
+                f"{Style.BRIGHT}{symbol}{Style.RESET_ALL}    -   Funding Period : {Fore.GREEN if funding_period else Fore.RED}{funding_period}{Style.RESET_ALL}"
+                f"\n\nBuyCondition1 : {Fore.GREEN if buyCondA else Fore.RED}{buyCondA}{Style.RESET_ALL},     "
+                f"BuyCondition2 : {Fore.GREEN if buyCondB else Fore.RED}{buyCondB}{Style.RESET_ALL},    "
+                f"BuyCondition3 : {Fore.GREEN if buyCondC else Fore.RED}{buyCondC}{Style.RESET_ALL}     "
+            )
+
+            # Satım durumu satırı
+            sell_status = (
+                f"SellCondition1: {Fore.GREEN if sellCondA else Fore.RED}{sellCondA}{Style.RESET_ALL},     "
+                f"SellCondition2: {Fore.GREEN if sellCondB else Fore.RED}{sellCondB}{Style.RESET_ALL},    "
+                f"SellCondition3: {Fore.GREEN if sellCondC else Fore.RED}{sellCondC}{Style.RESET_ALL}  "
+                f"\n"
+            )
+
+            current_status[symbol] = buy_status + "\n" + sell_status
+            
+        status_lines_count = (len(symbols) * 5) 
+
+        all_status = current_status.values()
+        all_status = "\n".join(all_status)
+
+        logger_move_cursor_up(status_lines_count)
+        for _ in range(status_lines_count):
+            print("                                                                                                                                                                     ")
+        logger_move_cursor_up(status_lines_count)
+        print(all_status)
+
+    except Exception as e:
+        logger.error(f"Current status error: {e}")
 
 async def current_position_monitor(p, pricePrecisions, logger):
     try:

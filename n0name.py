@@ -14,21 +14,24 @@ why n0t?"""
 # Main entry point for the async trading bot application.
 import warnings
 import asyncio
-from datetime import datetime
 from binance import AsyncClient  # Replace synchronous Client with AsyncClient
 from utils.load_config import load_config
 from utils.initial_adjustments import initial_adjustments  # Must be made async
 from utils.logging import error_logger_func
 from utils.current_status import current_status  # Assumed to be async
 from src.open_position import open_position  # Assumed to be async
-from auth.key_enryption import decrypt_api_keys
-from utils.globals import set_db_status, get_error_counter
-from utils.influxdb.inf_db_initializer import inf_db_init_main
+from auth.key_encryption import decrypt_api_keys
+from utils.globals import get_error_counter
+from utils.web_ui.project.api.main import start_server_and_updater
+from utils.web_ui.npm_run_dev import start_frontend
+
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+
 async def main():
-    # Initialize logger and config
+
+        # Initialize logger and config
     logger = error_logger_func()
     config = load_config()
 
@@ -38,21 +41,15 @@ async def main():
     max_open_positions = symbol_config['max_open_positions']
     symbols = symbol_config['symbols']
     capital_tbu = config['capital_tbu']
+    api_keys = config['api_keys']
+    api_key = api_keys['api_key']
+    api_secret = api_keys['api_secret']
+
     
-    
-    api_key, api_secret = decrypt_api_keys()
-
-    db_status = input("Do you want to use the InfluxDB? (y/n): ").strip().lower()
-    if db_status == "y":
-        set_db_status(True)
-        inf_db_init_main()
-    else:
-        set_db_status(False)
-
-
+    """api_key, api_secret = decrypt_api_keys()
     
     # Ask user to choose between Backtesting and Trading
-    """mode = input("\n\nChoose mode (Backtesting/Trading): ").strip().lower()
+    mode = input("\n\nChoose mode (Backtesting/Trading): ").strip().lower()
     while mode not in ["backtesting", "trading"]:
         print("Invalid mode. Please choose 'Backtesting' or 'Trading'.")
         mode = input("Choose mode (Backtesting/Trading): ").strip().lower()
@@ -61,19 +58,24 @@ async def main():
         backtest_pipeline(client, logger)
 
     elif mode == "trading":"""
+
     try:
         # Create AsyncClient instance
         client = await AsyncClient.create(api_key, api_secret)
-        # Perform initial adjustments asynchronously
+
         
+        
+        # Perform initial adjustments asynchronously
         await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
 
+        npm_process = await start_frontend()
+        server_task, updater_task = await start_server_and_updater(symbols, client)
+
+        
         # Run the main loop indefinitely
         while get_error_counter() < 3:
-            if datetime.now().second % 2 == 0:
-                await open_position(max_open_positions, symbols, logger, client, leverage)
-                await current_status(symbols)
-                await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
+            await open_position(max_open_positions, symbols, logger, client, leverage)
+            await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
 
         if get_error_counter >= 3:
             logger.error("Too many errors occurred. Exiting the bot...")

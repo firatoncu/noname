@@ -1,4 +1,4 @@
-from utils.globals import set_capital_tbu, set_sl_price, set_last_timestamp, set_error_counter
+from utils.globals import set_capital_tbu, set_sl_price, set_last_timestamp, set_error_counter, set_notif_status
 from src.init_start import signal_initializer
 import asyncio
 from colorama import Fore, Style, init
@@ -6,34 +6,26 @@ import random
 import os
 from utils.logging import logger_func
 from utils.position_opt import funding_fee_controller
+from utils.influxdb.db_status_check import db_status_check
+from src.check_condition import check_buy_conditions, check_sell_conditions
 
 logger = logger_func()
 
 async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logger):
-    try:
-        
-        
-        init(autoreset=True)
-        set_capital_tbu(capital_tbu)
-        for symbol in symbols:
-            set_sl_price(0, symbol)
-            set_last_timestamp(0, symbol)
-            set_error_counter(0)
-            await signal_initializer(client, symbol, logger)               
-            await client.futures_change_leverage(symbol=symbol, leverage=leverage)
-            await funding_fee_controller(symbol, client, logger)
+    try: 
+      init(autoreset=True)
 
-        # List of available foreground colors (excluding RESET)
-        colors = [
-            Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA,
-            Fore.CYAN, Fore.LIGHTRED_EX, Fore.LIGHTGREEN_EX, Fore.LIGHTYELLOW_EX,
-            Fore.LIGHTBLUE_EX, Fore.LIGHTMAGENTA_EX, Fore.LIGHTCYAN_EX, Fore.WHITE
-        ]
+      # List of available foreground colors (excluding RESET)
+      colors = [
+          Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.BLUE, Fore.MAGENTA,
+          Fore.CYAN, Fore.LIGHTRED_EX, Fore.LIGHTGREEN_EX, Fore.LIGHTYELLOW_EX,
+          Fore.LIGHTBLUE_EX, Fore.LIGHTMAGENTA_EX, Fore.LIGHTCYAN_EX, Fore.WHITE
+      ]
 
-        # Choose a random color
-        random_color = random.choice(colors)
-        os.system("cls" if os.name == "nt" else "clear") 
-        print(f"""{random_color}{Style.BRIGHT}
+      # Choose a random color
+      random_color = random.choice(colors)
+      os.system("cls" if os.name == "nt" else "clear") 
+      print(f"""{random_color}{Style.BRIGHT}
     
         ______                                                _ _                _                
        / __   |                           _                  | (_)              | |          _    
@@ -43,14 +35,28 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
 |_| |_|\_____/|_| |_|\_||_|_|_|_|\____)   \___)_|   \_||_|\____|_|_| |_|\_|| |  |____/ \___/ \___)
                                                                        (_____|                    
 
-          {Style.RESET_ALL}""")
-        logger.info("Starting the bot...")
-        await asyncio.sleep(3)  # Prevent tight looping; adjust as needed
-        logger.info("Initial adjustments completed, starting main loop...")
-        await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
-        logger.info(f"Current Crypto Pairs: {symbols}")
+            {Style.RESET_ALL}""")
+      logger.info("Starting the bot...\n\n")
 
-        print(f"""
+      set_capital_tbu(capital_tbu)
+      set_notif_status(True)
+      for symbol in symbols:
+          set_sl_price(0, symbol)
+          set_last_timestamp(0, symbol)
+          set_error_counter(0)
+          await signal_initializer(client, symbol, logger)   
+          await client.futures_change_leverage(symbol=symbol, leverage=leverage)
+          await funding_fee_controller(symbol, client, logger)
+          await check_buy_conditions(100, symbol, client, logger)
+          await check_sell_conditions(100, symbol, client, logger)
+          
+      
+      #await db_status_check()
+      logger.info("Initial adjustments completed, starting main loop...")
+      await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
+      logger.info(f"Current Crypto Pairs: {symbols}")
+
+      print(f"""
 
 {Fore.WHITE}{Style.BRIGHT}Trading Strategy Explanation:{Style.RESET_ALL}
 
@@ -68,11 +74,13 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
   This ensures clean buy or sell signals using MACD crossovers.
   {Style.BRIGHT}A buy signal is triggered{Style.RESET_ALL} when the MACD line crosses from {Style.BRIGHT}negative to positive{Style.RESET_ALL}.
   {Style.BRIGHT}A sell signal occurs{Style.RESET_ALL} when it crosses from {Style.BRIGHT}positive to negative{Style.RESET_ALL}.
+                    
+                    
                     """)
 
-        status_lines_count = (len(symbols) * 5) + 2
-        for _ in range(status_lines_count):
-            print(" ") 
+      #status_lines_count = (len(symbols) * 5) + 2
+      #for _ in range(status_lines_count):
+          #print(" ") 
 
 
     except Exception as e:

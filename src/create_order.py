@@ -4,8 +4,8 @@ from src.check_condition import check_buy_conditions, check_sell_conditions
 
 async def check_create_order(symbol, Q, df, client, logger):
     try:
-        buyAll = check_buy_conditions(df, symbol, logger)
-        sellAll = check_sell_conditions(df, symbol, logger)
+        buyAll = await check_buy_conditions(500, symbol, client, logger)
+        sellAll = await check_sell_conditions(500, symbol, client, logger)
         
         if buyAll:
             await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=Q)
