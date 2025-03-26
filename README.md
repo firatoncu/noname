@@ -1,5 +1,5 @@
 
-# n0name v0.8.2 by f0ncu
+# n0name v0.9.0 by f0ncu
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
@@ -61,12 +61,16 @@ There are 2 types of Stop Loss values in new strategy.
 Profit goal for every position is **%1**
 
 
-# Release Notes (0.8.2) 
+# Release Notes (0.9.0) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
 - Add initial web UI project setup with Tailwind CSS, Vite, and React.
 - InfluxDB integration and notification status management.
 - Positional improvements on condition table.
 - Implemented Enhanced Stop Loss strategy.
+
+##
+### Older Releases (< 0.8.2)
+- **Backtesting module** is Online!
 - Streamline buy/sell condition checks while in-position status.
 - Time synchronization feature added.
 - Added Funding Fee management.
@@ -78,10 +82,6 @@ Profit goal for every position is **%1**
 - Enhance backtesting pipeline with logging for input retrieval and strategy execution.
 - Big Security Update! Implemented API keys encryption and decryption with AES-256-GCM with an encrypted password using PBKDF2 (with over 100.000 iterations.) 
 - Enhance backtesting pipeline with user-defined balance, leverage, and fee rate inputs; improve error handling and user prompts.
-
-##
-### Older Releases (< 0.7.3)
-- **Backtesting module** is Online!
 - Now, Logger Module saves error logs on *error.log* file. 
 - Bug fixes and major improvements
 - Real-Time Strategy Tracking module & graphical updates on UI.
