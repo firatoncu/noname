@@ -9,12 +9,12 @@ def get_conditions_for_symbol_ui(symbol) -> tuple[dict, dict]:
     buy_conditions = {
         'condA': get_buyconda(symbol),
         'condB': get_buycondb(symbol),
-        'condC': True if get_buycondc(symbol) == 2 else False
+        'condC': get_buycondc(symbol)
     }
     sell_conditions = {
         'condA': get_sellconda(symbol),
         'condB': get_sellcondb(symbol),
-        'condC': True if get_sellcondc(symbol) == 2 else False
+        'condC': get_sellcondc(symbol)
     }
     return buy_conditions, sell_conditions
 

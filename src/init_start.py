@@ -24,13 +24,15 @@ async def signal_initializer(client, symbol, logger):
 
         # MACD'nin mevcut durumunu kontrol et
         close_prices = close_prices_str.astype(float)
-        min_index = close_prices.index(min(close_prices))
-        max_index = close_prices.index(max(close_prices))
+        min_close_price = min(close_prices)
+        max_close_price = max(close_prices)
+        min_index = close_prices.idxmin()
+        max_index = close_prices.idxmax()
 
 
         fibo_values = {}
-        fibo_values[0.236] = max(close_prices) - ( (max(close_prices) - min(close_prices))) * 0.236
-        fibo_values[0.786] = max(close_prices) - ( (max(close_prices) - min(close_prices))) * 0.786
+        fibo_values[0.236] = max_close_price - ( (max_close_price - min_close_price)) * 0.236
+        fibo_values[0.786] = max_close_price - ( (max_close_price - min_close_price)) * 0.786
         
         for i in range(min_index, len(close_prices)):
             if close_prices[i] >= fibo_values[0.786]:

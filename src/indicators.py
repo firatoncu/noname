@@ -1,4 +1,4 @@
-from utils.globals import set_clean_sell_signal, set_clean_buy_signal, get_clean_buy_signal, get_clean_sell_signal
+from utils.globals import set_clean_sell_signal, set_clean_buy_signal, get_clean_buy_signal, get_clean_sell_signal, set_buycondc, set_sellcondc
 
 def no_crossing_last_10(macd_line, signal_line, logger):
     try:
@@ -109,21 +109,25 @@ def first_wave_signal(close_prices_str, high_prices_str, low_prices_str, side, s
             and close_prices.iloc[-1] > fibo_values[0.618]
             and close_prices.iloc[-2] < fibo_values[0.618]):
             set_clean_buy_signal(1, symbol)
+            set_buycondc(False, symbol)
 
         if (side == 'buy' 
             and close_prices.iloc[-1] <= fibo_values[1]
             and get_clean_buy_signal(symbol) == 1):
             set_clean_buy_signal(2, symbol)
+            set_buycondc(True, symbol)
 
         if (side == 'sell'
             and close_prices.iloc[-1] < fibo_values[0.382]
             and close_prices.iloc[-2] > fibo_values[0.382]):
             set_clean_sell_signal(1, symbol)
+            set_sellcondc(False, symbol)
 
         if (side == 'sell'
             and close_prices.iloc[-1] >= fibo_values[0]
             and get_clean_sell_signal(symbol) == 1):
             set_clean_sell_signal(2, symbol)
+            set_sellcondc(True, symbol)
             
 
         return False

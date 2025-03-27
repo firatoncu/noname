@@ -21,6 +21,7 @@ async def check_buy_conditions(lookback_period, symbol, client, logger):
 
         set_buyconda(buyCondA, symbol)
         set_buycondb(buyCondB, symbol)
+        set_buycondc(buyCondC, symbol)
 
         buyAll = buyCondA and buyCondB and buyCondC
         return buyAll
@@ -45,6 +46,7 @@ async def check_sell_conditions(lookback_period, symbol, client, logger):
 
         set_sellconda(sellCondA, symbol)
         set_sellcondb(sellCondB, symbol)
+        set_sellcondc(sellCondC, symbol)
 
         sellAll = sellCondA and sellCondB and sellCondC
         return sellAll 
