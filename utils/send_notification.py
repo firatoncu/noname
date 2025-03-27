@@ -25,7 +25,7 @@ async def send_position_close_alert(tp, symbol, side, profit):
         f"🌐 <b>Symbol : {symbol}</b>\n\n"
         f"{s} <b>Side   : {side}</b>\n\n"
         f"💰 <b>Profit : ${profit}</b> 📈\n\n"
-        f"🗣️ <b>User   : ${username}</b> "
+        f"🗣️ <b>User   : {username}</b> "
         )
     else:
         message = (
@@ -34,7 +34,7 @@ async def send_position_close_alert(tp, symbol, side, profit):
         f"🌐 <b>Symbol : {symbol}</b>\n\n"
         f"{s} <b>Side   : {side}</b>\n\n"
         f"💸 <b>Loss   : ${profit}</b> 📉\n\n"
-        f"🗣️ <b>User   : ${username}</b> "
+        f"🗣️ <b>User   : {username}</b> "
         )
     
     try:
