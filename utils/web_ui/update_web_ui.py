@@ -78,7 +78,7 @@ def extract_position(trades: List[Dict[str, Any]], start_index: int) -> Tuple[Hi
     closing_trade = trades[i]
     symbol = closing_trade['symbol']
     # Determine position side: if qty < 0 then closing a LONG; if qty > 0 then closing a SHORT.
-    position_side = "LONG" if float(closing_trade['qty']) > 0 else "SHORT"
+    position_side = "LONG" if str(closing_trade['side']) == "SELL" else "SHORT"
     exit_price = closing_trade['price']
     closed_at = unix_milliseconds_to_datetime(closing_trade['time'])
     pnl_sum = float(closing_trade.get('realizedPnl', 0))
@@ -91,8 +91,8 @@ def extract_position(trades: List[Dict[str, Any]], start_index: int) -> Tuple[Hi
             break
         pnl_val = float(trade.get('realizedPnl', 0))
         # Determine trade's closed side using the same rule.
-        trade_side = "LONG" if float(trade['qty']) > 0 else "SHORT"
-        if pnl_val != 0 and trade_side == position_side:
+        #trade_side = "LONG" if str(trade['side']) == "SELL" else "SHORT"
+        if pnl_val != 0 :
             pnl_sum += pnl_val
             i += 1
         else:
