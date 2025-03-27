@@ -38,11 +38,11 @@ def get_user_time_zone():
     global user_time_zone
     return user_time_zone
 
-def set_clean_sell_signal(value: bool, symbol: str):
+def set_clean_sell_signal(value: int, symbol: str):
     global clean_sell_signal
     clean_sell_signal[symbol] = value
 
-def set_clean_buy_signal(value: bool, symbol: str):
+def set_clean_buy_signal(value: int, symbol: str):
     global clean_buy_signal
     clean_buy_signal[symbol] = value
 

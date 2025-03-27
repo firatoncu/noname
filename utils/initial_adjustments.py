@@ -47,8 +47,8 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
           await signal_initializer(client, symbol, logger)   
           await client.futures_change_leverage(symbol=symbol, leverage=leverage)
           await funding_fee_controller(symbol, client, logger)
-          await check_buy_conditions(100, symbol, client, logger)
-          await check_sell_conditions(100, symbol, client, logger)
+          await check_buy_conditions(500, symbol, client, logger)
+          await check_sell_conditions(500, symbol, client, logger)
           
       
       #await db_status_check()

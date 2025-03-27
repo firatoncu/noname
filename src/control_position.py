@@ -33,9 +33,9 @@ async def tpsl_checker(symbol, current_position, pricePrecisions, client, logger
 
     if current_position > 0:
         entry_price = await get_entry_price(symbol, client, logger)
-        tp_price = round(entry_price * 1.0033, pricePrecisions[symbol]) # %1
-        sl_price = round(entry_price * 0.99, pricePrecisions[symbol]) # %3
-        hard_sl_price = round(entry_price * 0.983, pricePrecisions[symbol]) # %5
+        tp_price = round(entry_price * 1.003, pricePrecisions[symbol]) # %1.5
+        sl_price = round(entry_price * 0.99, pricePrecisions[symbol]) # %5
+        hard_sl_price = round(entry_price * 0.983, pricePrecisions[symbol]) # 8.5
 
         if ((close_price >= tp_price) or (close_price <= sl_price and sell_hist_check == True) or (close_price <= hard_sl_price)): 
             await client.futures_create_order(symbol=symbol, side=SIDE_SELL, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
@@ -53,9 +53,9 @@ async def tpsl_checker(symbol, current_position, pricePrecisions, client, logger
             
     if current_position < 0:
         entry_price = await get_entry_price(symbol, client, logger)
-        tp_price = round(entry_price * 0.9966, pricePrecisions[symbol]) # %1
-        sl_price = round(entry_price * 1.01, pricePrecisions[symbol]) # %3
-        hard_sl_price = round(entry_price * 1.017, pricePrecisions[symbol]) # %5
+        tp_price = round(entry_price * 0.997, pricePrecisions[symbol]) # %1.5
+        sl_price = round(entry_price * 1.01, pricePrecisions[symbol]) # %5
+        hard_sl_price = round(entry_price * 1.017, pricePrecisions[symbol]) # %8.5
 
         if ((close_price <= tp_price) or (close_price >= sl_price and buy_hist_check == True) or (close_price >= hard_sl_price)):
             await client.futures_create_order(symbol=symbol, side=SIDE_BUY, type=ORDER_TYPE_MARKET, quantity=abs(current_position))
