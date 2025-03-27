@@ -87,7 +87,7 @@ export function TradingConditionsCard({
           </h3>
           <Condition label="MACD Histogram Breakout" value={conditions.buyConditions.condA} isDarkMode={isDarkMode} />
           <Condition label="Fibonacci Retracement Confirmation" value={conditions.buyConditions.condB} isDarkMode={isDarkMode} />
-          <Condition label="MACD Signal Line Crossover" value={conditions.buyConditions.condC} isDarkMode={isDarkMode} />
+          <Condition label="First Wave Signal" value={conditions.buyConditions.condC} isDarkMode={isDarkMode} />
         </div>
         
         <div className="space-y-3">
@@ -96,7 +96,7 @@ export function TradingConditionsCard({
           </h3>
           <Condition label="MACD Histogram Breakout" value={conditions.sellConditions.condA} isDarkMode={isDarkMode} />
           <Condition label="Fibonacci Retracement Confirmation" value={conditions.sellConditions.condB} isDarkMode={isDarkMode} />
-          <Condition label="MACD Signal Line Crossover" value={conditions.sellConditions.condC} isDarkMode={isDarkMode} />
+          <Condition label="First Wave Signal" value={conditions.sellConditions.condC} isDarkMode={isDarkMode} />
         </div>
       </div>
     </div>

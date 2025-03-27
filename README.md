@@ -1,5 +1,5 @@
 
-# n0name v0.9.0 by f0ncu
+# n0name v0.9.1 by f0ncu
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
@@ -10,9 +10,9 @@ This repository contains *project n0name* designed for automated Futures Trading
 # Description
 n0name is an automated, multi-layered technical analysis system developed for traders. Thanks to its ability to monitor 12 different highly volatile cryptocurrencies on minute-based charts, numerous trades can be executed in the market and investment opportunities are continuously evaluated. The system generates both buy and sell signals by combining various technical tools such as the MACD indicator, histogram analysis, and Fibonacci levels.
 
-The system executes trades using 3x leverage and targets a 1% profit on each trade. With a success rate of approximately 88%, and by maintaining an average risk/reward ratio of 1:3 in its orders, this structure not only helps control risk but also maximizes potential profit. With all these features combined, the robot is expected to deliver a daily return of between 3-4%.
+The system executes trades using 3x leverage and targets a 1% profit on each trade. With a success rate of approximately 88%, and by maintaining an average risk/reward ratio of 1.5:5 in its orders, this structure not only helps control risk but also maximizes potential profit. With all these features combined, the robot is expected to deliver a daily return of between 3-4%.
 
-In its trading strategy, the robot utilizes the trend and momentum data provided by the MACD. Clean signal crossovers on the MACD line filter out market noise, thereby increasing the accuracy of the trading signal. Additionally, the analysis of the last 500 data points of the histogram helps to control abrupt price movements and extreme conditions. Fibonacci levels play a critical role in identifying price retracement and reversal points. Thanks to the harmonious operation of these three methods, signals are activated only when all conditions are met, preventing erroneous buy or sell decisions.
+In its trading strategy, the robot utilizes the trend and momentum data provided by the MACD. Clean signal if price area updates itself and create new highs or lows. Additionally, the analysis of the last 500 data points of the histogram helps to control abrupt price movements and extreme conditions. Fibonacci levels play a critical role in identifying price retracement and reversal points. Thanks to the harmonious operation of these three methods, signals are activated only when all conditions are met, preventing erroneous buy or sell decisions.
 
 # Key Features
 
@@ -34,18 +34,18 @@ In its trading strategy, the robot utilizes the trend and momentum data provided
 The latest positive histogram value exceeds the 85th percentile of the last 500 positive histogram values, indicating strong upward momentum.
 ### Fibonacci Retracement Confirmation:
 Price breaks above the 78.6% retracement level (from the lowest to highest price in the last 500 candles) with a significant gap (>1%) to the 61.8% level, confirming a bullish move.
-### MACD Signal Line Crossover:
-The MACD line crosses from negative to positive, and no premature signals occurred since the last positive-to-negative crossover (ensured by signal_initializer).
+### First Wave Signal:
+Price breaks above highest value of current Fibonacci area . After an buy signal, price has to move at least %60 of current Fibonacci Area.
 
 **Action: Opens a long position if all conditions are true and the max open positions limit isn’t reached.**
 
 ## Sell Conditions
 ### MACD Histogram Breakout:
 The latest negative histogram value falls below the 85th percentile of the last 500 negative histogram values (absolute), indicating strong downward momentum.
-### Fibonacci Retracement Confirmation (last500_fibo_check):
+### Fibonacci Retracement Confirmation:
 Price drops below the 23.6% retracement level with a significant gap (>1%) to the 38.2% level, confirming a bearish move.
-### MACD Signal Line Crossover:
-The MACD line crosses from positive to negative, with no premature signals since the last negative-to-positive crossover.
+### First Wave Signal:
+Price dips below lowest value of current Fibonacci area. After an sell signal, price has to move at least %60 of current Fibonacci Area.
 
 **Action: Opens a short position if all conditions are true and the max open positions limit isn’t reached.**
 
@@ -53,16 +53,17 @@ The MACD line crosses from positive to negative, with no premature signals since
 
 ### Stop-Loss:
 There are 2 types of Stop Loss values in new strategy.
-*Soft Stop Loss Point*: %3 (gets activated if there is an cross-side signal)
-*Hard Stop Loss Point*: %5
+*Soft Stop Loss Point*: %5 (gets activated if there is an cross-side signal)
+*Hard Stop Loss Point*: %8.5
 
 
 ### Take-Profit:
-Profit goal for every position is **%1**
+Profit goal for every position is **%1.5** (%1 after fees.)
 
 
-# Release Notes (0.9.0) 
+# Release Notes (0.9.1) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Big Strategy Update ! Wave prediction is way more stronger now.
 - Added wallet and historical positions data models
 - Enhance TradingConditionsCard with navigation buttons
 - Added initial web UI project setup with Tailwind CSS, Vite, and React.
