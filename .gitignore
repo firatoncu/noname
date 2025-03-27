@@ -1,5 +1,5 @@
 influxdb_files
-config.yml
+*config.yml
 development
 archive_dir
 __pycache__
