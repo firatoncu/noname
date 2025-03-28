@@ -27,7 +27,7 @@ def last500_macd_check(macd_line, lookback_period, logger):
 
 #-|-|-|-|-|-|-|-|-|-|-|-|-v0.5 indicators-|-|-|-|-|-|-|-|-|-|-|-|-
 
-def last500_histogram_check(histogram, side, logger, quantile=0.85, histogram_lookback=500):
+def last500_histogram_check(histogram, side, logger, quantile=0.95, histogram_lookback=500):
     try:
         histogram_history = histogram.tail(histogram_lookback)
         if side == 'buy':

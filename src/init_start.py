@@ -1,5 +1,4 @@
 
-from src.indicators import last500_fibo_check, last500_histogram_check
 import pandas as pd
 import ta
 from utils.globals import set_clean_buy_signal, set_clean_sell_signal
