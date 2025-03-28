@@ -140,26 +140,6 @@ function App() {
                   API Connection Error
                 </span>
               )}
-              <div className="flex items-center space-x-4">
-                <label htmlFor="symbol-filter" className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Filter Symbol:
-                </label>
-                <select
-                  id="symbol-filter"
-                  value={selectedSymbol}
-                  onChange={(e) => setSelectedSymbol(e.target.value)}
-                  className={`block w-32 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm
-                    ${isDarkMode 
-                      ? 'bg-gray-700 border-gray-600 text-white' 
-                      : 'bg-white border-gray-300 text-gray-900'}`}
-                >
-                  {symbols.map(symbol => (
-                    <option key={symbol} value={symbol}>
-                      {symbol === 'all' ? 'All Symbols' : symbol}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className={`p-2 rounded-full hover:bg-opacity-20 
