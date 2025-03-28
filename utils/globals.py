@@ -22,6 +22,16 @@ notif_status = False
 
 user_time_zone = "UTC"
 
+trend_signal = {}
+
+def set_trend_signal(value: bool, symbol: str):
+    global trend_signal
+    trend_signal[symbol] = value
+
+def get_trend_signal(symbol: str):
+    global trend_signal
+    return trend_signal[symbol]
+
 def set_notif_status(value: bool):
     global notif_status
     notif_status = value

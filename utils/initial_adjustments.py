@@ -8,6 +8,7 @@ from utils.logging import logger_func
 from utils.position_opt import funding_fee_controller
 from utils.influxdb.db_status_check import db_status_check
 from src.check_condition import check_buy_conditions, check_sell_conditions
+from src.check_trending import trend_checker
 
 logger = logger_func()
 
@@ -44,6 +45,7 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
           set_sl_price(0, symbol)
           set_last_timestamp(0, symbol)
           set_error_counter(0)
+          await trend_checker(symbol, client, logger)
           await signal_initializer(client, symbol, logger)   
           await client.futures_change_leverage(symbol=symbol, leverage=leverage)
           await funding_fee_controller(symbol, client, logger)
@@ -53,7 +55,6 @@ async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logg
       
       #await db_status_check()
       logger.info("Initial adjustments completed, starting main loop...")
-      await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
       logger.info(f"Current Crypto Pairs: {symbols}")
 
       print(f"""

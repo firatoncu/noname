@@ -30,6 +30,7 @@ export interface WalletInfo {
 export interface TradingConditions {
   symbol: string;
   fundingPeriod: boolean;
+  trendingCondition: boolean;
   buyConditions: {
     condA: boolean;
     condB: boolean;

@@ -14,24 +14,24 @@ why n0t?"""
 # Main entry point for the async trading bot application.
 import warnings
 import asyncio
-from binance import AsyncClient  # Replace synchronous Client with AsyncClient
+from binance import AsyncClient 
 from utils.load_config import load_config
-from utils.initial_adjustments import initial_adjustments  # Must be made async
+from utils.initial_adjustments import initial_adjustments 
 from utils.logging import error_logger_func
-from utils.current_status import current_status  # Assumed to be async
-from src.open_position import open_position  # Assumed to be async
+from utils.current_status import current_status  
+from src.open_position import open_position  
 from auth.key_encryption import decrypt_api_keys
 from utils.globals import get_error_counter
 from utils.web_ui.project.api.main import start_server_and_updater
 from utils.web_ui.npm_run_dev import start_frontend
-
+from src.check_trending import check_trend  
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 async def main():
 
-        # Initialize logger and config
+    # Initialize logger and config
     logger = error_logger_func()
     config = load_config()
 
@@ -68,12 +68,14 @@ async def main():
         # Perform initial adjustments asynchronously
         await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
 
+        
         npm_process = await start_frontend()
         server_task, updater_task = await start_server_and_updater(symbols, client)
-
+        check_trend_task = asyncio.create_task(check_trend(symbols, logger, client))        
         
         # Run the main loop indefinitely
         while get_error_counter() < 3:
+            
             await open_position(max_open_positions, symbols, logger, client, leverage)
             await asyncio.sleep(1)  # Prevent tight looping; adjust as needed
 

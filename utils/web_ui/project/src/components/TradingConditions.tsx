@@ -1,6 +1,6 @@
 import React from 'react';
 import { TradingConditions } from '../types';
-import { CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, BarChart, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ConditionProps {
   label: string;
@@ -77,6 +77,11 @@ export function TradingConditionsCard({
           <span className={`text-sm ${conditions.fundingPeriod ? 'text-green-500' : 'text-red-500'}`}>
             Funding Period
           </span>
+          <span className="text-gray-400">|</span>
+          <BarChart className={`w-5 h-5 ${conditions.trendingCondition ? 'text-red-500' : 'text-green-500'}`} />
+          <span className={`text-sm ${conditions.trendingCondition ? 'text-red-500' : 'text-green-500'}`}>
+              {conditions.trendingCondition ? 'Volatile Market' : 'Ranging Market'}
+          </span>
         </div>
       </div>
 
@@ -85,18 +90,38 @@ export function TradingConditionsCard({
           <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>
             Buy Conditions
           </h3>
-          <Condition label="MACD Histogram Breakout" value={conditions.buyConditions.condA} isDarkMode={isDarkMode} />
-          <Condition label="Fibonacci Retracement Confirmation" value={conditions.buyConditions.condB} isDarkMode={isDarkMode} />
-          <Condition label="First Wave Signal" value={conditions.buyConditions.condC} isDarkMode={isDarkMode} />
+          {conditions.trendingCondition ? (
+            <>
+              <Condition label="MACD Signal Crossover" value={conditions.buyConditions.condA} isDarkMode={isDarkMode} />
+              <Condition label="Hardened Fibonacci Retracement" value={conditions.buyConditions.condB} isDarkMode={isDarkMode} />
+              <Condition label="First Wave Signal" value={conditions.buyConditions.condC} isDarkMode={isDarkMode} />
+            </>
+          ) : (
+            <>
+              <Condition label="MACD Histogram Breakout" value={conditions.buyConditions.condA} isDarkMode={isDarkMode} />
+              <Condition label="Fibonacci Retracement Confirmation" value={conditions.buyConditions.condB} isDarkMode={isDarkMode} />
+              <Condition label="First Wave Signal" value={conditions.buyConditions.condC} isDarkMode={isDarkMode} />
+            </>
+          )}
         </div>
         
         <div className="space-y-3">
           <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>
             Sell Conditions
           </h3>
-          <Condition label="MACD Histogram Breakout" value={conditions.sellConditions.condA} isDarkMode={isDarkMode} />
-          <Condition label="Fibonacci Retracement Confirmation" value={conditions.sellConditions.condB} isDarkMode={isDarkMode} />
-          <Condition label="First Wave Signal" value={conditions.sellConditions.condC} isDarkMode={isDarkMode} />
+          {conditions.trendingCondition ? (
+            <>
+              <Condition label="MACD Signal Crossover" value={conditions.sellConditions.condA} isDarkMode={isDarkMode} />
+              <Condition label="Hardened Fibonacci Retracement" value={conditions.sellConditions.condB} isDarkMode={isDarkMode} />
+              <Condition label="First Wave Signal" value={conditions.sellConditions.condC} isDarkMode={isDarkMode} />
+            </>
+          ) : (
+            <>
+              <Condition label="MACD Histogram Breakout" value={conditions.sellConditions.condA} isDarkMode={isDarkMode} />
+              <Condition label="Fibonacci Retracement Confirmation" value={conditions.sellConditions.condB} isDarkMode={isDarkMode} />
+              <Condition label="First Wave Signal" value={conditions.sellConditions.condC} isDarkMode={isDarkMode} />
+            </>
+          )}
         </div>
       </div>
     </div>

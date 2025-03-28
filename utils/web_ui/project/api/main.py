@@ -18,6 +18,7 @@ class Position(BaseModel):
 class TradingConditions(BaseModel):
     symbol: str
     fundingPeriod: bool
+    trendingCondition: bool
     buyConditions: Dict[str, bool]
     sellConditions: Dict[str, bool]
 
