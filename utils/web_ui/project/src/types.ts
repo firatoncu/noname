@@ -8,6 +8,7 @@ export interface Position {
 }
 
 export interface HistoricalPosition {
+  id: string;
   symbol: string;
   entryPrice: string;
   exitPrice: string;

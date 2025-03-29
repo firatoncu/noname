@@ -1,6 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Position } from '../types';
-import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, LineChart } from 'lucide-react';
 
 interface PositionCardProps {
   position: Position;
@@ -9,6 +10,7 @@ interface PositionCardProps {
 }
 
 export function PositionCard({ position, pricePrecision, isDarkMode }: PositionCardProps) {
+  const navigate = useNavigate();
   const isLong = parseFloat(position.positionAmt) > 0;
   const pnl = parseFloat(position.unRealizedProfit);
   const entryPrice = parseFloat(position.entryPrice);
@@ -20,6 +22,19 @@ export function PositionCard({ position, pricePrecision, isDarkMode }: PositionC
   const stopLoss = isLong
     ? (entryPrice * 0.993).toFixed(pricePrecision)
     : (entryPrice * 1.007).toFixed(pricePrecision);
+
+  const handleViewChart = () => {
+    const currentPosition = {
+      symbol: position.symbol,
+      side: isLong ? 'LONG' : 'SHORT',
+      entryPrice: position.entryPrice,
+      currentPrice: position.markPrice,
+      openedAt: new Date().toLocaleString('en-GB').replace(',', ''),
+      pnl: position.unRealizedProfit,
+      isActive: true
+    };
+    navigate(`/position/current/${position.symbol}`, { state: { position: currentPosition } });
+  };
 
   return (
     <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-6 mb-4 transition-colors duration-200`}>
@@ -36,11 +51,23 @@ export function PositionCard({ position, pricePrecision, isDarkMode }: PositionC
             {isLong ? 'LONG' : 'SHORT'}
           </span>
         </div>
-        <div className="flex items-center">
-          <DollarSign className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'} mr-1`} />
-          <span className={`font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-            ${Math.abs(parseFloat(position.notional)).toFixed(2)}
-          </span>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center">
+            <DollarSign className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'} mr-1`} />
+            <span className={`font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+              ${Math.abs(parseFloat(position.notional)).toFixed(2)}
+            </span>
+          </div>
+          <button
+            onClick={handleViewChart}
+            className={`flex items-center space-x-1 px-3 py-1 rounded-md 
+              ${isDarkMode 
+                ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+          >
+            <LineChart className="w-4 h-4" />
+            <span>View Chart</span>
+          </button>
         </div>
       </div>
       

@@ -1,6 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LineChart, History, ArrowUp, ArrowDown } from 'lucide-react';
 import { HistoricalPosition } from '../types';
-import { History, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface HistoricalPositionsProps {
   positions: HistoricalPosition[];
@@ -8,6 +9,12 @@ interface HistoricalPositionsProps {
 }
 
 export function HistoricalPositions({ positions, isDarkMode }: HistoricalPositionsProps) {
+  const navigate = useNavigate();
+
+
+  const handleViewChart = (position: HistoricalPosition) => {
+    navigate(`/position/${position.id}`, { state: { position } });}
+
   return (
     <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-6 mb-4 transition-colors duration-200`}>
       <div className="flex items-center mb-4">
@@ -68,6 +75,18 @@ export function HistoricalPositions({ positions, isDarkMode }: HistoricalPositio
                 <td className="py-3 pl-4 text-sm">
                   {new Date(position.closedAt).toLocaleString()}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    onClick={() => handleViewChart(position)}
+                    className={`flex items-center space-x-1 px-3 py-1 rounded-md 
+                      ${isDarkMode 
+                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                  >
+                    <LineChart className="w-4 h-4" />
+                    <span>View Chart</span>
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -76,3 +95,5 @@ export function HistoricalPositions({ positions, isDarkMode }: HistoricalPositio
     </div>
   );
 }
+
+
