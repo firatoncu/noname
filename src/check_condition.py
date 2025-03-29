@@ -22,6 +22,7 @@ async def check_buy_conditions(lookback_period, symbol, client, logger):
         else:
             buyCondA = trending_macd_crossover_check(macd_line, signal_line, "buy", logger)
             buyCondB = trending_last500_fibo_check(df['close'], df['high'], df['low'], "buy", logger)
+        
         buyCondC = True if get_clean_buy_signal(symbol) == 2 else False
 
         set_buyconda(buyCondA, symbol)
@@ -50,8 +51,9 @@ async def check_sell_conditions(lookback_period, symbol, client, logger):
             sellCondA = last500_histogram_check(hist_line, "sell", logger)
             sellCondB = last500_fibo_check(df['close'], df['high'], df['low'], "sell", logger)
         else:
-            sellCondA = trending_macd_crossover_check(macd_line, signal_line, "buy", logger)
+            sellCondA = trending_macd_crossover_check(macd_line, signal_line, "sell", logger)
             sellCondB = trending_last500_fibo_check(df['close'], df['high'], df['low'], "sell", logger)
+
         sellCondC = True if get_clean_sell_signal(symbol) == 2 else False
 
         set_sellconda(sellCondA, symbol)
