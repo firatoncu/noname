@@ -93,9 +93,16 @@ def last500_fibo_check(close_prices_str, high_prices_str, low_prices_str, side, 
 
 def trending_macd_crossover_check(macd_line, signal_line, side, logger):
     try:
+
+        macd_variance = macd_line.max() + abs(macd_line.min())
+        macd_threshold = macd_variance * 0.2
+        
         if side == "buy" and macd_line.iloc[-1] > signal_line.iloc[-1] and macd_line.iloc[-2] < signal_line.iloc[-2]:
-            return True
+            if abs(macd_line.iloc[-1]) >= macd_threshold:
+                return True
         elif side == "sell" and macd_line.iloc[-1] < signal_line.iloc[-1] and macd_line.iloc[-2] > signal_line.iloc[-2]:
+            if abs(macd_line.iloc[-1]) >= macd_threshold:
+                return True
             return True
         else:
             return False
