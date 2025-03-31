@@ -47,7 +47,8 @@ async def get_current_position_ui(client):
                 'notional': pos['notional'],
                 'unRealizedProfit': pos['unRealizedProfit'],
                 'entryPrice': pos['entryPrice'],
-                'markPrice': pos['markPrice']
+                'markPrice': pos['markPrice'],
+                'entryTime': unix_milliseconds_to_datetime(pos['updateTime']),
             }]
         
     else:

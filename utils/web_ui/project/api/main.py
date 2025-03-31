@@ -14,6 +14,7 @@ class Position(BaseModel):
     unRealizedProfit: str
     entryPrice: str
     markPrice: str
+    entryTime: str
 
 class TradingConditions(BaseModel):
     symbol: str
@@ -57,7 +58,7 @@ historical_positions = []
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Adjust for your frontend
+    allow_origins=["http://localhost:80", "http://n0name"],  # Adjust for your frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -111,7 +112,7 @@ async def update_ui(symbols, client):
 def run_uvicorn():
     config = uvicorn.Config(
         app,
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         log_level="error",
         loop="asyncio"

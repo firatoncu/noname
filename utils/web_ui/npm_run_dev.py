@@ -23,7 +23,7 @@ async def run_npm_dev():
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        webbrowser.open("http://localhost:5173")
+        webbrowser.open("http://n0name")
         logger.info("Started npm run dev")
         return process
 

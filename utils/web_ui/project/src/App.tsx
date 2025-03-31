@@ -16,9 +16,8 @@ function App() {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} transition-colors duration-200`}>
-
-
-      <Outlet context={{ isDarkMode }} />
+      // @ts-ignore
+      <Outlet context={{ isDarkMode }} />  
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { HistoricalPositions } from '../components/HistoricalPositions';
 import { Position, TradingConditions, WalletInfo, HistoricalPosition } from '../types';
 import { LayoutDashboard, Moon, Sun } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://n0name:8000/api';
 
 function App() {
   const [positions, setPositions] = useState<Position[]>([]);

@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { HistoricalPosition } from '../types';
+import { createChart, CrosshairMode } from 'lightweight-charts';
+import { MACD } from 'technicalindicators';
 
-const API_BASE_URL = 'http://n0name:8000/api';
+const API_BASE_URL = 'http://localhost:8000/api';
 
 function PositionChart() {
   const { isDarkMode } = useOutletContext<{ isDarkMode: boolean }>();
@@ -11,6 +13,8 @@ function PositionChart() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const widgetRef = useRef<any>(null);
+  const mainChartRef = useRef<HTMLDivElement>(null);
+  const macdChartRef = useRef<HTMLDivElement>(null);
   
   const initialPosition = location.state?.position;
   const [currentPosition, setCurrentPosition] = useState(initialPosition);
@@ -54,113 +58,133 @@ function PositionChart() {
   }, [initialPosition]);
 
   useEffect(() => {
-    if (!currentPosition || !containerRef.current) return;
+    if (!currentPosition || !mainChartRef.current || !macdChartRef.current) return;
 
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/tv.js';
-    script.async = true;
-    script.onload = () => {
-      if (containerRef.current && window.TradingView) {
-        // Parse the date string (DD.MM.YYYY HH:mm:ss)
+    const fetchDataAndCreateChart = async () => {
+      try {
+        // Parse the date string (YYYY-MM-DD HH:mm:ss)
         const parseCustomDate = (dateStr: string) => {
           const [datePart, timePart] = dateStr.split(' ');
-          const [day, month, year] = datePart.split('.');
+          const [year, month, day] = datePart.split('-');
           const [hours, minutes, seconds] = timePart.split(':');
           
-          return new Date(
+          return Date.UTC(
             parseInt(year),
             parseInt(month) - 1,
             parseInt(day),
             parseInt(hours),
             parseInt(minutes),
             parseInt(seconds)
-          ).getTime() / 1000;
+          ) / 1000;
         };
 
-        const openTime = parseCustomDate(currentPosition.openedAt);
+        const openTime = parseCustomDate(positionDetails.openedAt);
         const closeTime = currentPosition.isActive 
           ? Math.floor(Date.now() / 1000)
-          : parseCustomDate(currentPosition.closedAt);
+          : parseCustomDate(positionDetails.closedAt);
 
         // Calculate time range and padding
         const timeRange = closeTime - openTime;
         const paddingTime = Math.max(timeRange * 0.1, 3600); // At least 1 hour padding
+        const fromTime = (openTime - paddingTime) * 1000; // Binance expects milliseconds
+        const toTime = (closeTime + paddingTime) * 1000;
 
-        widgetRef.current = new window.TradingView.widget({
-          symbol: `BINANCE:${currentPosition.symbol}`,
-          interval: '1',
-          timezone: 'Etc/UTC',
-          theme: isDarkMode ? 'dark' : 'light',
-          style: '1',
-          locale: 'en',
-          toolbar_bg: isDarkMode ? '#1f2937' : '#f1f3f6',
-          enable_publishing: false,
-          allow_symbol_change: false,
-          container_id: 'tradingview-widget',
-          width: '130%',
-          height: '600',
-          save_image: false,
-          hide_side_toolbar: false,
-          studies: ['MACD@tv-basicstudies'],
-          time: openTime - paddingTime,
-          range: timeRange + (paddingTime * 2),
-          disabled_features: ["use_localstorage_for_settings"],
-          enabled_features: ["study_templates"],
-          charts_storage_api_version: "1.1",
-          client_id: "tradingview.com",
-          user_id: "public_user"
+        // Fetch candlestick data from Binance API
+        const response = await fetch(
+          `https://api.binance.com/api/v3/klines?symbol=${currentPosition.symbol}&interval=1m&startTime=${fromTime}&endTime=${toTime}`
+        );
+        const data = await response.json();
+
+        // Process candlestick data for lightweight charts
+        const candlestickData = data.map((d: any) => ({
+          time: d[0] / 1000, // Convert to seconds for lightweight charts
+          open: parseFloat(d[1]),
+          high: parseFloat(d[2]),
+          low: parseFloat(d[3]),
+          close: parseFloat(d[4]),
+        }));
+
+        // Calculate MACD
+        const closePrices = candlestickData.map(d => d.close);
+        const macdInput = {
+          values: closePrices,
+          fastPeriod: 12,
+          slowPeriod: 26,
+          signalPeriod: 9,
+          SimpleMAOscillator: false,
+          SimpleMASignal: false,
+        };
+        const macdResult = MACD.calculate(macdInput);
+
+        // Create main chart for candlesticks
+        const mainChart = createChart(mainChartRef.current, {
+          width: mainChartRef.current.clientWidth,
+          height: 400,
+          layout: {
+            background :
+            {Color: "black"},
+            textColor: isDarkMode ? '#ffffff' : '#000000',
+          },
+          grid: {
+            vertLines: { color: isDarkMode ? '#374151' : '#e5e7eb' },
+            horzLines: { color: isDarkMode ? '#374151' : '#e5e7eb' },
+          },
+          crosshair: { mode: CrosshairMode.Normal },
+          timeScale: { timeVisible: true, secondsVisible: false },
         });
 
-        // Add markers after widget is ready
-        widgetRef.current.onChartReady(() => {
-          const chart = widgetRef.current.chart();
-          
-          // Create entry marker
-          chart.createShape(
-            { time: openTime, price: parseFloat(currentPosition.entryPrice) },
-            {
-              shape: "arrow_up",
-              text: "Entry",
-              lock: true,
-              disableSelection: true,
-              disableSave: true,
-              overrides: {
-                backgroundColor: currentPosition.side === 'LONG' ? '#22c55e' : '#ef4444',
-                color: currentPosition.side === 'LONG' ? '#22c55e' : '#ef4444',
-                textColor: isDarkMode ? '#ffffff' : '#000000',
-                fontsize: 14,
-                bold: true
-              }
-            }
-          );
-
-          // Create exit marker for closed positions
-          if (!currentPosition.isActive) {
-            chart.createShape(
-              { time: closeTime, price: parseFloat(currentPosition.exitPrice) },
-              {
-                shape: "arrow_down",
-                text: "Exit",
-                lock: true,
-                disableSelection: true,
-                disableSave: true,
-                overrides: {
-                  backgroundColor: parseFloat(currentPosition.profit) >= 0 ? '#22c55e' : '#ef4444',
-                  color: parseFloat(currentPosition.profit) >= 0 ? '#22c55e' : '#ef4444',
-                  textColor: isDarkMode ? '#ffffff' : '#000000',
-                  fontsize: 14,
-                  bold: true
-                }
-              }
-            );
-          }
+        const candlestickSeries = mainChart.addCandlestickSeries({
+          upColor: '#22c55e',
+          downColor: '#ef4444',
+          borderUpColor: '#22c55e',
+          borderDownColor: '#ef4444',
+          wickUpColor: '#22c55e',
+          wickDownColor: '#ef4444',
         });
+        candlestickSeries.setData(candlestickData);
+
+        // Add entry and exit markers
+        const markers = [];
+        markers.push({
+          time: openTime,
+          position: 'belowBar',
+          color: currentPosition.side === 'LONG' ? '#22c55e' : '#ef4444',
+          shape: 'arrowUp',
+          text: 'Entry',
+        });
+        if (!currentPosition.isActive) {
+          markers.push({
+            time: closeTime,
+            position: 'aboveBar',
+            color: parseFloat(currentPosition.profit) >= 0 ? '#22c55e' : '#ef4444',
+            shape: 'arrowDown',
+            text: 'Exit',
+          });
+        }
+        candlestickSeries.setMarkers(markers);
+
+    
+
+        // Set visible range for both charts
+        const visibleRange = { from: openTime - paddingTime, to: closeTime + paddingTime };
+        mainChart.timeScale().setVisibleRange(visibleRange);
+
+        mainChart.timeScale().fitContent();
+        // Store chart instances for cleanup
+        widgetRef.current = { mainChart };
+
+      } catch (error) {
+        console.error('Error fetching data or creating chart:', error);
       }
     };
-    document.head.appendChild(script);
+
+    fetchDataAndCreateChart();
 
     return () => {
-      script.remove();
+      if (widgetRef.current) {
+        widgetRef.current.mainChart.remove();
+        widgetRef.current.macdChart.remove();
+      }
     };
   }, [currentPosition, isDarkMode]);
 
@@ -226,7 +250,10 @@ function PositionChart() {
           </div>
         </div>
 
-        <div ref={containerRef} id="tradingview-widget" className="rounded-lg overflow-hidden" />
+        <div className="flex flex-col gap-2">
+          <div ref={mainChartRef} className="rounded-lg overflow-hidden" style={{ height: '400px' }} />
+          <div ref={macdChartRef} className="rounded-lg overflow-hidden" style={{ height: '200px' }} />
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ export interface Position {
   unRealizedProfit: string;
   entryPrice: string;
   markPrice: string;
+  entryTime: string;
 }
 
 export interface HistoricalPosition {
