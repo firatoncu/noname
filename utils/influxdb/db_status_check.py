@@ -7,7 +7,5 @@ async def db_status_check():
     if db_status == "y":
         set_db_status(True)
         inf_db_init_main()
-    elif db_status == "a":
-        set_notif_status(True)
     else:
         set_db_status(False)
