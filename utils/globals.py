@@ -24,6 +24,8 @@ user_time_zone = "UTC"
 
 trend_signal = {}
 
+strategy_name = "Default Strategy"
+
 def set_trend_signal(value: bool, symbol: str):
     global trend_signal
     trend_signal[symbol] = value
@@ -161,3 +163,11 @@ def set_funding_flag(value: bool, symbol: str):
 def get_funding_flag(symbol: str):
     global funding_flag
     return funding_flag[symbol]
+
+def get_strategy_name():
+    global strategy_name
+    return strategy_name
+
+def set_strategy_name(name: str):
+    global strategy_name
+    strategy_name = name

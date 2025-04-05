@@ -1,5 +1,5 @@
 
-# n0name v0.9.5 by f0ncu
+# n0name v0.9.6 by f0ncu
 This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
 
 # Disclaimer
@@ -61,8 +61,10 @@ There are 2 types of Stop Loss values in new strategy.
 Profit goal for every position is **%1.5** (%1 after fees.)
 
 
-# Release Notes (0.9.5) 
+# Release Notes (0.9.6) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Released RSI & Bollinger Bands Strategy. 
+- Multistrategy support added.
 - Finalization of MACD Overlap & Fibonacci Retracement Strategy.
 - Enhancements on UI.
 - TradingView Integration completed. Added charts of open and historical positions.

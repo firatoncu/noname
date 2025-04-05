@@ -22,6 +22,7 @@ class TradingConditions(BaseModel):
     trendingCondition: bool
     buyConditions: Dict[str, bool]
     sellConditions: Dict[str, bool]
+    strategyName: str
 
 class WalletInfo(BaseModel):
     totalBalance: str

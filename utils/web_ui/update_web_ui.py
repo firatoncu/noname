@@ -1,4 +1,4 @@
-from utils.globals import get_buyconda, get_buycondb, get_buycondc, get_sellconda, get_sellcondb, get_sellcondc, get_funding_flag, get_trend_signal
+from utils.globals import get_buyconda, get_buycondb, get_buycondc, get_sellconda, get_sellcondb, get_sellcondc, get_funding_flag, get_trend_signal, get_strategy_name
 import asyncio
 from datetime import datetime , timedelta
 from typing import Literal, List, Dict, Any, Tuple
@@ -25,12 +25,14 @@ async def get_trading_conditions_ui(symbols):
         buy_conditions, sell_conditions = get_conditions_for_symbol_ui(symbol)
         funding_period = get_funding_flag(symbol)
         trending_condition = get_trend_signal(symbol)
+        strategy_name = get_strategy_name()
         trading_condition = {
             'symbol': symbol,
             'fundingPeriod': funding_period,
             'trendingCondition': trending_condition,
             'buyConditions': buy_conditions,
-            'sellConditions': sell_conditions
+            'sellConditions': sell_conditions,
+            'strategyName': strategy_name
         }
         trading_conditions.append(trading_condition)
     return trading_conditions

@@ -86,6 +86,12 @@ export function TradingConditionsCard({
           <span className={`text-sm ${conditions.trendingCondition ? 'text-gray-300' : 'text-gray-300'}`}>
               {conditions.trendingCondition ? 'Volatile Market' : 'Ranging Market'}
           </span>
+          <span className="text-gray-400">|</span>
+          <span className="text-gray-400">
+                <span className="text-sm font-medium">
+                {conditions.strategyName ? conditions.strategyName : 'No Strategy'}
+                </span>
+              </span>
         </div>
       </div>
 
@@ -96,9 +102,21 @@ export function TradingConditionsCard({
           </h3>
 
             <>
-              <Condition label="MACD Signal Crossover" value={conditions.buyConditions.condA} isDarkMode={isDarkMode} />
-              <Condition label="Hardened Fibonacci Retracement" value={conditions.buyConditions.condB} isDarkMode={isDarkMode} />
-              <Condition label="First Wave Signal" value={conditions.buyConditions.condC} isDarkMode={isDarkMode} />
+              <Condition 
+              label={conditions.strategyName === 'Bollinger Bands & RSI' ? 'Bollinger Squeeze Check' : 'MACD Signal Crossover'} 
+              value={conditions.buyConditions.condA} 
+              isDarkMode={isDarkMode} 
+              />
+              <Condition 
+              label={conditions.strategyName === 'Bollinger Bands & RSI' ? 'Price Breakout' : 'Hardened Fibonacci Retracement'} 
+              value={conditions.buyConditions.condB} 
+              isDarkMode={isDarkMode} 
+              />
+              <Condition 
+              label={conditions.strategyName === 'Bollinger Bands & RSI' ? 'RSI Momentum Check' : 'First Wave Signal'} 
+              value={conditions.buyConditions.condC} 
+              isDarkMode={isDarkMode} 
+              />
             </>
         </div>
         
@@ -106,10 +124,22 @@ export function TradingConditionsCard({
           <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-900'}`}>
             Sell Conditions
           </h3>
-            <>
-              <Condition label="MACD Signal Crossover" value={conditions.sellConditions.condA} isDarkMode={isDarkMode} />
-              <Condition label="Hardened Fibonacci Retracement" value={conditions.sellConditions.condB} isDarkMode={isDarkMode} />
-              <Condition label="First Wave Signal" value={conditions.sellConditions.condC} isDarkMode={isDarkMode} />
+          <>
+              <Condition 
+              label={conditions.strategyName === 'Bollinger Bands & RSI' ? 'Bollinger Squeeze Check' : 'MACD Signal Crossover'} 
+              value={conditions.sellConditions.condA} 
+              isDarkMode={isDarkMode} 
+              />
+              <Condition 
+              label={conditions.strategyName === 'Bollinger Bands & RSI' ? 'Price Breakout' : 'Hardened Fibonacci Retracement'} 
+              value={conditions.sellConditions.condB} 
+              isDarkMode={isDarkMode} 
+              />
+              <Condition 
+              label={conditions.strategyName === 'Bollinger Bands & RSI' ? 'RSI Momentum Check' : 'First Wave Signal'} 
+              value={conditions.sellConditions.condC} 
+              isDarkMode={isDarkMode} 
+              />
             </>
 
         </div>

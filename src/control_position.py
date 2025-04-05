@@ -4,7 +4,7 @@ from binance.enums import SIDE_BUY, SIDE_SELL, ORDER_TYPE_MARKET
 from utils.globals import set_error_counter, get_error_counter, get_notif_status
 from utils.fetch_data import binance_fetch_data
 from utils.send_notification import send_position_close_alert
-from src.indicators import last500_histogram_check
+from src.indicators.macd_fibonacci import last500_histogram_check
 import ta
 import asyncio
 

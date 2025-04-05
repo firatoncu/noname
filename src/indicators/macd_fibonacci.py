@@ -1,4 +1,4 @@
-from utils.globals import set_clean_sell_signal, set_clean_buy_signal, get_clean_buy_signal, get_clean_sell_signal, set_buycondc, set_sellcondc
+from utils.globals import set_clean_sell_signal, set_clean_buy_signal, get_clean_buy_signal, get_clean_sell_signal, set_buycondc, set_sellcondc, set_strategy_name
 
 
 def last500_histogram_check(histogram, side, logger, quantile=1, histogram_lookback=500):
@@ -21,7 +21,7 @@ def last500_histogram_check(histogram, side, logger, quantile=1, histogram_lookb
 
 def macd_crossover_check(macd_line, signal_line, side, logger):
     try:
-
+        set_strategy_name("MACD Crossover & Fibonacci")
         macd_variance = macd_line.max() + abs(macd_line.min())
         macd_threshold = macd_variance * 0.2
         

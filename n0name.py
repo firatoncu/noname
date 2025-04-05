@@ -21,7 +21,7 @@ from utils.logging import error_logger_func
 from utils.current_status import current_status  
 from src.open_position import open_position  
 from auth.key_encryption import decrypt_api_keys
-from utils.globals import get_error_counter
+from utils.globals import get_error_counter, set_strategy_name
 from utils.web_ui.project.api.main import start_server_and_updater
 from utils.web_ui.npm_run_dev import start_frontend
 from src.check_trending import check_trend  
@@ -46,6 +46,13 @@ async def main():
     api_keys = config['api_keys']
     api_key = api_keys['api_key']
     api_secret = api_keys['api_secret']
+    strategy_name = config['strategy_name']
+
+    if strategy_name == "Bollinger Bands & RSI":
+        set_strategy_name("Bollinger Bands & RSI")
+    else:
+        set_strategy_name("MACD & Fibonacci")
+        
     await db_status_check()
 
     try:
