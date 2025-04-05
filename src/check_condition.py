@@ -1,6 +1,6 @@
 #v0.5 Fibonacci and MACD Strategy Implementation
 import ta # type: ignore
-from src.indicators import last500_histogram_check, last500_fibo_check, first_wave_signal, trending_last500_fibo_check, trending_macd_crossover_check
+from src.indicators import last500_histogram_check, last500_fibo_check, first_wave_signal, last500_fibo_check, macd_crossover_check
 from utils.globals import get_clean_buy_signal, get_clean_sell_signal, set_buyconda, set_buycondb, set_buycondc, set_sellconda, set_sellcondb, set_sellcondc, get_trend_signal
 from utils.fetch_data import binance_fetch_data
 
@@ -15,14 +15,8 @@ async def check_buy_conditions(lookback_period, symbol, client, logger):
         hist_line = macd.macd_diff()
 
         first_wave_signal(df['close'], df['high'], df['low'], "buy", symbol, logger)
-        # Trend Signal Check
-        if get_trend_signal(symbol) == False:
-            buyCondA = last500_histogram_check(hist_line, "buy", logger)
-            buyCondB = last500_fibo_check(df['close'], df['high'], df['low'], "buy", logger)
-        else:
-            buyCondA = trending_macd_crossover_check(macd_line, signal_line, "buy", logger)
-            buyCondB = trending_last500_fibo_check(df['close'], df['high'], df['low'], "buy", logger)
-        
+        buyCondA = macd_crossover_check(macd_line, signal_line, "buy", logger)
+        buyCondB = last500_fibo_check(df['close'], df['high'], df['low'], "buy", logger)
         buyCondC = True if get_clean_buy_signal(symbol) == 2 else False
 
         set_buyconda(buyCondA, symbol)
@@ -46,14 +40,8 @@ async def check_sell_conditions(lookback_period, symbol, client, logger):
         hist_line = macd.macd_diff()
 
         first_wave_signal(df['close'], df['high'], df['low'], "sell", symbol, logger)
-        # Trend Signal Check
-        if get_trend_signal(symbol) == False:
-            sellCondA = last500_histogram_check(hist_line, "sell", logger)
-            sellCondB = last500_fibo_check(df['close'], df['high'], df['low'], "sell", logger)
-        else:
-            sellCondA = trending_macd_crossover_check(macd_line, signal_line, "sell", logger)
-            sellCondB = trending_last500_fibo_check(df['close'], df['high'], df['low'], "sell", logger)
-
+        sellCondA = macd_crossover_check(macd_line, signal_line, "sell", logger)
+        sellCondB = last500_fibo_check(df['close'], df['high'], df['low'], "sell", logger)
         sellCondC = True if get_clean_sell_signal(symbol) == 2 else False
 
         set_sellconda(sellCondA, symbol)

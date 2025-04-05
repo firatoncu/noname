@@ -50,7 +50,13 @@ export function WalletCard({ wallet, isDarkMode }: WalletCardProps) {
           <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Unrealized P&L
           </span>
-          <p className={`text-lg font-semibold ${parseFloat(wallet.unrealizedPnL) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            <p className={`text-lg font-semibold ${
+            parseFloat(wallet.unrealizedPnL) > 0 
+            ? 'text-green-500' 
+            : parseFloat(wallet.unrealizedPnL) < 0 
+            ? 'text-red-500' 
+            : 'text-white'
+            }`}>
             {formatCurrency(wallet.unrealizedPnL)}
           </p>
         </div>
@@ -81,7 +87,13 @@ export function WalletCard({ wallet, isDarkMode }: WalletCardProps) {
             ) : (
               <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
             )}
-            <p className={`text-lg font-semibold ${parseFloat(wallet.weeklyPnL) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            <p className={`text-lg font-semibold ${
+              parseFloat(wallet.weeklyPnL) > 0 
+              ? 'text-green-500' 
+              : parseFloat(wallet.weeklyPnL) < 0 
+              ? 'text-red-500' 
+              : 'text-white'
+            }`}>
               {formatCurrency(wallet.weeklyPnL)}
             </p>
           </div>
@@ -92,9 +104,9 @@ export function WalletCard({ wallet, isDarkMode }: WalletCardProps) {
             Margin Ratio
           </span>
           <div className="flex items-center">
-            <Percent className="w-4 h-4 text-blue-500 mr-1" />
-            <p className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              {parseFloat(wallet.marginRatio).toFixed(2)}%
+            <Percent className="w-4 h-4 text-gray-400 mr-1" />
+            <p className={`text-lg font-semibold ${parseFloat(wallet.marginRatio) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {parseFloat(wallet.marginRatio).toFixed(2)}
             </p>
           </div>
         </div>

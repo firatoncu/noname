@@ -55,7 +55,7 @@ def start_influxdb(binary_path):
     time.sleep(10)  # Wait for the server to initialize
     return influxd_process
 
-def create_database_if_not_exists(client, db_name='n0name-db'):
+def create_database_if_not_exists(client, db_name='n0namedb'):
     """Check if the database exists; create it if not found."""
     print(f"Checking if database '{db_name}' exists...")
     # Get list of existing databases
@@ -87,4 +87,4 @@ def inf_db_init_main():
     # Connect to InfluxDB and create database if it doesn't exist
     print("Connecting to InfluxDB...")
     client = InfluxDBClient(host='localhost', port=8086)
-    client = create_database_if_not_exists(client, 'n0name-db')
+    client = create_database_if_not_exists(client, 'n0namedb')

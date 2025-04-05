@@ -26,3 +26,4 @@ backtest_strategies
 ENCRYPTED_FILE
 utils/config*
 *.zip
+influxdb-*

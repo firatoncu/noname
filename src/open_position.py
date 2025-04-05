@@ -5,16 +5,16 @@ from src.position_value import position_val
 from src.control_position import position_checker
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
-from utils.globals import get_capital_tbu, get_db_status
-from utils.influxdb.inf_send_data import data_writer
+from utils.globals import get_capital_tbu
 from utils.position_opt import funding_fee_controller
 from utils.fetch_data import binance_fetch_data
+from utils.influxdb.csv_writer import write_to_daily_csv
+from utils.influxdb.inf_send_data import write_live_conditions
+
 
 # Async function to process a single symbol
 async def process_symbol(symbol, client, logger, stepSizes, quantityPrecisions, position_value):
     try:
-        if get_db_status() == True:
-            await data_writer(df, symbol)
         
         funding_fee = await funding_fee_controller(symbol, client, logger)
         if funding_fee == False:
@@ -24,7 +24,8 @@ async def process_symbol(symbol, client, logger, stepSizes, quantityPrecisions, 
         Q = calculate_quantity(position_value, close_price, stepSizes[symbol], quantityPrecisions[symbol])
 
         await check_create_order(symbol, Q, df, client, logger)
-
+        await write_live_conditions(df['timestamp'].iloc[-1], symbol)
+        
     except Exception as e:
         logger.error(f"{symbol} işlenirken hata: {e}")
 

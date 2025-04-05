@@ -89,7 +89,7 @@ function PositionChart() {
         widgetRef.current = new window.TradingView.widget({
           symbol: `BINANCE:${currentPosition.symbol}`,
           interval: '1',
-          timezone: 'Etc/UTC',
+          timezone: 'Europe/Istanbul',
           theme: isDarkMode ? 'dark' : 'light',
           style: '1',
           locale: 'en',

@@ -25,6 +25,7 @@ from utils.globals import get_error_counter
 from utils.web_ui.project.api.main import start_server_and_updater
 from utils.web_ui.npm_run_dev import start_frontend
 from src.check_trending import check_trend  
+from utils.influxdb.inf_db_initializer import inf_db_init_main
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -44,20 +45,7 @@ async def main():
     api_keys = config['api_keys']
     api_key = api_keys['api_key']
     api_secret = api_keys['api_secret']
-
-    
-    """api_key, api_secret = decrypt_api_keys()
-    
-    # Ask user to choose between Backtesting and Trading
-    mode = input("\n\nChoose mode (Backtesting/Trading): ").strip().lower()
-    while mode not in ["backtesting", "trading"]:
-        print("Invalid mode. Please choose 'Backtesting' or 'Trading'.")
-        mode = input("Choose mode (Backtesting/Trading): ").strip().lower()
-    if mode == "backtesting":
-        client = Client(api_key, api_secret)
-        backtest_pipeline(client, logger)
-
-    elif mode == "trading":"""
+    inf_db_init_main()
 
     try:
         # Create AsyncClient instance
