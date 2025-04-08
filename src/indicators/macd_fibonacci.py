@@ -99,12 +99,6 @@ def first_wave_signal(close_prices_str, high_prices_str, low_prices_str, side, s
             set_clean_buy_signal(2, symbol)
             set_buycondc(True, symbol)
 
-        if (side == 'buy'
-            and (close_prices.iloc[-2] < fibo_values[0] and close_prices.iloc[-1] < fibo_values[0])
-            and get_clean_buy_signal(symbol) == 2):
-            set_clean_buy_signal(0, symbol)
-            set_buycondc(False, symbol)
-
         if (side == 'sell'
             and close_prices.iloc[-1] < fibo_values[0.382]
             and close_prices.iloc[-2] > fibo_values[0.382]):
@@ -117,11 +111,6 @@ def first_wave_signal(close_prices_str, high_prices_str, low_prices_str, side, s
             set_clean_sell_signal(2, symbol)
             set_sellcondc(True, symbol)
 
-        if (side == 'sell'
-            and (close_prices.iloc[-2] < fibo_values[0] and close_prices.iloc[-1] < fibo_values[0])
-            and get_clean_sell_signal(symbol) == 2):
-            set_clean_sell_signal(0, symbol)
-            set_sellcondc(False, symbol)
 
     except Exception as e:
         logger.error(f"First Wave Error: {e}")
