@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App';
 import Dashboard from './pages/Dashboard';
 import PositionChart from './pages/PositionChart';
+import TradingConditionsPage from './pages/TradingConditionsPage';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: "/position/current/:symbol",
         element: <PositionChart />,
+      },
+      {
+        path: "/trading-conditions",
+        element: <TradingConditionsPage />,
       },
     ],
   },

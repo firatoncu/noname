@@ -26,6 +26,26 @@ trend_signal = {}
 
 strategy_name = "Default Strategy"
 
+order_status = {}
+
+limit_order = {}
+
+def set_limit_order(value: dict, symbol: str):
+    global limit_order
+    limit_order[symbol] = value
+
+def get_limit_order(symbol: str):
+    global limit_order
+    return limit_order[symbol]
+
+def set_order_status(value: str, symbol: str):
+    global order_status
+    order_status[symbol] = value
+
+def get_order_status(symbol: str):
+    global order_status
+    return order_status[symbol]
+
 def set_trend_signal(value: bool, symbol: str):
     global trend_signal
     trend_signal[symbol] = value

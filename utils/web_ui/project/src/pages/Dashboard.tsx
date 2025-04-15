@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { PositionCard } from '../components/PositionCard';
-import { TradingConditionsCard } from '../components/TradingConditions';
 import { WalletCard } from '../components/WalletCard';
 import { HistoricalPositions } from '../components/HistoricalPositions';
 import { Position, TradingConditions, WalletInfo, HistoricalPosition } from '../types';
-import { LayoutDashboard, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, Moon, Sun, BarChart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const API_BASE_URL = 'http://n0name:8000/api';
 
@@ -21,7 +21,6 @@ function App() {
   });
   const [historicalPositions, setHistoricalPositions] = useState<HistoricalPosition[]>([]);
   const [selectedSymbol, setSelectedSymbol] = useState<string>('all');
-  const [currentConditionIndex, setCurrentConditionIndex] = useState(0);
   const [apiError, setApiError] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -62,10 +61,6 @@ function App() {
       }
       if (Array.isArray(conditionsData)) {
         setConditions(conditionsData);
-        // Reset condition index if needed
-        if (currentConditionIndex >= conditionsData.length) {
-          setCurrentConditionIndex(0);
-        }
       }
       if (walletData && typeof walletData === 'object') {
         setWallet(walletData);
@@ -91,18 +86,9 @@ function App() {
     return () => clearInterval(intervalId);
   }, []); // Empty dependency array means this effect runs once on mount
 
-  // Reset condition index when selected symbol changes
-  useEffect(() => {
-    setCurrentConditionIndex(0);
-  }, [selectedSymbol]);
-
   const filteredPositions = selectedSymbol === 'all' 
     ? positions 
     : positions.filter(p => p.symbol === selectedSymbol);
-
-  const filteredConditions = selectedSymbol === 'all'
-    ? conditions
-    : conditions.filter(c => c.symbol === selectedSymbol);
 
   const symbols = ['all', ...Array.from(new Set(positions.map(p => p.symbol)))];
 
@@ -113,14 +99,6 @@ function App() {
     'XRPUSDT': 4,
     'REDUSDT': 4,
     'BMTUSDT': 4,
-  };
-
-  const handlePreviousCondition = () => {
-    setCurrentConditionIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNextCondition = () => {
-    setCurrentConditionIndex((prev) => Math.min(filteredConditions.length - 1, prev + 1));
   };
 
   return (
@@ -140,6 +118,17 @@ function App() {
                   API Connection Error
                 </span>
               )}
+              <Link 
+                to="/trading-conditions" 
+                className={`px-4 py-2 rounded-md flex items-center ${
+                  isDarkMode 
+                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+                }`}
+              >
+                <BarChart className="w-4 h-4 mr-2" />
+                <span>Trading Conditions</span>
+              </Link>
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className={`p-2 rounded-full hover:bg-opacity-20 
@@ -158,44 +147,25 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <WalletCard wallet={wallet} isDarkMode={isDarkMode} />
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div>
-            <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              Open Positions
-            </h2>
-            {filteredPositions.length > 0 ? (
-              filteredPositions.map((position) => (
-                <PositionCard
-                  key={position.symbol}
-                  position={position}
-                  pricePrecision={PRICE_PRECISION[position.symbol] || 2}
-                  isDarkMode={isDarkMode}
-                />
-              ))
-            ) : (
-              <div className={`${isDarkMode ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-500'} 
-                rounded-lg shadow-md p-6 text-center transition-colors duration-200`}>
-                No Open Positions
-              </div>
-            )}
-          </div>
-
-          <div>
-            <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-              Trading Conditions
-            </h2>
-            {filteredConditions.length > 0 && (
-              <TradingConditionsCard
-                key={filteredConditions[currentConditionIndex].symbol}
-                conditions={filteredConditions[currentConditionIndex]}
+        <div className="mb-6">
+          <h2 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            Open Positions
+          </h2>
+          {filteredPositions.length > 0 ? (
+            filteredPositions.map((position) => (
+              <PositionCard
+                key={position.symbol}
+                position={position}
+                pricePrecision={PRICE_PRECISION[position.symbol] || 2}
                 isDarkMode={isDarkMode}
-                onPrevious={handlePreviousCondition}
-                onNext={handleNextCondition}
-                isFirst={currentConditionIndex === 0}
-                isLast={currentConditionIndex === filteredConditions.length - 1}
               />
-            )}
-          </div>
+            ))
+          ) : (
+            <div className={`${isDarkMode ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-500'} 
+              rounded-lg shadow-md p-6 text-center transition-colors duration-200`}>
+              No Open Positions
+            </div>
+          )}
         </div>
 
         <HistoricalPositions 
