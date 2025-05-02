@@ -63,6 +63,7 @@ Profit goal for every position is **%1.5** (%1 after fees.)
 
 # Release Notes (0.9.6) 
 ##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
+- Various UI improvements.
 - Released RSI & Bollinger Bands Strategy. 
 - Multistrategy support added.
 - Finalization of MACD Overlap & Fibonacci Retracement Strategy.
