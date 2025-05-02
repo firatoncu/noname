@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TradingConditions } from '../types';
-import { LayoutDashboard, Moon, Sun, ChevronLeft, CheckCircle, XCircle, Clock, BarChart } from 'lucide-react';
+import { LayoutDashboard, Moon, Sun, ChevronLeft, CheckCircle, XCircle, Clock, BarChart, LineChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const API_BASE_URL = 'http://n0name:8000/api';
@@ -50,6 +50,16 @@ function TradingConditionCard({ conditions, isDarkMode }: TradingConditionCardPr
           <span className={`text-sm ${conditions.trendingCondition ? 'text-gray-300' : 'text-gray-300'}`}>
             {conditions.trendingCondition ? 'Volatile Market' : 'Ranging Market'}
           </span>
+          <Link 
+            to={`/trading-conditions/chart/${conditions.symbol}`}
+            className={`ml-2 p-2 rounded-full hover:bg-opacity-20 
+              ${isDarkMode 
+                ? 'hover:bg-gray-600 text-gray-300' 
+                : 'hover:bg-gray-200 text-gray-600'}`}
+            aria-label="View Chart"
+          >
+            <LineChart className="w-5 h-5" />
+          </Link>
         </div>
       </div>
 
@@ -109,16 +119,11 @@ function TradingConditionCard({ conditions, isDarkMode }: TradingConditionCardPr
 function TradingConditionsPage() {
   const [conditions, setConditions] = useState<TradingConditions[]>([]);
   const [apiError, setApiError] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
-  });
+  const isDarkMode = true;
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode);
-  }, [isDarkMode]);
+    document.documentElement.classList.add('dark');
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -150,13 +155,13 @@ function TradingConditionsPage() {
   }, []);
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} transition-colors duration-200`}>
-      <nav className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm transition-colors duration-200`}>
+    <div className="min-h-screen bg-gray-900 transition-colors duration-200">
+      <nav className="bg-gray-800 shadow-sm transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
-              <LayoutDashboard className={`w-6 h-6 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'} mr-2`} />
-              <span className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              <LayoutDashboard className="w-6 h-6 text-blue-400 mr-2" />
+              <span className="text-xl font-semibold text-white">
                 Trading Conditions
               </span>
             </div>
@@ -168,25 +173,11 @@ function TradingConditionsPage() {
               )}
               <Link 
                 to="/" 
-                className={`px-4 py-2 rounded-md flex items-center ${
-                  isDarkMode 
-                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' 
-                    : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-                }`}
+                className="px-4 py-2 rounded-md flex items-center bg-gray-700 hover:bg-gray-600 text-gray-200"
               >
                 <ChevronLeft className="w-4 h-4 mr-2" />
                 <span>Back to Dashboard</span>
               </Link>
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className={`p-2 rounded-full hover:bg-opacity-20 
-                  ${isDarkMode 
-                    ? 'hover:bg-gray-600 text-gray-300' 
-                    : 'hover:bg-gray-200 text-gray-600'}`}
-                aria-label="Toggle dark mode"
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
             </div>
           </div>
         </div>

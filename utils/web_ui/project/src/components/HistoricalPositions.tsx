@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LineChart, History, ArrowUp, ArrowDown } from 'lucide-react';
+import { LineChart, History, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
 import { HistoricalPosition } from '../types';
 
 interface HistoricalPositionsProps {
@@ -10,10 +10,18 @@ interface HistoricalPositionsProps {
 
 export function HistoricalPositions({ positions, isDarkMode }: HistoricalPositionsProps) {
   const navigate = useNavigate();
-
+  const [visiblePositions, setVisiblePositions] = useState(5);
 
   const handleViewChart = (position: HistoricalPosition) => {
-    navigate(`/position/${position.id}`, { state: { position } });}
+    navigate(`/position/${position.id}`, { state: { position } });
+  }
+
+  const handleShowMore = () => {
+    setVisiblePositions(prev => prev + 5);
+  }
+
+  const displayedPositions = positions.slice(0, visiblePositions);
+  const hasMorePositions = visiblePositions < positions.length;
 
   return (
     <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-6 mb-4 transition-colors duration-200`}>
@@ -39,12 +47,12 @@ export function HistoricalPositions({ positions, isDarkMode }: HistoricalPositio
             </tr>
           </thead>
           <tbody>
-            {positions.map((position, index) => (
+            {displayedPositions.map((position, index) => (
               <tr 
                 key={`${position.symbol}-${position.closedAt}`}
                 className={`
                   ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}
-                  ${index !== positions.length - 1 ? `border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}` : ''}
+                  ${index !== displayedPositions.length - 1 ? `border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}` : ''}
                 `}
               >
                 <td className="py-3 pr-4 font-medium">{position.symbol}</td>
@@ -92,8 +100,21 @@ export function HistoricalPositions({ positions, isDarkMode }: HistoricalPositio
           </tbody>
         </table>
       </div>
+      
+      {hasMorePositions && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={handleShowMore}
+            className={`flex items-center justify-center mx-auto px-4 py-2 rounded-md 
+              ${isDarkMode 
+                ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' 
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+          >
+            <ChevronDown className="w-4 h-4 mr-2" />
+            <span>Show More</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
-
-

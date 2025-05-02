@@ -144,7 +144,7 @@ async def get_last_5_positions(client) -> List[HistoricalPosition]:
         i = 0
         n = len(trades)
         # Extract positions until we have 5 or we run out of trades.
-        while i < n and len(positions) < 5:
+        while i < n and len(positions) < 50:
             try:
                 pos, new_index = extract_position(trades, i)
                 positions.append(pos)
@@ -152,7 +152,6 @@ async def get_last_5_positions(client) -> List[HistoricalPosition]:
                 i = new_index
             except ValueError as e:
                 # If extraction fails, break out.
-                print("Extraction stopped:", e)
                 break
         return positions
     finally:

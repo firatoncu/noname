@@ -29,7 +29,7 @@ export function PositionCard({ position, pricePrecision, isDarkMode }: PositionC
       side: isLong ? 'LONG' : 'SHORT',
       entryPrice: position.entryPrice,
       currentPrice: position.markPrice,
-      openedAt: new Date().toLocaleString('en-GB').replace(',', ''),
+      openedAt: position.entryTime,
       pnl: position.unRealizedProfit,
       isActive: true
     };

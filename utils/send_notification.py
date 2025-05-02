@@ -50,7 +50,7 @@ async def send_position_close_alert(tp, symbol, side, profit):
 
 
 
-async def send_position_open_alert(symbol):
+async def send_position_open_alert(symbol, side):
     
     config = load_config()
     TOKEN = config['telegram']['token']
@@ -62,11 +62,55 @@ async def send_position_open_alert(symbol):
     # You can get chat ID by messaging @getidsbo
     
     # Enhanced HTML-formatted message
-    
+    if side == "LONG":
+        s = "🔼"
+    else:
+        s = "🔽" 
+
+
     message = (
         "🌀 <b>Position Opened</b> 💠\n"
         "✦──────✦─────✦\n"  # Unicode line for separation
-        f"🌐 <b>Symbol : {symbol}</b>"
+        f"🌐 <b>Symbol : {symbol}</b>\n\n"
+        f"{s} <b>Side   : {side}</b>\n\n"
+        )
+
+    
+    try:
+        await bot.send_message(
+            chat_id=chat_id,
+            message_thread_id=4,
+            text=message,
+            parse_mode='HTML'
+        )
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+
+async def send_tp_limit_filled_alert(symbol, side):
+    
+    config = load_config()
+    TOKEN = config['telegram']['token']
+    chat_id = config['telegram']['chat_id']
+    username = config['username']
+    
+    bot = Bot(token=TOKEN)
+    # Replace 'CHAT_ID' with the chat ID you want to send to
+    # You can get chat ID by messaging @getidsbo
+    
+    # Enhanced HTML-formatted message
+    if side == "LONG":
+        s = "🔼"
+    else:
+        s = "🔽"   
+
+    message = (
+        "🌀 <b>Limit Order Filled! Take Profit Order Executed!</b> 💠\n"
+        "✦──────✦─────✦\n"  # Unicode line for separation
+        f"🌐 <b>Symbol : {symbol}</b>\n\n"
+        f"{s} <b>Side   : {side}</b>\n\n"
         )
 
     

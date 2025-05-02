@@ -18,7 +18,7 @@ error_counter = 0
 
 db_status = False
 
-notif_status = False
+notif_status = True
 
 user_time_zone = "UTC"
 

@@ -5,6 +5,7 @@ import App from './App';
 import Dashboard from './pages/Dashboard';
 import PositionChart from './pages/PositionChart';
 import TradingConditionsPage from './pages/TradingConditionsPage';
+import TradingConditionChart from './pages/TradingConditionChart';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "/trading-conditions",
         element: <TradingConditionsPage />,
+      },
+      {
+        path: "/trading-conditions/chart/:symbol",
+        element: <TradingConditionChart />,
       },
     ],
   },

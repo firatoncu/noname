@@ -87,13 +87,13 @@ function PositionChart() {
         const paddingTime = Math.max(timeRange * 0.1, 3600); // At least 1 hour padding
 
         widgetRef.current = new window.TradingView.widget({
-          symbol: `BINANCE:${currentPosition.symbol}`,
+          symbol: `BINANCE:${currentPosition.symbol}.P`,
           interval: '1',
           timezone: 'Europe/Istanbul',
-          theme: isDarkMode ? 'dark' : 'light',
+          theme: 'dark',
           style: '1',
           locale: 'en',
-          toolbar_bg: isDarkMode ? '#1f2937' : '#f1f3f6',
+          toolbar_bg: '#1f2937',
           enable_publishing: false,
           allow_symbol_change: false,
           container_id: 'tradingview-widget',
