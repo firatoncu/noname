@@ -78,9 +78,9 @@ export function PositionCard({ position, pricePrecision, isDarkMode }: PositionC
           </span>
         </div>
         <div className="flex flex-col">
-          <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>P&L (&)</span>
+          <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>P&L (%)</span>
           <span className={`font-semibold ${pnl > 0 ? 'text-green-500' : 'text-red-500'}`}>
-            ${(pnl / parseFloat(position.notional) * 500).toFixed(2)}%
+            ${(pnl / parseFloat(position.notional) * -500).toFixed(2)}%
           </span>
         </div>
         <div className="flex flex-col">

@@ -47,13 +47,14 @@ async def main():
     api_key = api_keys['api_key']
     api_secret = api_keys['api_secret']
     strategy_name = config['strategy_name']
+    db_status = config['db_status']
 
     if strategy_name == "Bollinger Bands & RSI":
         set_strategy_name("Bollinger Bands & RSI")
     else:
         set_strategy_name("MACD & Fibonacci")
         
-    await db_status_check()
+    await db_status_check(db_status)
 
     try:
         # Create AsyncClient instance
