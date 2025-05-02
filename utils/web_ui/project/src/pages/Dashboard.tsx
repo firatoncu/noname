@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { PositionCard } from '../components/PositionCard';
 import { WalletCard } from '../components/WalletCard';
 import { HistoricalPositions } from '../components/HistoricalPositions';
 import { Position, TradingConditions, WalletInfo, HistoricalPosition } from '../types';
-import { LayoutDashboard, Moon, Sun, BarChart } from 'lucide-react';
+import { LayoutDashboard, BarChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const API_BASE_URL = 'http://n0name:8000/api';
 
 function App() {
   const [positions, setPositions] = useState<Position[]>([]);
-  const [conditions, setConditions] = useState<TradingConditions[]>([]);
+  const [, setConditions] = useState<TradingConditions[]>([]);
   const [wallet, setWallet] = useState<WalletInfo>({
     totalBalance: '0',
     availableBalance: '0',
@@ -20,7 +20,7 @@ function App() {
     marginRatio: '0',
   });
   const [historicalPositions, setHistoricalPositions] = useState<HistoricalPosition[]>([]);
-  const [selectedSymbol, setSelectedSymbol] = useState<string>('all');
+  const [selectedSymbol, ] = useState<string>('all');
   const [apiError, setApiError] = useState(false);
   const isDarkMode = true;
 
@@ -85,7 +85,6 @@ function App() {
     ? positions 
     : positions.filter(p => p.symbol === selectedSymbol);
 
-  const symbols = ['all', ...Array.from(new Set(positions.map(p => p.symbol)))];
 
   const PRICE_PRECISION: { [key: string]: number } = {
     'BTCUSDT': 2,

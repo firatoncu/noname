@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Position } from '../types';
 import { DollarSign, TrendingUp, TrendingDown, LineChart } from 'lucide-react';
@@ -79,6 +78,12 @@ export function PositionCard({ position, pricePrecision, isDarkMode }: PositionC
           </span>
         </div>
         <div className="flex flex-col">
+          <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>P&L (&)</span>
+          <span className={`font-semibold ${pnl > 0 ? 'text-green-500' : 'text-red-500'}`}>
+            ${(pnl / parseFloat(position.notional) * 500).toFixed(2)}%
+          </span>
+        </div>
+        <div className="flex flex-col">
           <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Entry Price</span>
           <span className={`font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
             ${entryPrice.toFixed(pricePrecision)}
@@ -90,13 +95,14 @@ export function PositionCard({ position, pricePrecision, isDarkMode }: PositionC
             ${parseFloat(position.markPrice).toFixed(pricePrecision)}
           </span>
         </div>
-        <div className="flex flex-col">
-          <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Take Profit</span>
-          <span className="font-semibold text-green-500">${takeProfit}</span>
-        </div>
+
       </div>
       
       <div className={`flex items-center justify-between pt-2 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div className="flex  items-center">
+          <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mr-2`}>Take Profit </span>
+          <span className="font-semibold text-green-500">${takeProfit}</span>
+        </div>
         <div className="flex items-center">
           <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mr-2`}>Stop Loss</span>
           <span className="font-semibold text-red-500">${stopLoss}</span>
