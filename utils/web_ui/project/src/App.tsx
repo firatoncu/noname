@@ -1,15 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
+import { useTheme } from './contexts/ThemeContext';
 
 function App() {
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+  const { isDarkMode } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gray-900 transition-colors duration-200">
-      <Outlet context={{ isDarkMode: true }} />
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} transition-colors duration-200`}>
+      <Outlet context={{ isDarkMode }} />
     </div>
   );
 }

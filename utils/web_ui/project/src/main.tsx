@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import PositionChart from './pages/PositionChart';
 import TradingConditionsPage from './pages/TradingConditionsPage';
 import TradingConditionChart from './pages/TradingConditionChart';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -39,6 +40,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </StrictMode>
 );

@@ -40,23 +40,39 @@ async def get_trading_conditions_ui(symbols):
 
 async def get_current_position_ui(client):
     if await client.futures_position_information():
-        position = await client.futures_position_information()
-        pos = position[0]
-
-        current_position = [{
-                'symbol': pos['symbol'],
-                'positionAmt': pos['positionAmt'],
-                'notional': pos['notional'],
-                'unRealizedProfit': pos['unRealizedProfit'],
-                'entryPrice': pos['entryPrice'],
-                'markPrice': pos['markPrice'],
-                'entryTime': unix_milliseconds_to_datetime(pos['updateTime']),
-            }]
+        positions = await client.futures_position_information()
+        current_positions = []
         
+        for pos in positions:
+            # Only include positions with non-zero amount
+            if float(pos['positionAmt']) != 0:
+                # Get open orders for this symbol
+                open_orders = await client.futures_get_open_orders(symbol=pos['symbol'])
+                take_profit_price = None
+                stop_loss_price = None
+
+                # Find TP/SL orders
+                for order in open_orders:
+                    if order['type'] == 'TAKE_PROFIT_MARKET':
+                        take_profit_price = order['stopPrice']
+                    elif order['type'] == 'STOP_MARKET':
+                        stop_loss_price = order['stopPrice']
+
+                current_positions.append({
+                    'symbol': pos['symbol'],
+                    'positionAmt': pos['positionAmt'],
+                    'notional': pos['notional'],
+                    'unRealizedProfit': pos['unRealizedProfit'],
+                    'entryPrice': pos['entryPrice'],
+                    'markPrice': pos['markPrice'],
+                    'entryTime': unix_milliseconds_to_datetime(pos['updateTime']),
+                    'takeProfitPrice': take_profit_price,
+                    'stopLossPrice': stop_loss_price
+                })
+        
+        return current_positions
     else:
-        current_position = []
-    
-    return current_position
+        return []
 
 
 # Your data structure
