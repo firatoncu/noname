@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, TrendingUp, TrendingDown, LineChart, X, Target, AlertCircle } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, LineChart, X, Target, AlertCircle, Clock } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface PositionCardProps {
@@ -24,6 +24,7 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
     const [isClosing, setIsClosing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showTPSLDialog, setShowTPSLDialog] = useState(false);
+    const [showCloseConfirm, setShowCloseConfirm] = useState(false);
     const [tpPercentage, setTpPercentage] = useState('');
     const [slPercentage, setSlPercentage] = useState('');
     const [tpPrice, setTpPrice] = useState('');
@@ -48,6 +49,7 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
             if (data.error) {
                 setError(data.error);
             }
+            setShowCloseConfirm(false);
         } catch (error) {
             console.error('Error closing position:', error);
             setError(error instanceof Error ? error.message : 'Failed to close position');
@@ -198,6 +200,21 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
                             ${Math.abs(parseFloat(position.notional)).toFixed(2)}
                         </span>
                     </div>
+                    {/* Opened Time */}
+                    <div className="flex items-center space-x-2 bg-opacity-10 px-3 py-1.5 rounded-md ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}">
+                        <Clock className={`w-4 h-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'}`} />
+                        <div className="flex flex-col">
+                            <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Opened</span>
+                            <span className={`text-sm font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+                                {new Date(position.entryTime).toLocaleString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex items-center space-x-2">
                     <button
@@ -210,7 +227,7 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
                         <span>Set TP/SL</span>
                     </button>
                     <button
-                        onClick={handleClosePosition}
+                        onClick={() => setShowCloseConfirm(true)}
                         disabled={isClosing}
                         className={`flex items-center space-x-1 px-3 py-1 rounded-md 
                             ${isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white`}
@@ -260,6 +277,8 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
                         ${parseFloat(position.markPrice).toFixed(2)}
                     </span>
                 </div>
+
+
             </div>
 
             {/* Market TP/SL Section */}
@@ -443,6 +462,38 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
                                 className={`px-4 py-2 rounded-md ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white text-sm font-medium`}
                             >
                                 {isSettingTPSL ? 'Setting...' : 'Set TP/SL'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Close Position Confirmation Dialog */}
+            {showCloseConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} w-96`}>
+                        <div className="flex items-center space-x-3 mb-4">
+                            <AlertCircle className={`w-6 h-6 ${isDarkMode ? 'text-red-400' : 'text-red-500'}`} />
+                            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                Close Position
+                            </h3>
+                        </div>
+                        <p className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                            Are you sure you want to close your {position.symbol} {isLong ? 'LONG' : 'SHORT'} position?
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowCloseConfirm(false)}
+                                className={`px-4 py-2 rounded-md ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} text-sm font-medium`}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleClosePosition}
+                                disabled={isClosing}
+                                className={`px-4 py-2 rounded-md ${isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white text-sm font-medium`}
+                            >
+                                {isClosing ? 'Closing...' : 'Close Position'}
                             </button>
                         </div>
                     </div>
