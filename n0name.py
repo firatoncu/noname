@@ -88,4 +88,3 @@ async def main():
 # Entry point to run the async application
 if __name__ == "__main__":
     asyncio.run(main())
-    """ """
