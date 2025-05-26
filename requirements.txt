@@ -7,3 +7,10 @@ colorama
 pydantic>=2.0.0
 python-dotenv
 watchdog
+# Async optimization dependencies
+aiohttp>=3.8.0
+aiofiles>=23.0.0
+uvloop>=0.17.0  # For better async performance on Unix systems
+aiodns>=3.0.0  # For faster DNS resolution
+cchardet>=2.1.7  # For faster charset detection
+brotlipy>=0.7.0  # For Brotli compression support
