@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import PositionChart from './pages/PositionChart';
 import TradingConditionsPage from './pages/TradingConditionsPage';
 import TradingConditionChart from './pages/TradingConditionChart';
-import { ThemeProvider } from './contexts/ThemeContext';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -19,16 +18,28 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
+        path: "/trading-conditions",
+        element: <TradingConditionsPage />,
+      },
+      {
+        path: "/positions",
+        element: <Dashboard />, // For now, redirect to dashboard
+      },
+      {
+        path: "/wallet",
+        element: <Dashboard />, // For now, redirect to dashboard
+      },
+      {
+        path: "/history",
+        element: <Dashboard />, // For now, redirect to dashboard
+      },
+      {
         path: "/position/:id",
         element: <PositionChart />,
       },
       {
         path: "/position/current/:symbol",
         element: <PositionChart />,
-      },
-      {
-        path: "/trading-conditions",
-        element: <TradingConditionsPage />,
       },
       {
         path: "/trading-conditions/chart/:symbol",
@@ -40,8 +51,6 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <RouterProvider router={router} />
   </StrictMode>
 );

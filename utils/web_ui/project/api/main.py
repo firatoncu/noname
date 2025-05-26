@@ -1,16 +1,54 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Literal, Optional
+from typing import List, Dict, Literal, Optional, Set
 import uvicorn
 from utils.web_ui.update_web_ui import get_trading_conditions_ui, get_current_position_ui, get_last_5_positions, get_wallet_info
 import asyncio
+import json
 from binance.enums import SIDE_BUY, SIDE_SELL, ORDER_TYPE_MARKET, ORDER_TYPE_LIMIT, TIME_IN_FORCE_GTC
 import os
 
 # Define order types for Futures
 ORDER_TYPE_TAKE_PROFIT_MARKET = 'TAKE_PROFIT_MARKET'
 ORDER_TYPE_STOP_MARKET = 'STOP_MARKET'
+
+# WebSocket connection manager
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Set[WebSocket] = set()
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.add(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.discard(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        try:
+            await websocket.send_text(message)
+        except:
+            self.disconnect(websocket)
+
+    async def broadcast(self, message: dict):
+        if not self.active_connections:
+            return
+            
+        message_str = json.dumps(message)
+        disconnected = set()
+        
+        for connection in self.active_connections:
+            try:
+                await connection.send_text(message_str)
+            except:
+                disconnected.add(connection)
+        
+        # Remove disconnected connections
+        for connection in disconnected:
+            self.disconnect(connection)
+
+manager = ConnectionManager()
 
 # Define data models for the API responses
 class Position(BaseModel):
@@ -264,13 +302,90 @@ async def close_limit_orders(symbol: str, order_type: Optional[str] = None):
         print(f"Error in close_limit_orders: {e}")
         return {"error": str(e)}
 
-# Update UI values
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        # Send initial data
+        await websocket.send_text(json.dumps({
+            "type": "positions_update",
+            "data": [pos.dict() if hasattr(pos, 'dict') else pos for pos in current_positions]
+        }))
+        await websocket.send_text(json.dumps({
+            "type": "trading_conditions_update", 
+            "data": [cond.dict() if hasattr(cond, 'dict') else cond for cond in trading_conditions]
+        }))
+        await websocket.send_text(json.dumps({
+            "type": "wallet_update",
+            "data": wallet_info
+        }))
+        
+        while True:
+            # Keep connection alive and handle incoming messages
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Handle different message types
+                if message.get("type") == "refresh_data":
+                    # Send current data
+                    await websocket.send_text(json.dumps({
+                        "type": "positions_update",
+                        "data": [pos.dict() if hasattr(pos, 'dict') else pos for pos in current_positions]
+                    }))
+                    await websocket.send_text(json.dumps({
+                        "type": "trading_conditions_update",
+                        "data": [cond.dict() if hasattr(cond, 'dict') else cond for cond in trading_conditions]
+                    }))
+                    await websocket.send_text(json.dumps({
+                        "type": "wallet_update",
+                        "data": wallet_info
+                    }))
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                await websocket.send_text(json.dumps({
+                    "type": "error",
+                    "data": {"message": str(e)}
+                }))
+                
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+# Update UI values with WebSocket broadcasting
 async def update_ui_values(new_positions, new_conditions, new_wallet, new_historical):
     global current_positions, trading_conditions, wallet_info, historical_positions
+    
+    # Check if data has changed before broadcasting
+    positions_changed = current_positions != new_positions
+    conditions_changed = trading_conditions != new_conditions
+    wallet_changed = wallet_info != new_wallet
+    
+    # Update global variables
     wallet_info = new_wallet
     historical_positions = new_historical
     current_positions = new_positions
     trading_conditions = new_conditions
+    
+    # Broadcast updates via WebSocket
+    if positions_changed:
+        await manager.broadcast({
+            "type": "positions_update",
+            "data": [pos.dict() if hasattr(pos, 'dict') else pos for pos in current_positions]
+        })
+    
+    if conditions_changed:
+        await manager.broadcast({
+            "type": "trading_conditions_update",
+            "data": [cond.dict() if hasattr(cond, 'dict') else cond for cond in trading_conditions]
+        })
+    
+    if wallet_changed:
+        await manager.broadcast({
+            "type": "wallet_update",
+            "data": wallet_info
+        })
 
 # Updater loop
 async def update_ui(symbols, client):
