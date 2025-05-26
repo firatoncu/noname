@@ -4,3 +4,6 @@ pandas
 ta
 asyncio
 colorama
+pydantic>=2.0.0
+python-dotenv
+watchdog
