@@ -5,8 +5,7 @@ import { HistoricalPositions } from '../components/HistoricalPositions';
 import { Position, TradingConditions, WalletInfo, HistoricalPosition } from '../types';
 import { LayoutDashboard, BarChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const API_BASE_URL = 'http://n0name:8000/api';
+import { createApiUrl, API_ENDPOINTS } from '../config/api';
 
 function App() {
   const [positions, setPositions] = useState<Position[]>([]);
@@ -31,10 +30,10 @@ function App() {
   const fetchData = async () => {
     try {
       const responses = await Promise.all([
-        fetch(`${API_BASE_URL}/positions`),
-        fetch(`${API_BASE_URL}/trading-conditions`),
-        fetch(`${API_BASE_URL}/wallet`),
-        fetch(`${API_BASE_URL}/historical-positions`)
+        fetch(createApiUrl(API_ENDPOINTS.POSITIONS)),
+        fetch(createApiUrl(API_ENDPOINTS.TRADING_CONDITIONS)),
+        fetch(createApiUrl(API_ENDPOINTS.WALLET)),
+        fetch(createApiUrl(API_ENDPOINTS.HISTORICAL_POSITIONS))
       ]);
 
       const [positionsRes, conditionsRes, walletRes, historicalRes] = responses;

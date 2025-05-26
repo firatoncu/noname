@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TradingConditions } from '../types';
 import { LayoutDashboard, Moon, Sun, ChevronLeft, CheckCircle, XCircle, Clock, BarChart, LineChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const API_BASE_URL = 'http://n0name:8000/api';
+import { createApiUrl, API_ENDPOINTS } from '../config/api';
 
 interface ConditionProps {
   label: string;
@@ -127,7 +126,7 @@ function TradingConditionsPage() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/trading-conditions`);
+      const response = await fetch(createApiUrl(API_ENDPOINTS.TRADING_CONDITIONS));
       
       if (!response.ok) {
         throw new Error('API response not ok');

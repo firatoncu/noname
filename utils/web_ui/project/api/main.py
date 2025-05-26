@@ -6,6 +6,7 @@ import uvicorn
 from utils.web_ui.update_web_ui import get_trading_conditions_ui, get_current_position_ui, get_last_5_positions, get_wallet_info
 import asyncio
 from binance.enums import SIDE_BUY, SIDE_SELL, ORDER_TYPE_MARKET, ORDER_TYPE_LIMIT, TIME_IN_FORCE_GTC
+import os
 
 # Define order types for Futures
 ORDER_TYPE_TAKE_PROFIT_MARKET = 'TAKE_PROFIT_MARKET'
@@ -73,7 +74,12 @@ binance_client = None  # Initialize client as None
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:80", "http://n0name"],  # Adjust for your frontend
+    allow_origins=[
+        "https://localhost:5173",
+        "http://localhost:5173",
+        "https://127.0.0.1:5173",
+        "http://127.0.0.1:5173"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -286,15 +292,38 @@ async def update_ui(symbols, client):
             print(f"Error in update_ui: {e}")  # Replace with proper logging if needed
         await asyncio.sleep(1)  # Wait before retrying
 
-# Uvicorn server setup
+# Uvicorn server setup with HTTPS support
 def run_uvicorn():
-    config = uvicorn.Config(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        log_level="error",
-        loop="asyncio"
-    )
+    # Path to SSL certificates
+    cert_dir = os.path.join(os.path.dirname(__file__), '..', 'certs')
+    cert_file = os.path.join(cert_dir, 'localhost-cert.pem')
+    key_file = os.path.join(cert_dir, 'localhost-key.pem')
+    
+    # Check if SSL certificates exist
+    use_ssl = os.path.exists(cert_file) and os.path.exists(key_file)
+    
+    if use_ssl:
+        config = uvicorn.Config(
+            app,
+            host="localhost",
+            port=8000,
+            log_level="error",
+            loop="asyncio",
+            ssl_keyfile=key_file,
+            ssl_certfile=cert_file
+        )
+        print("🔐 Starting HTTPS server on https://localhost:8000")
+    else:
+        config = uvicorn.Config(
+            app,
+            host="localhost",
+            port=8000,
+            log_level="error",
+            loop="asyncio"
+        )
+        print("⚠️  SSL certificates not found. Starting HTTP server on http://localhost:8000")
+        print("💡 Run: python utils/web_ui/generate_certificates.py to enable HTTPS")
+    
     return uvicorn.Server(config)
 
 async def start_server_and_updater(symbols, client):

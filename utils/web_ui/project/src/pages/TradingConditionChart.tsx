@@ -2,8 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
-const API_BASE_URL = 'http://n0name:8000/api';
-
 function TradingConditionChart() {
   const { symbol } = useParams<{ symbol: string }>();
   const containerRef = useRef<HTMLDivElement>(null);

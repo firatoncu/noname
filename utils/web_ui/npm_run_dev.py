@@ -23,8 +23,10 @@ async def run_npm_dev():
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        webbrowser.open("http://n0name")
-        logger.info("Started npm run dev")
+        
+        # Open localhost URL instead of custom domain
+        webbrowser.open("https://localhost:5173")
+        logger.info("Started npm run dev - Opening https://localhost:5173")
         return process
 
     except Exception as e:

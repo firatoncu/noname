@@ -26,7 +26,6 @@ from utils.web_ui.project.api.main import start_server_and_updater
 from utils.web_ui.npm_run_dev import start_frontend
 from src.check_trending import check_trend  
 from utils.influxdb.db_status_check import db_status_check
-from utils.web_ui.modify_hosts import add_to_hosts
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
@@ -60,8 +59,6 @@ async def main():
         # Create AsyncClient instance
         client = await AsyncClient.create(api_key, api_secret)
 
-        add_to_hosts("n0name", ip="127.0.0.1")
-        
         # Perform initial adjustments asynchronously
         await initial_adjustments(leverage, symbols, capital_tbu, client, logger)
 
