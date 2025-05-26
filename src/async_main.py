@@ -32,6 +32,10 @@ from utils.async_signal_manager import (
     initialize_async_signal_manager, cleanup_async_signal_manager,
     get_async_signal_manager
 )
+from utils.client_manager import (
+    ClientManager, ClientConfig, initialize_client_manager, 
+    get_client_manager, cleanup_client_manager
+)
 
 # Import existing modules
 from utils.config_loader import load_config
@@ -57,6 +61,7 @@ class AsyncTradingApplication:
         self.task_manager = None
         self.shutdown_event = asyncio.Event()
         self.running_tasks: List[asyncio.Task] = []
+        self.client_manager = None
     
     async def initialize(self):
         """Initialize all application components asynchronously."""
@@ -83,7 +88,7 @@ class AsyncTradingApplication:
             if self.config.get('db_status', False):
                 await self._initialize_influxdb()
             
-            # Initialize Binance client
+            # Initialize Binance client manager
             await self._initialize_binance_client()
             
             # Set up signal handlers for graceful shutdown
@@ -113,10 +118,11 @@ class AsyncTradingApplication:
             self.influxdb_client = None
     
     async def _initialize_binance_client(self):
-        """Initialize Binance client asynchronously."""
+        """Initialize Binance client manager asynchronously."""
         try:
             api_keys = self.config['api_keys']
             
+            # Configure Binance client
             binance_config = BinanceConfig(
                 api_key=api_keys['api_key'],
                 api_secret=api_keys['api_secret'],
@@ -128,13 +134,40 @@ class AsyncTradingApplication:
                 max_order_requests_per_second=5
             )
             
-            self.binance_client = initialize_binance_client(binance_config)
-            await self.binance_client.connect()
+            # Configure client manager for robust connection handling
+            client_config = ClientConfig(
+                min_connections=2,
+                max_connections=8,
+                health_check_interval=30.0,
+                health_check_timeout=10.0,
+                max_health_check_failures=3,
+                enable_fallback_endpoints=True,
+                enable_adaptive_scaling=True,
+                enable_connection_warming=True,
+                fallback_endpoints=[
+                    "https://fapi.binance.com",
+                    "https://fapi1.binance.com", 
+                    "https://fapi2.binance.com"
+                ]
+            )
             
-            logger.info("Binance client initialized successfully")
+            # Initialize and start client manager
+            self.client_manager = initialize_client_manager(binance_config, client_config)
+            await self.client_manager.start()
+            
+            # Keep reference to old interface for compatibility
+            self.binance_client = get_client_manager()
+            
+            logger.info("Binance ClientManager initialized successfully")
+            
+            # Log initial metrics
+            metrics = self.client_manager.get_metrics()
+            health_status = self.client_manager.get_health_status()
+            logger.info(f"ClientManager health: {health_status.value}")
+            logger.info(f"Active connections: {metrics['connection_metrics']['active_connections']}")
             
         except Exception as e:
-            logger.error(f"Failed to initialize Binance client: {e}")
+            logger.error(f"Failed to initialize Binance ClientManager: {e}")
             raise
     
     def _setup_signal_handlers(self):
@@ -209,23 +242,25 @@ class AsyncTradingApplication:
             logger.warning(f"Failed to add host entry: {e}")
     
     async def _set_leverage_for_symbols(self):
-        """Set leverage for all symbols concurrently."""
+        """Set leverage for all symbols concurrently using ClientManager."""
         try:
             symbols = self.config['symbols']['symbols']
             leverage = self.config['symbols']['leverage']
             
-            # Create batch requests for setting leverage
-            batch_requests = []
-            for symbol in symbols:
-                batch_requests.append({
-                    'method': 'POST',
-                    'endpoint': '/fapi/v1/leverage',
-                    'params': {'symbol': symbol, 'leverage': leverage},
-                    'signed': True
-                })
-            
-            # Execute batch requests
-            results = await self.binance_client.batch_request(batch_requests)
+            # Use client manager for robust connection handling
+            async with self.client_manager.get_client() as client:
+                # Create batch requests for setting leverage
+                batch_requests = []
+                for symbol in symbols:
+                    batch_requests.append({
+                        'method': 'POST',
+                        'endpoint': '/fapi/v1/leverage',
+                        'params': {'symbol': symbol, 'leverage': leverage},
+                        'signed': True
+                    })
+                
+                # Execute batch requests
+                results = await client.batch_request(batch_requests)
             
             logger.info(f"Leverage set to {leverage} for {len(symbols)} symbols")
             
@@ -331,70 +366,128 @@ class AsyncTradingApplication:
                 await asyncio.sleep(5)
     
     async def _process_symbol_positions(self, symbol: str, max_positions: int, leverage: int):
-        """Process positions for a single symbol."""
+        """Process positions for a specific symbol using ClientManager."""
         try:
-            # Get current position
-            positions = await self.binance_client.get_position_info(symbol)
-            
-            # Get trading signals
-            signals = await self.signal_manager.get_all_active_signals_async(symbol)
-            
-            # Process position logic here
-            # This would include your existing position management logic
-            # but optimized for async operations
-            
-            # Example: Check for buy/sell signals and execute orders
-            if signals:
-                await self._execute_signal_based_orders(symbol, signals, positions)
-            
+            async with self.client_manager.get_client() as client:
+                # Get current positions
+                positions = await client.get_position_info(symbol)
+                
+                # Get pending signals for this symbol
+                signals = await self.signal_manager.get_pending_signals_async(symbol)
+                
+                if signals:
+                    await self._execute_signal_based_orders(symbol, signals, positions, client)
+                
+                # Control existing positions
+                await self._control_existing_positions(symbol, positions, client)
+                
         except Exception as e:
             logger.error(f"Error processing positions for {symbol}: {e}")
-            raise
     
-    async def _execute_signal_based_orders(self, symbol: str, signals: Dict, positions: List[Dict]):
-        """Execute orders based on signals."""
+    async def _execute_signal_based_orders(self, symbol: str, signals: Dict, positions: List[Dict], client):
+        """Execute orders based on signals using provided client."""
         try:
-            # This is a simplified example - implement your actual trading logic
-            from utils.async_binance_client import RequestType
+            # Check if we can open new positions
+            open_positions = [p for p in positions if float(p['positionAmt']) != 0]
             
-            buy_signal = signals.get('BUY')
-            sell_signal = signals.get('SELL')
+            if len(open_positions) >= self.config['symbols']['max_open_positions']:
+                logger.info(f"Max positions reached for {symbol}, skipping new orders")
+                return
             
-            if buy_signal and buy_signal.value > 0:
-                # Execute buy order
-                order_result = await self.binance_client.create_order(
-                    symbol=symbol,
-                    side='BUY',
-                    order_type='MARKET',
-                    quantity=0.001  # Calculate appropriate quantity
-                )
+            # Process each signal
+            for signal_id, signal_data in signals.items():
+                try:
+                    # Determine order parameters
+                    side = 'BUY' if signal_data['action'] == 'long' else 'SELL'
+                    quantity = await self._calculate_position_size(symbol, signal_data, client)
+                    
+                    if quantity > 0:
+                        # Create market order
+                        order_result = await client.create_order(
+                            symbol=symbol,
+                            side=side,
+                            order_type='MARKET',
+                            quantity=quantity,
+                            reduce_only=False
+                        )
+                        
+                        logger.info(f"Order executed for {symbol}: {order_result['orderId']}")
+                        
+                        # Mark signal as processed
+                        await self.signal_manager.mark_signal_processed_async(signal_id)
+                        
+                        # Store order in InfluxDB if available
+                        if self.influxdb_client:
+                            await self._store_order_metrics(symbol, order_result, signal_data)
                 
-                logger.info(f"Buy order executed for {symbol}: {order_result}")
+                except Exception as e:
+                    logger.error(f"Failed to execute order for signal {signal_id}: {e}")
+                    
+        except Exception as e:
+            logger.error(f"Error executing signal-based orders for {symbol}: {e}")
+    
+    async def _control_existing_positions(self, symbol: str, positions: List[Dict], client):
+        """Control existing positions using provided client."""
+        try:
+            for position in positions:
+                position_amt = float(position['positionAmt'])
                 
-                # Confirm signal
-                await self.signal_manager.confirm_signal_async(
-                    symbol, buy_signal.signal_type, "Order executed"
-                )
+                if position_amt != 0:
+                    # Check if position should be closed based on PnL or other criteria
+                    unrealized_pnl = float(position['unRealizedProfit'])
+                    
+                    # Simple PnL-based exit (customize as needed)
+                    if unrealized_pnl < -100:  # Close if loss > $100
+                        await self._close_position(symbol, position, client)
+                    elif unrealized_pnl > 200:  # Close if profit > $200
+                        await self._close_position(symbol, position, client)
+                        
+        except Exception as e:
+            logger.error(f"Error controlling positions for {symbol}: {e}")
+    
+    async def _close_position(self, symbol: str, position: Dict, client):
+        """Close a position using provided client."""
+        try:
+            position_amt = float(position['positionAmt'])
+            side = 'SELL' if position_amt > 0 else 'BUY'
+            quantity = abs(position_amt)
             
-            elif sell_signal and sell_signal.value > 0:
-                # Execute sell order
-                order_result = await self.binance_client.create_order(
-                    symbol=symbol,
-                    side='SELL',
-                    order_type='MARKET',
-                    quantity=0.001  # Calculate appropriate quantity
-                )
-                
-                logger.info(f"Sell order executed for {symbol}: {order_result}")
-                
-                # Confirm signal
-                await self.signal_manager.confirm_signal_async(
-                    symbol, sell_signal.signal_type, "Order executed"
-                )
+            order_result = await client.create_order(
+                symbol=symbol,
+                side=side,
+                order_type='MARKET',
+                quantity=quantity,
+                reduce_only=True
+            )
+            
+            logger.info(f"Position closed for {symbol}: {order_result['orderId']}")
             
         except Exception as e:
-            logger.error(f"Error executing orders for {symbol}: {e}")
-            raise
+            logger.error(f"Failed to close position for {symbol}: {e}")
+    
+    async def _calculate_position_size(self, symbol: str, signal_data: Dict, client) -> float:
+        """Calculate position size based on account balance and risk management."""
+        try:
+            # Get account information
+            account_info = await client.get_account_info()
+            available_balance = float(account_info['availableBalance'])
+            
+            # Use 1% of available balance per trade (customize as needed)
+            risk_amount = available_balance * 0.01
+            
+            # Get current price
+            ticker = await client.get_ticker_price(symbol)
+            current_price = float(ticker['price'])
+            
+            # Calculate quantity based on risk amount
+            quantity = risk_amount / current_price
+            
+            # Round to appropriate precision (implement precision logic)
+            return round(quantity, 3)  # Simplified rounding
+            
+        except Exception as e:
+            logger.error(f"Error calculating position size for {symbol}: {e}")
+            return 0.0
     
     async def _trend_checking_loop(self, symbols: List[str]):
         """Trend checking loop."""
@@ -420,31 +513,26 @@ class AsyncTradingApplication:
                 await asyncio.sleep(60)
     
     async def _check_symbol_trend(self, symbol: str):
-        """Check trend for a single symbol."""
+        """Check trend for a specific symbol using ClientManager."""
         try:
-            # Get kline data
-            klines = await self.binance_client.get_klines(
-                symbol=symbol,
-                interval='1h',
-                limit=100
-            )
-            
-            # Analyze trend (implement your trend analysis logic)
-            trend_signal = self._analyze_trend(klines)
-            
-            # Create trend signal
-            if trend_signal is not None:
-                await self.signal_manager.create_signal_async(
+            async with self.client_manager.get_client() as client:
+                # Get recent klines
+                klines = await client.get_klines(
                     symbol=symbol,
-                    signal_type='TREND',
-                    value=trend_signal,
-                    confidence=0.7,
-                    source_indicator='trend_analysis'
+                    interval='1h',
+                    limit=50
                 )
-            
+                
+                # Analyze trend
+                is_uptrend = self._analyze_trend(klines)
+                
+                if is_uptrend is not None:
+                    # Store trend data if InfluxDB is available
+                    if self.influxdb_client:
+                        await self._store_trend_data(symbol, is_uptrend, klines[-1])
+                
         except Exception as e:
             logger.error(f"Error checking trend for {symbol}: {e}")
-            raise
     
     def _analyze_trend(self, klines: List[List]) -> Optional[bool]:
         """Analyze trend from kline data."""
@@ -504,26 +592,40 @@ class AsyncTradingApplication:
             logger.error(f"Error during task shutdown: {e}")
     
     async def cleanup(self):
-        """Clean up all resources."""
+        """Cleanup resources."""
+        logger.info("Starting cleanup...")
+        
         try:
-            logger.info("Cleaning up application resources...")
+            # Cancel all running tasks
+            for task in self.running_tasks:
+                if not task.done():
+                    task.cancel()
             
-            # Clean up async utilities
+            # Wait for tasks to complete
+            if self.running_tasks:
+                await asyncio.gather(*self.running_tasks, return_exceptions=True)
+            
+            # Cancel task manager tasks
+            await self.task_manager.cancel_all()
+            
+            # Cleanup ClientManager
+            if hasattr(self, 'client_manager'):
+                await cleanup_client_manager()
+                logger.info("ClientManager cleaned up")
+            
+            # Cleanup InfluxDB
+            if self.influxdb_client:
+                await cleanup_influxdb()
+                logger.info("InfluxDB cleaned up")
+            
+            # Cleanup async utilities
             await cleanup_async_utils()
-            
-            # Clean up Binance client
-            await cleanup_binance_client()
-            
-            # Clean up InfluxDB
-            await cleanup_influxdb()
-            
-            # Clean up signal manager
-            await cleanup_async_signal_manager()
-            
-            logger.info("Application cleanup completed")
+            logger.info("Async utilities cleaned up")
             
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
+        finally:
+            logger.info("Cleanup completed")
 
 
 async def main():
