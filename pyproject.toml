@@ -58,12 +58,27 @@ dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.0.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.3.0",
+    "pytest-html>=4.0.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-timeout>=2.1.0",
+    "pytest-randomly>=3.12.0",
+    "pytest-sugar>=0.9.7",
     "black>=23.0.0",
     "isort>=5.12.0",
     "mypy>=1.0.0",
     "flake8>=6.0.0",
     "pre-commit>=3.0.0",
     "ruff>=0.1.0",
+    "factory-boy>=3.3.0",
+    "freezegun>=1.2.0",
+    "responses>=0.24.0",
+    "aioresponses>=0.7.4",
+    "httpx>=0.25.0",
+    "faker>=20.0.0",
+    "coverage[toml]>=7.0.0",
+    "tox>=4.0.0",
 ]
 performance = [
     "cython>=3.0.0",
@@ -146,7 +161,20 @@ ignore_missing_imports = true
 # Pytest configuration
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q --strict-markers --strict-config"
+addopts = [
+    "-ra",
+    "-q",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml",
+    "--cov-fail-under=80",
+    "--tb=short",
+    "--maxfail=5",
+    "--durations=10",
+]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
@@ -155,6 +183,20 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "smoke: marks tests as smoke tests for quick validation",
+    "regression: marks tests as regression tests",
+    "performance: marks tests as performance tests",
+    "security: marks tests as security tests",
+    "api: marks tests that require API access",
+    "database: marks tests that require database access",
+    "websocket: marks tests that require websocket connections",
+    "mock: marks tests that use extensive mocking",
+]
+asyncio_mode = "auto"
+timeout = 300
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
 ]
 
 # Coverage configuration
@@ -164,7 +206,17 @@ omit = [
     "*/tests/*",
     "*/test_*",
     "*/__pycache__/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/virtualenv/*",
+    "*/site-packages/*",
+    "*/build/*",
+    "*/dist/*",
+    "*/examples/*",
+    "*/scripts/*",
 ]
+branch = true
+parallel = true
 
 [tool.coverage.report]
 exclude_lines = [
@@ -178,7 +230,22 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
+    "except ImportError:",
+    "except ModuleNotFoundError:",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.",
 ]
+show_missing = true
+skip_covered = false
+precision = 2
+sort = "Cover"
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "n0name Trading Bot Test Coverage"
+
+[tool.coverage.xml]
+output = "coverage.xml"
 
 # Ruff configuration
 [tool.ruff]
