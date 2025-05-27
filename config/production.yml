@@ -1,0 +1,282 @@
+# n0name Trading Bot - Production Configuration
+# Optimized for production deployment with security and performance focus
+
+# Application environment
+environment: production
+debug: false
+version: "2.0.0"
+
+# Core trading configuration
+trading:
+  # Initial capital for trading
+  capital: ${TRADING_CAPITAL:50000.0}
+  
+  # Leverage multiplier
+  leverage: ${TRADING_LEVERAGE:3}
+  
+  # Trading symbols
+  symbols:
+    - "BTCUSDT"
+    - "ETHUSDT"
+    - "ADAUSDT"
+    - "DOTUSDT"
+    - "BNBUSDT"
+    - "SOLUSDT"
+    - "AVAXUSDT"
+    - "MATICUSDT"
+    - "LINKUSDT"
+    - "UNIUSDT"
+    - "LTCUSDT"
+    - "XRPUSDT"
+  
+  # Disable paper trading in production
+  paper_trading: false
+  
+  # Auto-start trading
+  auto_start: true
+  
+  # Strategy configuration
+  strategy:
+    name: "macd_fibonacci_strategy"
+    type: "macd_fibonacci"
+    enabled: true
+    symbols: []  # Use trading.symbols
+    timeframe: "1m"
+    lookback_period: 500
+    parameters:
+      # MACD parameters
+      macd_fast: 12
+      macd_slow: 26
+      macd_signal: 9
+      histogram_percentile: 85
+      
+      # Fibonacci parameters
+      fib_levels: [0.236, 0.382, 0.618, 0.786]
+      price_gap_threshold: 0.01
+      wave_completion_threshold: 0.6
+      
+      # Signal confirmation
+      require_volume_confirmation: true
+      min_volume_ratio: 1.2
+  
+  # Risk management configuration
+  risk:
+    max_position_size: 0.08  # 8% per position
+    max_daily_loss: 0.03     # 3% daily loss limit
+    max_drawdown: 0.15       # 15% max drawdown
+    risk_per_trade: 0.015    # 1.5% risk per trade
+    max_open_positions: 8
+    stop_loss_percentage: 0.085  # 8.5% hard stop loss
+    soft_stop_loss_percentage: 0.05  # 5% soft stop loss
+    take_profit_ratio: 1.5   # 1.5% take profit
+    position_sizing_method: "dynamic_capital"
+
+# Exchange configuration
+exchange:
+  type: "binance"
+  api_key: "${BINANCE_API_KEY}"
+  api_secret: "${BINANCE_API_SECRET}"
+  testnet: false
+  sandbox: false
+  rate_limit: 1200
+  timeout: 30
+  retry_attempts: 5
+  retry_delay: 2.0
+  
+  # Connection pool settings
+  max_connections: 20
+  keepalive_timeout: 30
+
+# Database configuration
+database:
+  type: "postgresql"
+  url: "${DATABASE_URL}"
+  pool_size: 20
+  max_overflow: 30
+  pool_timeout: 30
+  pool_recycle: 3600
+  echo: false
+  
+  # Connection retry settings
+  retry_attempts: 3
+  retry_delay: 5
+
+# Cache configuration
+cache:
+  type: "redis"
+  url: "${REDIS_URL}"
+  max_connections: 20
+  timeout: 10
+  default_ttl: 1800  # 30 minutes
+  
+  # Redis-specific settings
+  socket_keepalive: true
+  socket_keepalive_options: {}
+  health_check_interval: 30
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # File logging
+  file_path: "/app/logs/trading_bot.log"
+  max_file_size: 52428800  # 50MB
+  backup_count: 10
+  
+  # Console output
+  console_output: true
+  
+  # Structured logging
+  structured_logging: true
+  
+  # Log to database for analysis
+  log_to_database: true
+  
+  # Performance logging
+  log_performance_metrics: true
+  performance_log_interval: 300  # 5 minutes
+
+# Security configuration
+security:
+  encryption_enabled: true
+  api_key_encryption: true
+  database_encryption: true
+  ssl_verify: true
+  rate_limiting: true
+  
+  # IP whitelist for API access
+  ip_whitelist: []
+  
+  # Session settings
+  session_timeout: 1800  # 30 minutes
+  max_login_attempts: 3
+  
+  # API security
+  api_rate_limit: 100  # requests per minute per IP
+  require_api_key: true
+
+# Notification configuration
+notifications:
+  enabled: true
+  types:
+    - "email"
+    - "telegram"
+  
+  # Email settings
+  email:
+    smtp_server: "${EMAIL_SMTP_SERVER}"
+    smtp_port: ${EMAIL_SMTP_PORT:587}
+    username: "${EMAIL_USERNAME}"
+    password: "${EMAIL_PASSWORD}"
+    from_address: "${EMAIL_FROM}"
+    to_addresses:
+      - "${EMAIL_TO}"
+    use_tls: true
+  
+  # Telegram settings
+  telegram:
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+    
+  # Notification triggers
+  triggers:
+    trade_executed: true
+    position_opened: true
+    position_closed: true
+    stop_loss_triggered: true
+    take_profit_triggered: true
+    error_occurred: true
+    daily_summary: true
+    system_alerts: true
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  metrics_collection: true
+  performance_tracking: true
+  health_checks: true
+  
+  # InfluxDB settings
+  influxdb:
+    url: "${INFLUXDB_URL}"
+    token: "${INFLUXDB_TOKEN}"
+    org: "${INFLUXDB_ORG}"
+    bucket: "${INFLUXDB_BUCKET}"
+    timeout: 10
+    batch_size: 1000
+    flush_interval: 10
+  
+  # Alert thresholds
+  alert_thresholds:
+    cpu_usage: 85.0
+    memory_usage: 90.0
+    error_rate: 2.0
+    latency: 500.0
+    position_count: 12
+    daily_pnl: -1000.0
+    drawdown: 12.0
+    api_errors: 10
+  
+  # Dashboard settings
+  dashboard_port: 8080
+  metrics_retention_days: 90
+  
+  # Health check endpoints
+  health_check_interval: 30
+  health_check_timeout: 10
+
+# Web UI configuration
+web_ui:
+  enabled: true
+  host: "0.0.0.0"
+  port: 3000
+  debug: false
+  auto_reload: false
+  cors_enabled: true
+  cors_origins:
+    - "https://yourdomain.com"
+    - "https://www.yourdomain.com"
+  
+  # Authentication
+  require_auth: true
+  jwt_secret: "${JWT_SECRET}"
+  jwt_expiry: 3600
+
+# Performance optimization
+performance:
+  # Async settings
+  max_workers: 10
+  connection_pool_size: 20
+  
+  # Caching
+  enable_data_caching: true
+  cache_market_data: true
+  cache_ttl: 60
+  
+  # Database optimization
+  use_connection_pooling: true
+  enable_query_caching: true
+  
+  # Memory management
+  gc_threshold: 1000
+  max_memory_usage: 2048  # MB
+
+# Backup configuration
+backup:
+  enabled: true
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention_days: 30
+  backup_database: true
+  backup_logs: true
+  backup_config: true
+  
+  # Storage settings
+  storage_type: "local"  # local, s3, gcs
+  storage_path: "/app/backups"
+
+# Directory settings
+data_directory: "/app/data"
+log_directory: "/app/logs"
+config_directory: "/app/config"
+backup_directory: "/app/backups" 

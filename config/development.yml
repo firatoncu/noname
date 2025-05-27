@@ -1,0 +1,249 @@
+# n0name Trading Bot - Development Configuration
+# Optimized for development with debugging and testing features
+
+# Application environment
+environment: development
+debug: true
+version: "2.0.0"
+
+# Core trading configuration
+trading:
+  # Lower capital for development testing
+  capital: 1000.0
+  
+  # Lower leverage for safety
+  leverage: 1
+  
+  # Limited symbols for faster testing
+  symbols:
+    - "BTCUSDT"
+    - "ETHUSDT"
+    - "ADAUSDT"
+  
+  # Enable paper trading for development
+  paper_trading: true
+  
+  # Manual start for development
+  auto_start: false
+  
+  # Strategy configuration
+  strategy:
+    name: "bollinger_rsi_strategy"
+    type: "bollinger_rsi"
+    enabled: true
+    symbols: []  # Use trading.symbols
+    timeframe: "5m"  # Longer timeframe for development
+    lookback_period: 100  # Shorter for faster testing
+    parameters:
+      # Bollinger Bands parameters
+      bb_period: 20
+      bb_std_dev: 2.0
+      
+      # RSI parameters
+      rsi_period: 14
+      rsi_overbought: 70
+      rsi_oversold: 30
+      
+      # Signal confirmation
+      require_volume_confirmation: false  # Disabled for easier testing
+      min_volume_ratio: 1.0
+  
+  # Risk management configuration
+  risk:
+    max_position_size: 0.2   # 20% for testing
+    max_daily_loss: 0.1      # 10% daily loss limit
+    max_drawdown: 0.3        # 30% max drawdown
+    risk_per_trade: 0.05     # 5% risk per trade
+    max_open_positions: 3
+    stop_loss_percentage: 0.05   # 5% stop loss
+    take_profit_ratio: 1.0       # 1% take profit
+    position_sizing_method: "fixed_percentage"
+
+# Exchange configuration
+exchange:
+  type: "binance"
+  api_key: "${BINANCE_API_KEY}"
+  api_secret: "${BINANCE_API_SECRET}"
+  testnet: true  # Always use testnet in development
+  sandbox: true
+  rate_limit: 600  # Lower rate limit for development
+  timeout: 60      # Longer timeout for debugging
+  retry_attempts: 3
+  retry_delay: 1.0
+
+# Database configuration
+database:
+  type: "sqlite"
+  url: "sqlite:///data/trading_bot_dev.db"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+  echo: true  # Enable SQL logging for debugging
+
+# Cache configuration
+cache:
+  type: "memory"  # Use memory cache for development
+  max_connections: 5
+  timeout: 5
+  default_ttl: 300  # 5 minutes
+
+# Logging configuration
+logging:
+  level: "DEBUG"  # Verbose logging for development
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+  
+  # File logging
+  file_path: "logs/trading_bot_dev.log"
+  max_file_size: 10485760  # 10MB
+  backup_count: 3
+  
+  # Console output
+  console_output: true
+  
+  # Structured logging
+  structured_logging: true
+  
+  # Log to database for development analysis
+  log_to_database: true
+  
+  # Performance logging
+  log_performance_metrics: true
+  performance_log_interval: 60  # 1 minute for development
+
+# Security configuration
+security:
+  encryption_enabled: false  # Disabled for easier development
+  api_key_encryption: false
+  database_encryption: false
+  ssl_verify: false  # Disabled for local development
+  rate_limiting: false
+  
+  # No IP restrictions in development
+  ip_whitelist: []
+  
+  # Session settings
+  session_timeout: 7200  # 2 hours for development
+  max_login_attempts: 10  # More lenient for development
+
+# Notification configuration
+notifications:
+  enabled: false  # Disabled by default in development
+  types: []
+  
+  # Email settings (for testing)
+  email:
+    smtp_server: "localhost"
+    smtp_port: 1025  # Mailhog SMTP port
+    username: ""
+    password: ""
+    from_address: "dev@n0name.local"
+    to_addresses:
+      - "test@n0name.local"
+    use_tls: false
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  metrics_collection: true
+  performance_tracking: true
+  health_checks: true
+  
+  # InfluxDB settings (optional in development)
+  influxdb:
+    url: "http://localhost:8087"
+    token: "${INFLUXDB_TOKEN}"
+    org: "${INFLUXDB_ORG}"
+    bucket: "${INFLUXDB_BUCKET}_dev"
+    timeout: 10
+    batch_size: 100
+    flush_interval: 5
+  
+  # Alert thresholds (more lenient for development)
+  alert_thresholds:
+    cpu_usage: 95.0
+    memory_usage: 95.0
+    error_rate: 20.0
+    latency: 5000.0
+    position_count: 5
+    daily_pnl: -100.0
+    drawdown: 25.0
+  
+  # Dashboard settings
+  dashboard_port: 8080
+  metrics_retention_days: 7  # Shorter retention for development
+
+# Web UI configuration
+web_ui:
+  enabled: true
+  host: "0.0.0.0"
+  port: 3000
+  debug: true
+  auto_reload: true
+  cors_enabled: true
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
+    - "http://localhost:8080"
+    - "http://127.0.0.1:8080"
+  
+  # No authentication in development
+  require_auth: false
+
+# Backtesting configuration
+backtest:
+  enabled: true
+  start_date: "2024-01-01"
+  end_date: "2024-01-31"
+  initial_capital: 1000.0
+  commission: 0.001
+  slippage: 0.0005
+
+# Performance optimization (relaxed for development)
+performance:
+  # Async settings
+  max_workers: 4
+  connection_pool_size: 5
+  
+  # Caching
+  enable_data_caching: true
+  cache_market_data: true
+  cache_ttl: 30
+  
+  # Database optimization
+  use_connection_pooling: false  # Simpler for development
+  enable_query_caching: false
+  
+  # Memory management
+  gc_threshold: 100
+  max_memory_usage: 512  # MB
+
+# Development-specific features
+development:
+  # Hot reloading
+  hot_reload: true
+  
+  # Mock data
+  use_mock_data: false
+  mock_data_file: "data/mock_market_data.json"
+  
+  # Testing features
+  enable_test_endpoints: true
+  test_mode: true
+  
+  # Debugging
+  enable_profiling: true
+  profile_output_dir: "logs/profiles"
+  
+  # Development tools
+  enable_jupyter: true
+  jupyter_port: 8888
+  
+  # API documentation
+  enable_swagger: true
+  swagger_ui_path: "/docs"
+
+# Directory settings
+data_directory: "data"
+log_directory: "logs"
+config_directory: "config" 

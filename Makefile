@@ -1,7 +1,7 @@
 # Makefile for n0name Trading Bot
-# Provides convenient shortcuts for development and testing tasks
+# Provides convenient shortcuts for development, testing, building, and deployment
 
-.PHONY: help install install-dev test test-unit test-integration test-performance test-security test-all coverage lint format clean docs build
+.PHONY: help install install-dev test test-unit test-integration test-performance test-security test-all coverage lint format clean docs build deploy
 
 # Default target
 help:
@@ -33,10 +33,30 @@ help:
 	@echo "  type-check       Run type checking with mypy"
 	@echo "  security-scan    Run security analysis"
 	@echo ""
+	@echo "Build Commands:"
+	@echo "  build            Build package for distribution"
+	@echo "  build-dev        Build for development"
+	@echo "  build-prod       Build for production"
+	@echo "  build-exe        Build standalone executable"
+	@echo "  build-docker     Build Docker images"
+	@echo "  build-release    Build complete release package"
+	@echo ""
+	@echo "Deployment Commands:"
+	@echo "  deploy-dev       Deploy to development environment"
+	@echo "  deploy-staging   Deploy to staging environment"
+	@echo "  deploy-prod      Deploy to production environment"
+	@echo "  deploy-rollback  Rollback deployment"
+	@echo ""
+	@echo "Docker Commands:"
+	@echo "  docker-build     Build Docker images"
+	@echo "  docker-up        Start Docker services"
+	@echo "  docker-down      Stop Docker services"
+	@echo "  docker-logs      View Docker logs"
+	@echo "  docker-clean     Clean Docker resources"
+	@echo ""
 	@echo "Development Commands:"
 	@echo "  clean            Clean up build artifacts and cache files"
 	@echo "  docs             Build documentation"
-	@echo "  build            Build package for distribution"
 	@echo "  check-deps       Check if all dependencies are installed"
 	@echo ""
 	@echo "CI/CD Commands:"
@@ -105,6 +125,74 @@ security-scan:
 	safety check --json --output safety-report.json
 	@echo "Security reports generated: bandit-report.json, safety-report.json"
 
+# Build Commands
+build:
+	python scripts/build.py --type prod
+
+build-dev:
+	python scripts/build.py --type dev
+
+build-prod:
+	python scripts/build.py --type prod --test --lint
+
+build-exe:
+	python scripts/build.py --type exe --onefile
+
+build-docker:
+	python scripts/build.py --type docker
+
+build-release:
+	@read -p "Enter version (e.g., 2.0.0): " version; \
+	python scripts/build.py --type release --version $$version
+
+# Deployment Commands
+deploy-dev:
+	./scripts/deploy.sh -e development
+
+deploy-staging:
+	./scripts/deploy.sh -e staging
+
+deploy-prod:
+	@echo "WARNING: This will deploy to PRODUCTION!"
+	@read -p "Are you sure? (y/N): " confirm; \
+	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
+		./scripts/deploy.sh -e production; \
+	else \
+		echo "Deployment cancelled."; \
+	fi
+
+deploy-rollback:
+	./scripts/deploy.sh --rollback
+
+deploy-dry-run:
+	./scripts/deploy.sh --dry-run -e production
+
+# Docker Commands
+docker-build:
+	docker-compose build
+
+docker-up:
+	docker-compose up -d
+
+docker-down:
+	docker-compose down
+
+docker-logs:
+	docker-compose logs -f
+
+docker-clean:
+	docker system prune -a -f
+	docker volume prune -f
+
+docker-dev-up:
+	docker-compose -f docker-compose.dev.yml up -d
+
+docker-dev-down:
+	docker-compose -f docker-compose.dev.yml down
+
+docker-dev-logs:
+	docker-compose -f docker-compose.dev.yml logs -f
+
 # Development Commands
 clean:
 	@echo "Cleaning up build artifacts and cache files..."
@@ -127,11 +215,6 @@ docs:
 	# Add documentation build commands here when docs are added
 	@echo "Documentation build would run here"
 
-build:
-	@echo "Building package for distribution..."
-	python -m build
-	@echo "Package built in dist/"
-
 check-deps:
 	python tests/run_tests.py --check-deps
 
@@ -153,17 +236,19 @@ test-debug:
 test-profile:
 	pytest --durations=10 --verbose
 
-# Docker Commands (if using Docker)
-docker-test:
-	docker build -t n0name-test .
-	docker run --rm n0name-test make test-all
+# Database Commands
+db-migrate:
+	@echo "Running database migrations..."
+	# Add database migration commands here
 
-# Database Commands (if using database)
-db-test:
-	@echo "Setting up test database..."
-	# Add database setup commands here
-	python tests/run_tests.py --integration --verbose
-	@echo "Database tests completed"
+db-reset:
+	@echo "Resetting database..."
+	docker-compose exec postgres psql -U n0name -d n0name_trading -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
+db-backup:
+	@echo "Creating database backup..."
+	mkdir -p backups
+	docker-compose exec postgres pg_dump -U n0name n0name_trading > backups/db_backup_$(shell date +%Y%m%d_%H%M%S).sql
 
 # Performance Monitoring
 benchmark:
@@ -182,12 +267,22 @@ watch-tests:
 release-check: clean lint test-all coverage security-scan
 	@echo "Release checks completed successfully!"
 
+release-tag:
+	@read -p "Enter version tag (e.g., v2.0.0): " tag; \
+	git tag -a $$tag -m "Release $$tag"; \
+	git push origin $$tag
+
 # Environment Commands
 env-check:
 	@echo "Python version: $$(python --version)"
 	@echo "Pip version: $$(pip --version)"
 	@echo "Virtual environment: $$VIRTUAL_ENV"
 	python -c "import sys; print(f'Python path: {sys.path}')"
+
+env-setup:
+	@echo "Setting up development environment..."
+	cp env.example .env
+	@echo "Please edit .env with your configuration"
 
 # Quick Commands for Development
 quick-test:
@@ -197,44 +292,57 @@ quick-lint:
 	ruff check src/ tests/
 	black --check src/ tests/
 
+# Monitoring Commands
+logs:
+	tail -f logs/trading_bot.log
+
+logs-error:
+	grep ERROR logs/trading_bot.log | tail -20
+
+status:
+	@echo "=== Service Status ==="
+	docker-compose ps
+	@echo ""
+	@echo "=== Health Checks ==="
+	curl -s http://localhost:8080/health || echo "Application not responding"
+
+# Utility Commands
+install-hooks:
+	pre-commit install
+	@echo "Pre-commit hooks installed"
+
+update-deps:
+	pip install -e .[dev,performance,monitoring] --upgrade
+	pip freeze > requirements-frozen.txt
+
+generate-requirements:
+	pip-compile requirements.in
+	pip-compile requirements-dev.in
+
 # Help for specific categories
-help-test:
-	@echo "Testing Commands Help:"
-	@echo ""
-	@echo "  test             - Run unit tests (fastest, for development)"
-	@echo "  test-unit        - Run all unit tests with verbose output"
-	@echo "  test-integration - Run integration tests (slower, more comprehensive)"
-	@echo "  test-performance - Run performance benchmarks"
-	@echo "  test-security    - Run security vulnerability tests"
-	@echo "  test-all         - Run all test categories"
-	@echo "  test-parallel    - Run tests in parallel (faster on multi-core)"
-	@echo ""
-	@echo "Coverage:"
-	@echo "  coverage         - Run tests with coverage reporting"
-	@echo "  coverage-html    - Generate HTML coverage report"
-	@echo ""
-	@echo "Custom:"
-	@echo "  test-custom      - Run tests matching a custom pattern"
-	@echo "  test-debug       - Run tests with debugger on failure"
+help-build:
+	@echo "Build Commands:"
+	@echo "  build            Build package for distribution"
+	@echo "  build-dev        Build for development"
+	@echo "  build-prod       Build for production with tests"
+	@echo "  build-exe        Build standalone executable"
+	@echo "  build-docker     Build Docker images"
+	@echo "  build-release    Build complete release package"
 
-help-quality:
-	@echo "Code Quality Commands Help:"
-	@echo ""
-	@echo "  lint             - Run ruff, mypy, and black checks"
-	@echo "  format           - Auto-format code with black and isort"
-	@echo "  type-check       - Run mypy type checking"
-	@echo "  security-scan    - Run bandit and safety security scans"
-	@echo ""
-	@echo "Quick checks:"
-	@echo "  quick-lint       - Fast linting for development"
-	@echo "  pre-commit       - Run all pre-commit checks"
+help-deploy:
+	@echo "Deployment Commands:"
+	@echo "  deploy-dev       Deploy to development environment"
+	@echo "  deploy-staging   Deploy to staging environment"
+	@echo "  deploy-prod      Deploy to production environment (with confirmation)"
+	@echo "  deploy-rollback  Rollback to previous deployment"
+	@echo "  deploy-dry-run   Show what would be deployed without executing"
 
-# Aliases for common commands
-t: test
-tu: test-unit
-ti: test-integration
-ta: test-all
-c: coverage
-l: lint
-f: format
-cl: clean 
+help-docker:
+	@echo "Docker Commands:"
+	@echo "  docker-build     Build Docker images"
+	@echo "  docker-up        Start production Docker services"
+	@echo "  docker-down      Stop Docker services"
+	@echo "  docker-logs      View Docker logs"
+	@echo "  docker-clean     Clean Docker resources"
+	@echo "  docker-dev-up    Start development Docker services"
+	@echo "  docker-dev-down  Stop development Docker services" 

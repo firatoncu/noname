@@ -1,0 +1,169 @@
+version: '3.8'
+
+services:
+  # Development trading bot with hot reloading
+  n0name-bot-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: n0name-trading-bot-dev
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - BINANCE_API_KEY=${BINANCE_API_KEY}
+      - BINANCE_API_SECRET=${BINANCE_API_SECRET}
+      - DATABASE_URL=postgresql://n0name:${DB_PASSWORD}@postgres:5432/n0name_trading_dev
+      - REDIS_URL=redis://redis:6379/1
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}_dev
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config/development.yml:/app/config/development.yml:ro
+      - /app/__pycache__
+      - /app/.pytest_cache
+    ports:
+      - "8080:8080"
+      - "3000:3000"
+      - "8888:8888"  # Jupyter notebook
+    depends_on:
+      - postgres
+      - redis
+      - influxdb
+    networks:
+      - n0name-network
+    stdin_open: true
+    tty: true
+    command: >
+      sh -c "
+        pip install -e . &&
+        python -m uvicorn src.n0name.api:app --host 0.0.0.0 --port 8080 --reload
+      "
+
+  # PostgreSQL for development
+  postgres:
+    image: postgres:15-alpine
+    container_name: n0name-postgres-dev
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=n0name_trading_dev
+      - POSTGRES_USER=n0name
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5433:5432"
+    networks:
+      - n0name-network
+
+  # Redis for development
+  redis:
+    image: redis:7-alpine
+    container_name: n0name-redis-dev
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_dev_data:/data
+    ports:
+      - "6380:6379"
+    networks:
+      - n0name-network
+
+  # InfluxDB for development
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: n0name-influxdb-dev
+    restart: unless-stopped
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}_dev
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
+    volumes:
+      - influxdb_dev_data:/var/lib/influxdb2
+    ports:
+      - "8087:8086"
+    networks:
+      - n0name-network
+
+  # Jupyter notebook for development and analysis
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: n0name-jupyter
+    restart: unless-stopped
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN}
+    volumes:
+      - .:/app
+      - ./notebooks:/app/notebooks
+      - ./data:/app/data
+    ports:
+      - "8888:8888"
+    networks:
+      - n0name-network
+    command: >
+      sh -c "
+        pip install -e . &&
+        jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='${JUPYTER_TOKEN}'
+      "
+
+  # Mailhog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: n0name-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - n0name-network
+
+  # Test runner service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: n0name-test-runner
+    environment:
+      - ENVIRONMENT=test
+      - DATABASE_URL=postgresql://n0name:${DB_PASSWORD}@postgres:5432/n0name_trading_test
+    volumes:
+      - .:/app
+      - ./test-results:/app/test-results
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - n0name-network
+    profiles:
+      - testing
+    command: >
+      sh -c "
+        pip install -e . &&
+        python -m pytest tests/ -v --cov=src --cov-report=html:/app/test-results/coverage
+      "
+
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+  influxdb_dev_data:
+    driver: local
+
+networks:
+  n0name-network:
+    driver: bridge 
