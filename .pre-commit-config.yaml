@@ -1,0 +1,176 @@
+# Pre-commit configuration for n0name Trading Bot
+# This file configures automatic code quality checks that run before each commit
+
+repos:
+  # Code formatting with Black
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3
+        args: [--line-length=88]
+        exclude: ^(migrations/|docs/|build/|dist/)
+
+  # Import sorting with isort
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black, --line-length=88]
+        exclude: ^(migrations/|docs/|build/|dist/)
+
+  # Code linting with flake8
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-docstrings
+          - flake8-type-checking
+          - flake8-bugbear
+        args:
+          - --max-line-length=88
+          - --extend-ignore=E203,W503,D100,D101,D102,D103,D104,D105,D106,D107
+          - --per-file-ignores=__init__.py:F401,tests/*:D
+        exclude: ^(migrations/|docs/|build/|dist/|__pycache__/)
+
+  # Type checking with mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
+        args:
+          - --ignore-missing-imports
+          - --disallow-untyped-defs
+          - --no-implicit-optional
+        exclude: ^(tests/|migrations/|docs/|build/|dist/)
+
+  # Security linting with bandit
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: [-r, -f, json, -o, bandit-report.json]
+        exclude: ^(tests/|docs/|build/|dist/)
+
+  # General pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # File formatting
+      - id: trailing-whitespace
+        exclude: ^(docs/|\.md$)
+      - id: end-of-file-fixer
+        exclude: ^(docs/|\.md$)
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+      # File validation
+      - id: check-yaml
+        exclude: ^(\.github/|docs/)
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+
+      # Python specific
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-docstring-first
+      - id: debug-statements
+      - id: name-tests-test
+        args: [--pytest-test-first]
+
+      # Git specific
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      - id: forbid-new-submodules
+
+      # Security
+      - id: detect-private-key
+
+  # Docstring style checking
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args:
+          - --convention=google
+          - --add-ignore=D100,D101,D102,D103,D104,D105,D106,D107
+        exclude: ^(tests/|migrations/|docs/|build/|dist/)
+
+  # Dead code detection
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.10
+    hooks:
+      - id: vulture
+        args: [--min-confidence=80]
+        exclude: ^(tests/|migrations/|docs/|build/|dist/)
+
+  # Dependency security check
+  - repo: https://github.com/pyupio/safety
+    rev: 2.3.5
+    hooks:
+      - id: safety
+        args: [--json, --output, safety-report.json]
+        exclude: ^(tests/|docs/|build/|dist/)
+
+  # Conventional commits
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  # YAML formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types: [yaml]
+        exclude: ^(\.github/|docs/)
+
+  # Markdown formatting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]
+        exclude: ^(docs/|CHANGELOG\.md)
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+
+# Configuration for specific tools
+default_language_version:
+  python: python3.9
+
+# Global excludes
+exclude: |
+  (?x)^(
+    \.git/|
+    \.venv/|
+    venv/|
+    __pycache__/|
+    \.pytest_cache/|
+    \.mypy_cache/|
+    \.coverage|
+    build/|
+    dist/|
+    \.egg-info/|
+    node_modules/|
+    \.DS_Store|
+    Thumbs\.db
+  )
+
+# Fail fast - stop on first failure
+fail_fast: false
+
+# Minimum pre-commit version
+minimum_pre_commit_version: 3.0.0 

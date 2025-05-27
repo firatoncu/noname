@@ -3,15 +3,66 @@ Trading Engine - Main Trading Orchestrator
 
 This module provides the main trading engine that orchestrates all trading operations,
 implementing the strategy pattern and coordinating between different components.
+
+The TradingEngine class serves as the central coordinator for:
+- Strategy execution and signal processing
+- Position management and monitoring
+- Order execution and lifecycle management
+- Risk management and validation
+- Performance monitoring and metrics collection
+
+Architecture:
+    The trading engine follows a modular design with clear separation of concerns:
+    
+    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+    │   Strategy      │    │  Position       │    │  Order          │
+    │   Manager       │◄──►│  Manager        │◄──►│  Manager        │
+    └─────────────────┘    └─────────────────┘    └─────────────────┘
+            ▲                        ▲                        ▲
+            │                        │                        │
+            └────────────────────────┼────────────────────────┘
+                                     │
+                            ┌─────────────────┐
+                            │  Trading        │
+                            │  Engine         │
+                            │  (Coordinator)  │
+                            └─────────────────┘
+
+Example:
+    Basic usage of the trading engine:
+    
+    >>> from src.core.trading_engine import TradingEngine, TradingConfig
+    >>> from src.strategies.bollinger_rsi import BollingerRSIStrategy
+    >>> 
+    >>> # Create strategy and configuration
+    >>> strategy = BollingerRSIStrategy()
+    >>> config = TradingConfig(max_open_positions=5, leverage=10)
+    >>> 
+    >>> # Initialize trading engine
+    >>> engine = TradingEngine(strategy, config)
+    >>> await engine.initialize(symbols, client, logger)
+    >>> 
+    >>> # Start trading
+    >>> await engine.start_trading(client, logger)
+
+Author: n0name Development Team
+Version: 2.0.0
+Last Modified: 2024-01-01
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass
+from typing import Dict, Any, Optional, List, Tuple, Union
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+import time
 
+# Core trading components
 from .base_strategy import BaseStrategy, MarketData, SignalType, PositionSide
-from .position_manager import PositionManager, PositionConfig
-from .order_manager import OrderManager, OrderConfig
+from .position_manager import PositionManager, PositionConfig, Position
+from .order_manager import OrderManager, OrderConfig, Order
+
+# Utility imports
 from utils.fetch_data import binance_fetch_data
 from utils.calculate_quantity import calculate_quantity
 from utils.stepsize_precision import stepsize_precision
@@ -19,16 +70,189 @@ from utils.globals import get_capital_tbu, get_db_status
 from utils.influxdb.csv_writer import write_to_daily_csv
 from utils.influxdb.inf_send_data import write_live_conditions
 
+# Type imports
+from src.n0name.types import Symbol, Price, Quantity, Leverage, Percentage
+from src.n0name.exceptions import (
+    TradingException, 
+    SystemException, 
+    ValidationException,
+    ErrorCategory, 
+    ErrorSeverity,
+    create_error_context
+)
+
+# Enhanced logging
+from utils.enhanced_logging import PerformanceLogger, log_performance
+
+
+class TradingEngineState(str, Enum):
+    """
+    Enumeration of possible trading engine states.
+    
+    States:
+        IDLE: Engine is initialized but not running
+        STARTING: Engine is in the process of starting up
+        RUNNING: Engine is actively trading
+        STOPPING: Engine is in the process of stopping
+        STOPPED: Engine has been stopped
+        ERROR: Engine encountered a critical error
+    """
+    IDLE = "idle"
+    STARTING = "starting" 
+    RUNNING = "running"
+    STOPPING = "stopping"
+    STOPPED = "stopped"
+    ERROR = "error"
+
 
 @dataclass
 class TradingConfig:
-    """Configuration for the trading engine"""
+    """
+    Configuration class for the trading engine.
+    
+    This dataclass encapsulates all configuration parameters needed for
+    trading operations, providing sensible defaults and validation.
+    
+    Attributes:
+        max_open_positions: Maximum number of concurrent open positions
+        leverage: Trading leverage multiplier (1-125 for Binance)
+        lookback_period: Number of historical candles for analysis
+        position_value_percentage: Percentage of capital to use per position (0.0-1.0)
+        enable_database_logging: Whether to log trading data to database
+        enable_notifications: Whether to send trading notifications
+        risk_management_enabled: Whether to apply risk management rules
+        max_daily_trades: Maximum number of trades per day (0 = unlimited)
+        stop_loss_percentage: Default stop loss percentage (0.0-1.0)
+        take_profit_percentage: Default take profit percentage (0.0-1.0)
+        min_profit_threshold: Minimum profit threshold to close positions
+        max_position_hold_time: Maximum time to hold a position (in hours)
+        
+    Example:
+        >>> config = TradingConfig(
+        ...     max_open_positions=3,
+        ...     leverage=5,
+        ...     position_value_percentage=0.1,
+        ...     stop_loss_percentage=0.02
+        ... )
+    """
     max_open_positions: int = 5
-    leverage: int = 10
+    leverage: Leverage = Leverage(10)
     lookback_period: int = 500
-    position_value_percentage: float = 0.2  # 20% of capital per position
+    position_value_percentage: Percentage = 0.2  # 20% of capital per position
     enable_database_logging: bool = True
     enable_notifications: bool = True
+    risk_management_enabled: bool = True
+    max_daily_trades: int = 0  # 0 = unlimited
+    stop_loss_percentage: Percentage = 0.02  # 2% stop loss
+    take_profit_percentage: Percentage = 0.05  # 5% take profit
+    min_profit_threshold: Percentage = 0.001  # 0.1% minimum profit
+    max_position_hold_time: int = 24  # 24 hours
+    
+    # Performance and monitoring settings
+    signal_processing_interval: float = 1.0  # seconds
+    position_monitoring_interval: float = 1.0  # seconds
+    performance_logging_interval: int = 300  # 5 minutes
+    
+    def __post_init__(self) -> None:
+        """Validate configuration parameters after initialization."""
+        self._validate_config()
+    
+    def _validate_config(self) -> None:
+        """
+        Validate configuration parameters.
+        
+        Raises:
+            ValidationException: If any configuration parameter is invalid
+        """
+        errors = []
+        
+        # Validate numeric ranges
+        if self.max_open_positions <= 0:
+            errors.append("max_open_positions must be positive")
+        
+        if not (1 <= self.leverage <= 125):
+            errors.append("leverage must be between 1 and 125")
+        
+        if self.lookback_period < 50:
+            errors.append("lookback_period must be at least 50")
+        
+        if not (0.0 < self.position_value_percentage <= 1.0):
+            errors.append("position_value_percentage must be between 0.0 and 1.0")
+        
+        if not (0.0 <= self.stop_loss_percentage <= 1.0):
+            errors.append("stop_loss_percentage must be between 0.0 and 1.0")
+        
+        if not (0.0 <= self.take_profit_percentage <= 1.0):
+            errors.append("take_profit_percentage must be between 0.0 and 1.0")
+        
+        if self.max_position_hold_time <= 0:
+            errors.append("max_position_hold_time must be positive")
+        
+        if errors:
+            raise ValidationException(
+                f"Invalid trading configuration: {'; '.join(errors)}",
+                context=create_error_context(
+                    component="trading_config",
+                    operation="validate_config"
+                )
+            )
+
+
+@dataclass
+class TradingMetrics:
+    """
+    Container for trading performance metrics.
+    
+    This class tracks various performance metrics for monitoring
+    and analysis of trading operations.
+    
+    Attributes:
+        total_trades: Total number of trades executed
+        winning_trades: Number of profitable trades
+        losing_trades: Number of losing trades
+        total_pnl: Total profit/loss across all trades
+        max_drawdown: Maximum drawdown experienced
+        win_rate: Percentage of winning trades
+        average_trade_duration: Average time positions are held
+        sharpe_ratio: Risk-adjusted return metric
+        last_updated: Timestamp of last metrics update
+    """
+    total_trades: int = 0
+    winning_trades: int = 0
+    losing_trades: int = 0
+    total_pnl: float = 0.0
+    max_drawdown: float = 0.0
+    win_rate: float = 0.0
+    average_trade_duration: float = 0.0
+    sharpe_ratio: float = 0.0
+    last_updated: datetime = field(default_factory=datetime.utcnow)
+    
+    def update_metrics(self, trade_pnl: float, trade_duration: float) -> None:
+        """
+        Update metrics with new trade data.
+        
+        Args:
+            trade_pnl: Profit/loss of the completed trade
+            trade_duration: Duration of the trade in hours
+        """
+        self.total_trades += 1
+        self.total_pnl += trade_pnl
+        
+        if trade_pnl > 0:
+            self.winning_trades += 1
+        else:
+            self.losing_trades += 1
+        
+        # Update win rate
+        self.win_rate = self.winning_trades / self.total_trades if self.total_trades > 0 else 0.0
+        
+        # Update average trade duration
+        self.average_trade_duration = (
+            (self.average_trade_duration * (self.total_trades - 1) + trade_duration) 
+            / self.total_trades
+        )
+        
+        self.last_updated = datetime.utcnow()
 
 
 class TradingEngine:
@@ -36,63 +260,234 @@ class TradingEngine:
     Main trading engine that orchestrates all trading operations.
     
     This class implements the strategy pattern and coordinates between
-    strategies, position management, and order execution.
+    strategies, position management, and order execution. It serves as
+    the central hub for all trading activities.
+    
+    The engine operates in an event-driven manner, continuously processing
+    market data, generating signals, and executing trades based on the
+    configured strategy.
+    
+    Attributes:
+        strategy: The trading strategy instance
+        config: Trading configuration parameters
+        position_manager: Position lifecycle manager
+        order_manager: Order execution manager
+        state: Current engine state
+        metrics: Performance metrics tracker
+        
+    Example:
+        >>> strategy = BollingerRSIStrategy()
+        >>> config = TradingConfig(max_open_positions=5)
+        >>> engine = TradingEngine(strategy, config)
+        >>> 
+        >>> await engine.initialize(symbols, client, logger)
+        >>> await engine.start_trading(client, logger)
     """
     
     def __init__(
         self,
         strategy: BaseStrategy,
-        trading_config: TradingConfig = None,
-        position_config: PositionConfig = None,
-        order_config: OrderConfig = None
-    ):
+        trading_config: Optional[TradingConfig] = None,
+        position_config: Optional[PositionConfig] = None,
+        order_config: Optional[OrderConfig] = None
+    ) -> None:
         """
         Initialize the trading engine.
         
         Args:
-            strategy: Trading strategy to use
-            trading_config: Trading engine configuration
-            position_config: Position management configuration
-            order_config: Order management configuration
+            strategy: Trading strategy to use for signal generation
+            trading_config: Configuration for trading operations
+            position_config: Configuration for position management
+            order_config: Configuration for order management
+            
+        Raises:
+            ValidationException: If strategy or configuration is invalid
         """
+        # Validate strategy
+        if not isinstance(strategy, BaseStrategy):
+            raise ValidationException(
+                "Strategy must be an instance of BaseStrategy",
+                field_name="strategy",
+                context=create_error_context(
+                    component="trading_engine",
+                    operation="initialize"
+                )
+            )
+        
+        # Initialize core components
         self.strategy = strategy
         self.config = trading_config or TradingConfig()
         
-        # Initialize managers
+        # Initialize managers with configurations
         self.position_manager = PositionManager(position_config)
         self.order_manager = OrderManager(order_config)
         
-        # Trading state
+        # Engine state management
+        self.state = TradingEngineState.IDLE
+        self.metrics = TradingMetrics()
+        
+        # Trading state variables
         self._is_running = False
-        self._symbols: List[str] = []
-        self._step_sizes: Dict[str, float] = {}
-        self._quantity_precisions: Dict[str, int] = {}
-        self._price_precisions: Dict[str, int] = {}
+        self._symbols: List[Symbol] = []
+        self._step_sizes: Dict[Symbol, float] = {}
+        self._quantity_precisions: Dict[Symbol, int] = {}
+        self._price_precisions: Dict[Symbol, int] = {}
+        
+        # Performance tracking
+        self._last_performance_log = time.time()
+        self._iteration_count = 0
+        self._start_time: Optional[datetime] = None
+        
+        # Task management
+        self._running_tasks: List[asyncio.Task] = []
     
-    async def initialize(self, symbols: List[str], client, logger):
+    @log_performance()
+    async def initialize(
+        self, 
+        symbols: List[Union[str, Symbol]], 
+        client, 
+        logger: PerformanceLogger
+    ) -> None:
         """
         Initialize the trading engine with symbols and market data.
         
+        This method prepares the engine for trading by:
+        1. Validating and storing trading symbols
+        2. Fetching market precision data from the exchange
+        3. Initializing strategy with historical data
+        4. Setting up monitoring and logging
+        
         Args:
-            symbols: List of trading symbols
-            client: Binance client
-            logger: Logger instance
+            symbols: List of trading symbols to monitor
+            client: Binance API client instance
+            logger: Enhanced logger for structured logging
+            
+        Raises:
+            ValidationException: If symbols list is invalid
+            SystemException: If initialization fails
+            
+        Example:
+            >>> symbols = ["BTCUSDT", "ETHUSDT", "ADAUSDT"]
+            >>> await engine.initialize(symbols, client, logger)
         """
         try:
-            self._symbols = symbols
+            self.state = TradingEngineState.STARTING
             
-            # Get market precision data
-            step_sizes, quantity_precisions, price_precisions = await stepsize_precision(client, symbols)
-            self._step_sizes = step_sizes
-            self._quantity_precisions = quantity_precisions
-            self._price_precisions = price_precisions
+            # Validate symbols
+            if not symbols or not isinstance(symbols, list):
+                raise ValidationException(
+                    "Symbols must be a non-empty list",
+                    field_name="symbols",
+                    context=create_error_context(
+                        component="trading_engine",
+                        operation="initialize"
+                    )
+                )
             
-            logger.info(f"Trading engine initialized with {len(symbols)} symbols")
-            logger.info(f"Strategy: {self.strategy.name}")
+            # Convert to Symbol type and validate
+            validated_symbols = []
+            for symbol in symbols:
+                if isinstance(symbol, str):
+                    symbol = Symbol(symbol)
+                validated_symbols.append(symbol)
+            
+            self._symbols = validated_symbols
+            
+            logger.info(
+                f"Initializing trading engine with {len(self._symbols)} symbols",
+                extra={
+                    "symbols": [str(s) for s in self._symbols],
+                    "strategy": self.strategy.name,
+                    "max_positions": self.config.max_open_positions
+                }
+            )
+            
+            # Fetch market precision data for accurate order placement
+            logger.info("Fetching market precision data...")
+            step_sizes, quantity_precisions, price_precisions = await stepsize_precision(
+                client, [str(s) for s in self._symbols]
+            )
+            
+            self._step_sizes = {Symbol(k): v for k, v in step_sizes.items()}
+            self._quantity_precisions = {Symbol(k): v for k, v in quantity_precisions.items()}
+            self._price_precisions = {Symbol(k): v for k, v in price_precisions.items()}
+            
+            # Initialize strategy with market data
+            logger.info("Initializing strategy with historical data...")
+            await self._initialize_strategy_data(client, logger)
+            
+            # Initialize managers
+            await self.position_manager.initialize(logger)
+            await self.order_manager.initialize(client, logger)
+            
+            self.state = TradingEngineState.IDLE
+            
+            logger.info(
+                "Trading engine initialized successfully",
+                extra={
+                    "symbols_count": len(self._symbols),
+                    "strategy": self.strategy.name,
+                    "precision_data_loaded": True
+                }
+            )
             
         except Exception as e:
-            logger.error(f"Error initializing trading engine: {e}")
-            raise
+            self.state = TradingEngineState.ERROR
+            logger.error(
+                "Failed to initialize trading engine",
+                category=ErrorCategory.SYSTEM,
+                severity=ErrorSeverity.CRITICAL,
+                extra={"error": str(e)}
+            )
+            
+            if isinstance(e, (ValidationException, SystemException)):
+                raise
+            else:
+                raise SystemException(
+                    "Trading engine initialization failed",
+                    original_exception=e,
+                    context=create_error_context(
+                        component="trading_engine",
+                        operation="initialize"
+                    )
+                )
+    
+    async def _initialize_strategy_data(self, client, logger: PerformanceLogger) -> None:
+        """
+        Initialize strategy with historical market data.
+        
+        Args:
+            client: Binance API client
+            logger: Enhanced logger instance
+        """
+        for symbol in self._symbols:
+            try:
+                # Fetch historical data for strategy initialization
+                df, current_price = await binance_fetch_data(
+                    self.config.lookback_period, 
+                    str(symbol), 
+                    client
+                )
+                
+                market_data = MarketData(
+                    df=df,
+                    close_price=current_price,
+                    symbol=str(symbol),
+                    timestamp=int(time.time() * 1000)
+                )
+                
+                # Validate data with strategy
+                if not self.strategy.validate_market_data(market_data):
+                    logger.warning(
+                        f"Insufficient market data for {symbol}",
+                        extra={"symbol": str(symbol), "data_length": len(df)}
+                    )
+                
+            except Exception as e:
+                logger.warning(
+                    f"Failed to initialize data for {symbol}: {e}",
+                    extra={"symbol": str(symbol)}
+                )
     
     async def start_trading(self, client, logger):
         """
