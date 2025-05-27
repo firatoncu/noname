@@ -1,531 +1,349 @@
+# n0name Trading Bot v2.0.0
 
-# n0name v1.0.1 by f0ncu
-This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green.svg)](https://github.com/features/actions)
 
-# Disclaimer
+A professional-grade automated cryptocurrency trading bot designed for Binance Futures trading. Built with Python, featuring modular architecture, comprehensive risk management, and extensive monitoring capabilities.
 
-*The information provided by this bot is not intended to be and should not be construed as financial advice. Always conduct your own research and consult with a qualified financial advisor before making any trading decisions.Trading in cryptocurrencies and futures involves a high level of risk and may not be suitable for all investors. You should carefully consider your financial situation and risk tolerance before engaging in such activities.There are no guarantees of profit or avoidance of losses when using this bot. Past performance is not indicative of future results.You are solely responsible for any trades executed using this bot. The developers and contributors of this project are not liable for any financial losses or damages that may occur as a result of using this bot.Ensure that your use of this bot complies with all applicable laws and regulations in your jurisdiction. It is your responsibility to understand and adhere to any legal requirements related to cryptocurrency trading.*
-#
-# Architecture Documentation - n0name Trading Bot
+## ⚠️ Disclaimer
 
-## Overview
+**The information provided by this bot is not intended to be and should not be construed as financial advice. Always conduct your own research and consult with a qualified financial advisor before making any trading decisions. Trading in cryptocurrencies and futures involves a high level of risk and may not be suitable for all investors. You should carefully consider your financial situation and risk tolerance before engaging in such activities. There are no guarantees of profit or avoidance of losses when using this bot. Past performance is not indicative of future results. You are solely responsible for any trades executed using this bot. The developers and contributors of this project are not liable for any financial losses or damages that may occur as a result of using this bot. Ensure that your use of this bot complies with all applicable laws and regulations in your jurisdiction.**
 
-The n0name trading bot is designed as a modular, scalable, and maintainable system that implements automated cryptocurrency trading strategies. The architecture follows modern software engineering principles including separation of concerns, dependency injection, and event-driven design.
+## 🚀 Quick Start
 
-## System Architecture
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/your-username/n0name-trading-bot.git
+cd n0name-trading-bot
 
-### High-Level Architecture
+# Install dependencies
+pip install -r requirements.txt
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        n0name Trading Bot                       │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
-│  │   Web UI    │  │     CLI     │  │   REST API  │  │  WebUI  │ │
-│  │ (Frontend)  │  │ Interface   │  │  Endpoints  │  │ Backend │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│                      Application Layer                          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
-│  │   Trading   │  │  Position   │  │    Order    │  │Strategy │ │
-│  │   Engine    │  │  Manager    │  │   Manager   │  │Manager  │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│                       Business Layer                            │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
-│  │ Strategies  │  │ Indicators  │  │Risk Manager │  │ Signal  │ │
-│  │             │  │             │  │             │  │Processor│ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│                      Infrastructure Layer                       │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
-│  │   Logging   │  │ Monitoring  │  │   Config    │  │Security │ │
-│  │   System    │  │   System    │  │ Management  │  │ Manager │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
-├─────────────────────────────────────────────────────────────────┤
-│                       External Services                         │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────┐ │
-│  │   Binance   │  │  InfluxDB   │  │   File      │  │Network  │ │
-│  │     API     │  │  Database   │  │   System    │  │Services │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────┘ │
-└─────────────────────────────────────────────────────────────────┘
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys and settings
+
+# Run the bot
+python n0name.py
 ```
 
-## Core Components
+### Docker Quick Start
+```bash
+# Using Docker Compose (Recommended)
+docker-compose up -d
 
-### 1. Trading Engine (`src/core/trading_engine.py`)
-
-The central orchestrator that coordinates all trading activities.
-
-**Responsibilities:**
-- Manages the main trading loop
-- Coordinates between strategies, position management, and order execution
-- Handles signal processing and position monitoring
-- Implements the Strategy pattern for pluggable trading strategies
-
-**Key Methods:**
-- `initialize()`: Sets up the engine with symbols and market data
-- `start_trading()`: Begins the main trading loop
-- `_signal_processing_loop()`: Processes trading signals
-- `_position_monitoring_loop()`: Monitors open positions
-
-**Design Patterns:**
-- Strategy Pattern: For pluggable trading strategies
-- Observer Pattern: For event notifications
-- State Pattern: For trading engine states
-
-### 2. Position Manager (`src/core/position_manager.py`)
-
-Manages the lifecycle of trading positions.
-
-**Responsibilities:**
-- Track open positions
-- Calculate position metrics (PnL, duration, etc.)
-- Handle position state transitions
-- Implement risk management rules
-
-**Key Features:**
-- Position state management (OPEN, CLOSED, PARTIAL)
-- Real-time PnL calculation
-- Position sizing and risk validation
-- Stop-loss and take-profit management
-
-### 3. Order Manager (`src/core/order_manager.py`)
-
-Handles order execution and management.
-
-**Responsibilities:**
-- Execute buy/sell orders
-- Manage order states and lifecycle
-- Handle order validation and error recovery
-- Implement order types (market, limit, stop)
-
-**Key Features:**
-- Async order execution
-- Order validation and precision handling
-- Error handling and retry logic
-- Order history tracking
-
-### 4. Strategy System (`src/core/base_strategy.py`)
-
-Provides the framework for implementing trading strategies.
-
-**Base Strategy Interface:**
-```python
-class BaseStrategy(ABC):
-    @abstractmethod
-    async def generate_signals(self, market_data: MarketData) -> Dict[str, Any]:
-        """Generate trading signals based on market data."""
-        pass
-    
-    @abstractmethod
-    def validate_market_data(self, market_data: MarketData) -> bool:
-        """Validate if market data is sufficient for analysis."""
-        pass
+# View logs
+docker-compose logs -f n0name-bot
 ```
 
-**Strategy Types:**
-- Bollinger Bands & RSI Strategy
-- MACD & Fibonacci Strategy
-- Custom user-defined strategies
+## 📚 Documentation
 
-## Data Flow Architecture
+Our comprehensive documentation is organized to help both users and developers:
 
-### 1. Market Data Pipeline
+### 🎯 For Users
+- **[Installation Guide](docs/user-guide/installation.md)** - Complete setup instructions
+- **[Configuration Guide](docs/user-guide/configuration.md)** - Configuration reference
+- **[Trading Strategies](docs/user-guide/trading-strategies.md)** - Available strategies and usage
+- **[Troubleshooting](docs/user-guide/troubleshooting.md)** - Common issues and solutions
 
-```
-Binance API → Data Fetcher → Data Validator → Strategy Engine → Signal Generator
-     ↓              ↓              ↓              ↓              ↓
-Market Data → Raw OHLCV → Validated Data → Technical Analysis → Trading Signals
-```
+### 🔧 For Developers
+- **[Architecture Overview](docs/developer-guide/architecture.md)** - System design and components
+- **[Contributing Guidelines](docs/developer-guide/contributing.md)** - How to contribute
+- **[Testing Guide](docs/developer-guide/testing.md)** - Testing framework and practices
+- **[Performance Guide](docs/developer-guide/performance.md)** - Optimization techniques
+- **[Security Guidelines](docs/developer-guide/security.md)** - Security best practices
 
-### 2. Trading Execution Pipeline
+### 🚀 For DevOps
+- **[Docker Deployment](docs/deployment/docker.md)** - Container deployment guide
+- **[Monitoring Setup](docs/deployment/monitoring.md)** - Monitoring and alerting
+- **[Backup & Recovery](docs/deployment/backup-recovery.md)** - Data protection
 
-```
-Trading Signals → Risk Manager → Order Manager → Exchange API → Position Manager
-       ↓              ↓              ↓              ↓              ↓
-   Buy/Sell → Risk Validation → Order Creation → Order Execution → Position Update
-```
+### 🔌 API Reference
+- **[API Endpoints](docs/api/endpoints.md)** - REST API documentation
+- **[API Manager](docs/api/manager.md)** - API client libraries
+- **[Authentication](docs/api/authentication.md)** - API security
 
-### 3. Monitoring and Logging Pipeline
+### 📖 Migration & Guides
+- **[Migration Guides](docs/guides/migration/)** - Upgrade and migration instructions
+- **[Optimization Guides](docs/guides/optimization/)** - Performance optimization
+- **[Modernization Guides](docs/guides/modernization/)** - Code modernization
 
-```
-All Components → Event Collector → Log Processor → Storage → Monitoring Dashboard
-      ↓              ↓              ↓              ↓              ↓
-   Events → Structured Logs → Log Analysis → InfluxDB → Web Interface
-```
+## ✨ Key Features
 
-## Module Organization
+### 🎯 Trading Capabilities
+- **Multiple Strategies**: MACD-Fibonacci, Bollinger-RSI, and custom strategies
+- **Risk Management**: Advanced position sizing, stop-loss, and take-profit
+- **Paper Trading**: Test strategies without real money
+- **Multi-Timeframe**: Support for various timeframes (1m to 1d)
+- **Multi-Asset**: Trade multiple cryptocurrency pairs simultaneously
 
-### Core Application (`src/n0name/`)
+### 🛡️ Security & Safety
+- **Encrypted Configuration**: Secure API key storage
+- **Risk Limits**: Configurable drawdown and position limits
+- **Emergency Stop**: Immediate trading halt functionality
+- **Audit Logging**: Comprehensive trade and system logging
 
-```
-src/n0name/
-├── __init__.py          # Package initialization
-├── cli.py              # Command-line interface
-├── exceptions.py       # Exception hierarchy
-├── types.py           # Type definitions
-├── config/            # Configuration management
-├── di/               # Dependency injection
-├── interfaces/       # Abstract interfaces
-└── strategies/       # Strategy implementations
-```
+### 📊 Monitoring & Analytics
+- **Real-time Dashboard**: Web-based monitoring interface
+- **Performance Metrics**: Detailed trading statistics
+- **Alerting System**: Email, Slack, and Telegram notifications
+- **Database Integration**: InfluxDB for time-series data
 
-### Business Logic (`src/core/`)
+### 🔧 Technical Excellence
+- **Modular Architecture**: Clean, maintainable codebase
+- **Async Processing**: High-performance async operations
+- **Docker Support**: Containerized deployment
+- **CI/CD Pipeline**: Automated testing and deployment
+- **Comprehensive Testing**: Unit, integration, and performance tests
 
-```
-src/core/
-├── __init__.py
-├── trading_engine.py    # Main trading orchestrator
-├── position_manager.py  # Position lifecycle management
-├── order_manager.py     # Order execution and management
-└── base_strategy.py     # Strategy interface
-```
-
-### Utilities and Infrastructure (`utils/`)
-
-```
-utils/
-├── enhanced_logging.py  # Structured logging system
-├── config/             # Configuration utilities
-├── influxdb/          # Database integration
-├── web_ui/            # Web interface components
-├── security/          # Security utilities
-└── monitoring/        # System monitoring
-```
-
-## Design Patterns and Principles
-
-### 1. Strategy Pattern
-
-Used for implementing pluggable trading strategies:
-
-```python
-class TradingEngine:
-    def __init__(self, strategy: BaseStrategy):
-        self.strategy = strategy
-    
-    def switch_strategy(self, new_strategy: BaseStrategy):
-        self.strategy = new_strategy
-```
-
-### 2. Dependency Injection
-
-Components receive their dependencies through constructor injection:
-
-```python
-class TradingEngine:
-    def __init__(
-        self,
-        strategy: BaseStrategy,
-        position_manager: PositionManager,
-        order_manager: OrderManager
-    ):
-        self.strategy = strategy
-        self.position_manager = position_manager
-        self.order_manager = order_manager
-```
-
-### 3. Observer Pattern
-
-Used for event notifications and monitoring:
-
-```python
-class EventEmitter:
-    def __init__(self):
-        self._observers = []
-    
-    def subscribe(self, observer):
-        self._observers.append(observer)
-    
-    def notify(self, event):
-        for observer in self._observers:
-            observer.handle_event(event)
-```
-
-### 4. Command Pattern
-
-Used for order execution:
-
-```python
-class OrderCommand:
-    def __init__(self, order_type, symbol, quantity, price):
-        self.order_type = order_type
-        self.symbol = symbol
-        self.quantity = quantity
-        self.price = price
-    
-    async def execute(self, client):
-        # Execute the order
-        pass
-```
-
-### 5. State Pattern
-
-Used for managing position and order states:
-
-```python
-class PositionState(Enum):
-    OPEN = "open"
-    CLOSED = "closed"
-    PARTIAL = "partial"
-
-class Position:
-    def __init__(self):
-        self.state = PositionState.OPEN
-    
-    def close(self):
-        self.state = PositionState.CLOSED
-```
-
-## Error Handling Architecture
-
-### Exception Hierarchy
+## 🏗️ Project Structure
 
 ```
-TradingBotException (Base)
-├── ConfigurationException
-├── NetworkException
-├── APIException
-├── TradingException
-├── StrategyException
-├── DatabaseException
-├── SecurityException
-├── ValidationException
-├── RateLimitException
-└── SystemException
+n0name-trading-bot/
+├── 📁 src/                    # Source code
+│   └── n0name/               # Main package
+│       ├── core/             # Core business logic
+│       ├── strategies/       # Trading strategies
+│       ├── indicators/       # Technical indicators
+│       ├── api/             # REST API
+│       ├── monitoring/      # Monitoring system
+│       ├── utils/           # Utilities
+│       ├── security/        # Security components
+│       └── backtesting/     # Backtesting framework
+├── 📁 tests/                 # Test suite
+│   ├── unit/                # Unit tests
+│   ├── integration/         # Integration tests
+│   ├── performance/         # Performance tests
+│   └── security/            # Security tests
+├── 📁 config/               # Configuration files
+│   ├── environments/        # Environment-specific configs
+│   ├── strategies/          # Strategy configurations
+│   └── infrastructure/      # Infrastructure configs
+├── 📁 docs/                 # Documentation
+│   ├── user-guide/          # User documentation
+│   ├── developer-guide/     # Developer documentation
+│   ├── deployment/          # Deployment guides
+│   ├── api/                 # API documentation
+│   └── guides/              # Specialized guides
+├── 📁 scripts/              # Automation scripts
+│   ├── build/               # Build scripts
+│   ├── deployment/          # Deployment scripts
+│   ├── development/         # Development scripts
+│   ├── maintenance/         # Maintenance scripts
+│   └── utilities/           # Utility scripts
+├── 📁 tools/                # Development tools
+│   ├── build/               # Build tools
+│   ├── docker/              # Docker utilities
+│   ├── monitoring/          # Monitoring tools
+│   └── security/            # Security tools
+├── 📁 examples/             # Example configurations
+├── 📁 archive/              # Archived/legacy files
+└── 📁 data/                 # Runtime data (gitignored)
 ```
 
-### Error Context
+## 🎯 Available Strategies
 
-Each exception includes rich context information:
+### 1. MACD Fibonacci Strategy
+- **Type**: Trend-following
+- **Best for**: Trending markets, medium to long-term trades
+- **Indicators**: MACD crossovers + Fibonacci retracements
+- **Risk Management**: Configurable stop-loss and take-profit
 
-```python
-class ErrorContext:
-    def __init__(
-        self,
-        component: str,
-        operation: str,
-        symbol: Optional[str] = None,
-        additional_data: Optional[Dict] = None
-    ):
-        self.component = component
-        self.operation = operation
-        self.symbol = symbol
-        self.additional_data = additional_data
-        self.timestamp = datetime.utcnow()
+### 2. Bollinger Bands RSI Strategy
+- **Type**: Mean reversion
+- **Best for**: Range-bound markets, high volatility
+- **Indicators**: Bollinger Bands + RSI confirmation
+- **Risk Management**: Dynamic position sizing
+
+### 3. Custom Strategy Framework
+- **Extensible**: Create your own strategies
+- **Template**: Base strategy class with common functionality
+- **Backtesting**: Built-in backtesting support
+
+## ⚙️ Configuration
+
+### Environment Variables
+```env
+# Trading Configuration
+TRADING_MODE=paper          # paper or live
+EXCHANGE=binance
+API_KEY=your_api_key
+API_SECRET=your_api_secret
+
+# Database
+DATABASE_URL=sqlite:///n0name.db
+
+# Monitoring
+INFLUXDB_URL=http://localhost:8086
+GRAFANA_URL=http://localhost:3000
 ```
 
-## Security Architecture
-
-### 1. API Key Management
-
-- Encrypted storage of API keys
-- Key rotation support
-- Secure key retrieval
-
-### 2. Authentication and Authorization
-
-- Role-based access control
-- Session management
-- API endpoint protection
-
-### 3. Data Protection
-
-- Encryption at rest and in transit
-- Secure configuration management
-- Audit logging
-
-## Performance Architecture
-
-### 1. Async/Await Pattern
-
-All I/O operations use async/await for non-blocking execution:
-
-```python
-async def fetch_market_data(symbol: str) -> MarketData:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f"/api/v3/klines?symbol={symbol}") as response:
-            data = await response.json()
-            return process_market_data(data)
-```
-
-### 2. Connection Pooling
-
-- HTTP connection pooling for API calls
-- Database connection pooling
-- WebSocket connection management
-
-### 3. Caching Strategy
-
-- In-memory caching for frequently accessed data
-- Redis caching for shared data
-- Cache invalidation strategies
-
-### 4. Resource Management
-
-- Proper cleanup of async resources
-- Memory usage monitoring
-- CPU usage optimization
-
-## Monitoring and Observability
-
-### 1. Structured Logging
-
-```python
-logger.info(
-    "Order executed",
-    extra={
-        "symbol": "BTCUSDT",
-        "side": "BUY",
-        "quantity": 0.001,
-        "price": 45000.0,
-        "order_id": "12345"
-    }
-)
-```
-
-### 2. Metrics Collection
-
-- Trading performance metrics
-- System performance metrics
-- Business metrics (PnL, win rate, etc.)
-
-### 3. Health Checks
-
-- Component health monitoring
-- External service availability
-- System resource monitoring
-
-### 4. Alerting
-
-- Critical error alerts
-- Performance threshold alerts
-- Business rule violations
-
-## Scalability Considerations
-
-### 1. Horizontal Scaling
-
-- Stateless component design
-- Load balancing support
-- Distributed processing capability
-
-### 2. Vertical Scaling
-
-- Efficient resource utilization
-- Memory optimization
-- CPU optimization
-
-### 3. Database Scaling
-
-- Read replicas for analytics
-- Partitioning strategies
-- Query optimization
-
-## Configuration Management
-
-### 1. Environment-based Configuration
-
+### Strategy Configuration
 ```yaml
-# config/production.yml
+# config/environments/production.yml
+strategy:
+  name: macd_fibonacci
+  parameters:
+    risk_management:
+      max_position_size: 0.02  # 2% per trade
+      stop_loss: 0.015         # 1.5%
+      take_profit: 0.045       # 4.5%
+      max_drawdown: 0.10       # 10%
+
 trading:
-  max_open_positions: 10
-  leverage: 5
-  risk_percentage: 0.02
-
-database:
-  host: "prod-db.example.com"
-  port: 8086
-  
-logging:
-  level: "INFO"
-  structured: true
+  pairs: ["BTC/USDT", "ETH/USDT"]
+  timeframe: "1h"
+  max_concurrent_trades: 3
 ```
 
-### 2. Dynamic Configuration
+## 🚀 Deployment Options
 
-- Runtime configuration updates
-- Feature flags
-- A/B testing support
+### Local Development
+```bash
+# Install dependencies
+pip install -r requirements-dev.txt
 
-### 3. Configuration Validation
+# Run tests
+python -m pytest tests/
 
-- Schema validation
-- Type checking
-- Required field validation
-
-## Testing Architecture
-
-### 1. Unit Testing
-
-- Component isolation
-- Mock external dependencies
-- Comprehensive test coverage
-
-### 2. Integration Testing
-
-- End-to-end workflows
-- External service integration
-- Database integration
-
-### 3. Performance Testing
-
-- Load testing
-- Stress testing
-- Latency testing
-
-### 4. Security Testing
-
-- Vulnerability scanning
-- Penetration testing
-- Security audit
-
-## Deployment Architecture
-
-### 1. Containerization
-
-```dockerfile
-FROM python:3.9-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["python", "n0name.py"]
+# Start development server
+python n0name.py --mode paper
 ```
 
-### 2. Orchestration
+### Docker Production
+```bash
+# Production deployment
+docker-compose -f docker-compose.yml up -d
 
-- Docker Compose for development
-- Kubernetes for production
-- Service mesh for microservices
+# With monitoring stack
+docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+```
 
-### 3. CI/CD Pipeline
+### Cloud Deployment
+- **AWS**: ECS/EKS deployment guides
+- **Google Cloud**: GKE deployment
+- **Azure**: AKS deployment
+- **DigitalOcean**: Droplet deployment
 
-- Automated testing
-- Code quality checks
-- Automated deployment
+## 📊 Monitoring & Metrics
 
-## Future Architecture Considerations
+### Key Metrics
+- **Performance**: Win rate, profit factor, Sharpe ratio
+- **Risk**: Maximum drawdown, position exposure
+- **System**: CPU, memory, API latency
+- **Trading**: Order fill rates, slippage
 
-### 1. Microservices Migration
+### Dashboards
+- **Grafana**: Real-time trading dashboard
+- **Web UI**: Built-in monitoring interface
+- **Mobile**: Responsive design for mobile monitoring
 
-- Service decomposition strategy
-- API gateway implementation
-- Service discovery
+### Alerts
+- **Email**: Trade notifications and system alerts
+- **Slack**: Team notifications
+- **Telegram**: Personal alerts
+- **Webhook**: Custom integrations
 
-### 2. Event-Driven Architecture
+## 🛠️ Development
 
-- Event sourcing
-- CQRS pattern
-- Message queues
+### Prerequisites
+- Python 3.8+
+- Docker & Docker Compose
+- Git
 
-### 3. Machine Learning Integration
+### Development Setup
+```bash
+# Clone and setup
+git clone https://github.com/your-username/n0name-trading-bot.git
+cd n0name-trading-bot
 
-- Model serving infrastructure
-- Feature store
-- ML pipeline integration
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+# or venv\Scripts\activate  # Windows
+
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run tests
+make test
+
+# Start development server
+make dev
+```
+
+### Available Commands
+```bash
+# Development
+make dev              # Start development server
+make test             # Run test suite
+make lint             # Run linting
+make format           # Format code
+
+# Building
+make build            # Build Python package
+make docker-build     # Build Docker image
+make docs             # Generate documentation
+
+# Deployment
+make deploy-staging   # Deploy to staging
+make deploy-prod      # Deploy to production
+make backup           # Backup data
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](docs/developer-guide/contributing.md) for details.
+
+### Quick Contribution Guide
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Add tests for new functionality
+5. Run the test suite (`make test`)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+### Getting Help
+- **Documentation**: Check our [comprehensive docs](docs/README.md)
+- **Issues**: [GitHub Issues](https://github.com/your-username/n0name-trading-bot/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-username/n0name-trading-bot/discussions)
+- **Community**: Join our Discord server
+
+### Reporting Issues
+When reporting issues, please include:
+- Operating system and Python version
+- Error messages and stack traces
+- Steps to reproduce the issue
+- Configuration (remove sensitive data)
+
+## 🔄 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
+
+## 🙏 Acknowledgments
+
+- **ccxt**: Cryptocurrency exchange library
+- **TA-Lib**: Technical analysis library
+- **FastAPI**: Modern web framework
+- **Docker**: Containerization platform
+- **Grafana**: Monitoring and visualization
 
 ---
 
-This architecture documentation provides a comprehensive overview of the n0name trading bot's design and implementation. For specific implementation details, refer to the individual component documentation and code comments. 
+**⚡ Ready to start trading?** Check out our [Installation Guide](docs/user-guide/installation.md) to get started!
+
+**🔧 Want to contribute?** Read our [Developer Guide](docs/developer-guide/architecture.md) to understand the architecture.

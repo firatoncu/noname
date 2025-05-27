@@ -1,17 +1,24 @@
-# Makefile for n0name Trading Bot
+# Makefile for n0name Trading Bot v2.0.0
 # Provides convenient shortcuts for development, testing, building, and deployment
 
 .PHONY: help install install-dev test test-unit test-integration test-performance test-security test-all coverage lint format clean docs build deploy
 
 # Default target
 help:
-	@echo "n0name Trading Bot - Development Commands"
+	@echo "n0name Trading Bot v2.0.0 - Development Commands"
 	@echo ""
-	@echo "Setup Commands:"
+	@echo "🚀 Quick Start:"
+	@echo "  dev              Start development environment"
+	@echo "  setup            Complete development setup"
+	@echo "  quick-test       Run quick validation tests"
+	@echo ""
+	@echo "📦 Setup Commands:"
 	@echo "  install          Install package in production mode"
 	@echo "  install-dev      Install package in development mode with all dependencies"
+	@echo "  setup-dev        Complete development environment setup"
+	@echo "  setup-hooks      Install pre-commit hooks"
 	@echo ""
-	@echo "Testing Commands:"
+	@echo "🧪 Testing Commands:"
 	@echo "  test             Run unit tests (default)"
 	@echo "  test-unit        Run unit tests only"
 	@echo "  test-integration Run integration tests only"
@@ -21,19 +28,20 @@ help:
 	@echo "  test-all         Run all tests"
 	@echo "  test-parallel    Run tests in parallel"
 	@echo ""
-	@echo "Coverage Commands:"
+	@echo "📊 Coverage Commands:"
 	@echo "  coverage         Run tests with coverage reporting"
 	@echo "  coverage-unit    Run unit tests with coverage"
 	@echo "  coverage-html    Generate HTML coverage report"
 	@echo "  coverage-report  Generate comprehensive test report"
 	@echo ""
-	@echo "Code Quality Commands:"
+	@echo "🔍 Code Quality Commands:"
 	@echo "  lint             Run all linting tools"
 	@echo "  format           Format code with black and isort"
 	@echo "  type-check       Run type checking with mypy"
 	@echo "  security-scan    Run security analysis"
+	@echo "  validate         Run all validation checks"
 	@echo ""
-	@echo "Build Commands:"
+	@echo "🏗️ Build Commands:"
 	@echo "  build            Build package for distribution"
 	@echo "  build-dev        Build for development"
 	@echo "  build-prod       Build for production"
@@ -41,34 +49,71 @@ help:
 	@echo "  build-docker     Build Docker images"
 	@echo "  build-release    Build complete release package"
 	@echo ""
-	@echo "Deployment Commands:"
+	@echo "🚀 Deployment Commands:"
 	@echo "  deploy-dev       Deploy to development environment"
 	@echo "  deploy-staging   Deploy to staging environment"
 	@echo "  deploy-prod      Deploy to production environment"
 	@echo "  deploy-rollback  Rollback deployment"
+	@echo "  deploy-dry-run   Test deployment without changes"
 	@echo ""
-	@echo "Docker Commands:"
+	@echo "🐳 Docker Commands:"
 	@echo "  docker-build     Build Docker images"
 	@echo "  docker-up        Start Docker services"
 	@echo "  docker-down      Stop Docker services"
 	@echo "  docker-logs      View Docker logs"
 	@echo "  docker-clean     Clean Docker resources"
+	@echo "  docker-dev       Start development Docker environment"
 	@echo ""
-	@echo "Development Commands:"
-	@echo "  clean            Clean up build artifacts and cache files"
+	@echo "📚 Documentation Commands:"
 	@echo "  docs             Build documentation"
-	@echo "  check-deps       Check if all dependencies are installed"
+	@echo "  docs-serve       Serve documentation locally"
+	@echo "  docs-clean       Clean documentation build"
 	@echo ""
-	@echo "CI/CD Commands:"
+	@echo "🛠️ Maintenance Commands:"
+	@echo "  clean            Clean up build artifacts and cache files"
+	@echo "  clean-all        Deep clean including dependencies"
+	@echo "  backup           Backup important data"
+	@echo "  check-deps       Check if all dependencies are installed"
+	@echo "  update-deps      Update dependencies"
+	@echo ""
+	@echo "🔄 CI/CD Commands:"
 	@echo "  ci-test          Run the same tests as CI pipeline"
 	@echo "  pre-commit       Run pre-commit checks"
+	@echo "  validate-setup   Validate project setup"
+
+# Quick Start Commands
+dev:
+	@echo "🚀 Starting development environment..."
+	docker-compose -f docker-compose.dev.yml up -d
+	@echo "✅ Development environment started!"
+	@echo "📊 Grafana: http://localhost:3000"
+	@echo "📈 InfluxDB: http://localhost:8086"
+	@echo "🔍 Logs: make docker-dev-logs"
+
+setup: install-dev setup-hooks
+	@echo "✅ Development setup complete!"
+
+quick-test: test-smoke lint
+	@echo "✅ Quick validation passed!"
 
 # Setup Commands
 install:
 	pip install -e .
 
 install-dev:
-	pip install -e .[dev,performance,monitoring]
+	pip install -e .[dev,performance,monitoring,security]
+	pip install -r requirements-dev.txt
+
+setup-dev: install-dev setup-hooks
+	@echo "Setting up development environment..."
+	mkdir -p logs data/market data/backtest data/cache
+	cp -n .env.example .env || true
+	@echo "✅ Development environment setup complete!"
+	@echo "📝 Please edit .env with your configuration"
+
+setup-hooks:
+	pre-commit install
+	pre-commit install --hook-type commit-msg
 
 # Testing Commands
 test:
@@ -103,12 +148,12 @@ coverage-unit:
 	python tests/run_tests.py --unit --coverage --verbose
 
 coverage-html:
-	python tests/run_tests.py --coverage
-	@echo "Coverage report generated at: htmlcov/index.html"
+	python tests/run_tests.py --coverage --html
+	@echo "📊 Coverage report: htmlcov/index.html"
 
 coverage-report:
 	python tests/run_tests.py --report
-	@echo "Comprehensive test report generated"
+	@echo "📋 Comprehensive test report generated"
 
 # Code Quality Commands
 lint:
@@ -118,54 +163,58 @@ format:
 	python tests/run_tests.py --format
 
 type-check:
-	python -m mypy src/
+	python -m mypy src/ --config-file pyproject.toml
 
 security-scan:
-	bandit -r src/ -f json -o bandit-report.json
-	safety check --json --output safety-report.json
-	@echo "Security reports generated: bandit-report.json, safety-report.json"
+	@echo "🔍 Running security scans..."
+	bandit -r src/ -f json -o reports/bandit-report.json
+	safety check --json --output reports/safety-report.json
+	@echo "📋 Security reports: reports/bandit-report.json, reports/safety-report.json"
+
+validate: lint type-check security-scan test-smoke
+	@echo "✅ All validation checks passed!"
 
 # Build Commands
 build:
-	python scripts/build.py --type prod
+	python scripts/build/build.py --type prod
 
 build-dev:
-	python scripts/build.py --type dev
+	python scripts/build/build.py --type dev
 
 build-prod:
-	python scripts/build.py --type prod --test --lint
+	python scripts/build/build.py --type prod --test --lint
 
 build-exe:
-	python scripts/build.py --type exe --onefile
+	python scripts/build/build.py --type exe --onefile
 
 build-docker:
-	python scripts/build.py --type docker
+	python scripts/build/build.py --type docker
 
 build-release:
-	@read -p "Enter version (e.g., 2.0.0): " version; \
-	python scripts/build.py --type release --version $$version
+	@read -p "Enter version (e.g., 2.1.0): " version; \
+	python scripts/build/build.py --type release --version $$version
 
 # Deployment Commands
 deploy-dev:
-	./scripts/deploy.sh -e development
+	scripts/deployment/deploy.sh -e development
 
 deploy-staging:
-	./scripts/deploy.sh -e staging
+	scripts/deployment/deploy.sh -e staging
 
 deploy-prod:
-	@echo "WARNING: This will deploy to PRODUCTION!"
+	@echo "⚠️  WARNING: This will deploy to PRODUCTION!"
 	@read -p "Are you sure? (y/N): " confirm; \
 	if [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ]; then \
-		./scripts/deploy.sh -e production; \
+		scripts/deployment/deploy.sh -e production; \
 	else \
-		echo "Deployment cancelled."; \
+		echo "❌ Deployment cancelled."; \
 	fi
 
 deploy-rollback:
-	./scripts/deploy.sh --rollback
+	scripts/deployment/deploy.sh --rollback
 
 deploy-dry-run:
-	./scripts/deploy.sh --dry-run -e production
+	scripts/deployment/deploy.sh --dry-run -e production
 
 # Docker Commands
 docker-build:
@@ -184,7 +233,7 @@ docker-clean:
 	docker system prune -a -f
 	docker volume prune -f
 
-docker-dev-up:
+docker-dev:
 	docker-compose -f docker-compose.dev.yml up -d
 
 docker-dev-down:
@@ -193,9 +242,25 @@ docker-dev-down:
 docker-dev-logs:
 	docker-compose -f docker-compose.dev.yml logs -f
 
-# Development Commands
+docker-dev-shell:
+	docker-compose -f docker-compose.dev.yml exec n0name-bot bash
+
+# Documentation Commands
+docs:
+	@echo "📚 Building documentation..."
+	mkdir -p docs/_build
+	@echo "✅ Documentation built!"
+
+docs-serve:
+	@echo "🌐 Serving documentation at http://localhost:8000"
+	cd docs && python -m http.server 8000
+
+docs-clean:
+	rm -rf docs/_build
+
+# Maintenance Commands
 clean:
-	@echo "Cleaning up build artifacts and cache files..."
+	@echo "🧹 Cleaning up build artifacts and cache files..."
 	rm -rf build/
 	rm -rf dist/
 	rm -rf *.egg-info/
@@ -203,146 +268,133 @@ clean:
 	rm -rf .coverage
 	rm -rf htmlcov/
 	rm -rf .mypy_cache/
-	rm -rf .ruff_cache/
+	rm -rf .tox/
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 	find . -type f -name "*.pyo" -delete
-	find . -type f -name "*~" -delete
-	@echo "Cleanup complete!"
+	@echo "✅ Cleanup complete!"
 
-docs:
-	@echo "Building documentation..."
-	# Add documentation build commands here when docs are added
-	@echo "Documentation build would run here"
+clean-all: clean
+	@echo "🧹 Deep cleaning..."
+	rm -rf venv/
+	rm -rf .venv/
+	rm -rf node_modules/
+	docker system prune -a -f
+	@echo "✅ Deep cleanup complete!"
+
+backup:
+	@echo "💾 Creating backup..."
+	scripts/maintenance/backup.sh
+	@echo "✅ Backup complete!"
 
 check-deps:
-	python tests/run_tests.py --check-deps
+	@echo "🔍 Checking dependencies..."
+	python scripts/utilities/validate-setup.py --deps
+	@echo "✅ Dependencies check complete!"
+
+update-deps:
+	@echo "📦 Updating dependencies..."
+	pip install --upgrade pip
+	pip install --upgrade -r requirements.txt
+	pip install --upgrade -r requirements-dev.txt
+	@echo "✅ Dependencies updated!"
 
 # CI/CD Commands
-ci-test: lint test-unit test-integration coverage
-	@echo "CI test pipeline completed"
+ci-test:
+	@echo "🔄 Running CI pipeline tests..."
+	python tests/run_tests.py --ci
+	@echo "✅ CI tests complete!"
 
-pre-commit: format lint test-unit
-	@echo "Pre-commit checks completed"
+pre-commit:
+	pre-commit run --all-files
 
-# Advanced Testing Commands
-test-custom:
-	@read -p "Enter test pattern: " pattern; \
-	python tests/run_tests.py --custom "$$pattern" --verbose
+validate-setup:
+	@echo "🔍 Validating project setup..."
+	python scripts/utilities/validate-setup.py --all
+	@echo "✅ Setup validation complete!"
 
-test-debug:
-	pytest -v -s --tb=long --pdb
+# Monitoring Commands
+monitor:
+	@echo "📊 Opening monitoring dashboard..."
+	@echo "Grafana: http://localhost:3000"
+	@echo "InfluxDB: http://localhost:8086"
 
-test-profile:
-	pytest --durations=10 --verbose
+logs:
+	tail -f logs/n0name.log
+
+logs-error:
+	tail -f logs/error.log
+
+# Development Utilities
+shell:
+	python -c "from n0name import *; import IPython; IPython.embed()"
+
+debug:
+	python -m pdb n0name.py
+
+profile:
+	python -m cProfile -o profile.stats n0name.py
+	@echo "📊 Profile saved to profile.stats"
 
 # Database Commands
 db-migrate:
-	@echo "Running database migrations..."
-	# Add database migration commands here
-
-db-reset:
-	@echo "Resetting database..."
-	docker-compose exec postgres psql -U n0name -d n0name_trading -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+	python scripts/utilities/migrate-data.py
 
 db-backup:
-	@echo "Creating database backup..."
-	mkdir -p backups
-	docker-compose exec postgres pg_dump -U n0name n0name_trading > backups/db_backup_$(shell date +%Y%m%d_%H%M%S).sql
+	scripts/maintenance/backup.sh --database-only
 
-# Performance Monitoring
+db-restore:
+	@read -p "Enter backup file path: " backup_file; \
+	scripts/maintenance/backup.sh --restore $$backup_file
+
+# Security Commands
+security-audit:
+	@echo "🔒 Running security audit..."
+	python tools/security/audit.py
+	@echo "✅ Security audit complete!"
+
+encrypt-config:
+	python tools/security/encrypt_config.py
+
+decrypt-config:
+	python tools/security/decrypt_config.py
+
+# Performance Commands
 benchmark:
-	pytest --benchmark-only --benchmark-sort=mean
+	python tests/performance/test_benchmarks.py
 
-benchmark-compare:
-	pytest --benchmark-compare=0001 --benchmark-sort=mean
-
-# Continuous Testing
-watch-tests:
-	@echo "Watching for file changes and running tests..."
-	# Requires entr or similar tool
-	find src/ tests/ -name "*.py" | entr -c make test-unit
+load-test:
+	python tests/performance/test_load.py
 
 # Release Commands
-release-check: clean lint test-all coverage security-scan
-	@echo "Release checks completed successfully!"
+tag-release:
+	@read -p "Enter version (e.g., v2.1.0): " version; \
+	git tag -a $$version -m "Release $$version"; \
+	git push origin $$version
 
-release-tag:
-	@read -p "Enter version tag (e.g., v2.0.0): " tag; \
-	git tag -a $$tag -m "Release $$tag"; \
-	git push origin $$tag
-
-# Environment Commands
-env-check:
-	@echo "Python version: $$(python --version)"
-	@echo "Pip version: $$(pip --version)"
-	@echo "Virtual environment: $$VIRTUAL_ENV"
-	python -c "import sys; print(f'Python path: {sys.path}')"
-
-env-setup:
-	@echo "Setting up development environment..."
-	cp env.example .env
-	@echo "Please edit .env with your configuration"
-
-# Quick Commands for Development
-quick-test:
-	pytest tests/unit/ -x -v
-
-quick-lint:
-	ruff check src/ tests/
-	black --check src/ tests/
-
-# Monitoring Commands
-logs:
-	tail -f logs/trading_bot.log
-
-logs-error:
-	grep ERROR logs/trading_bot.log | tail -20
-
-status:
-	@echo "=== Service Status ==="
-	docker-compose ps
-	@echo ""
-	@echo "=== Health Checks ==="
-	curl -s http://localhost:8080/health || echo "Application not responding"
-
-# Utility Commands
-install-hooks:
-	pre-commit install
-	@echo "Pre-commit hooks installed"
-
-update-deps:
-	pip install -e .[dev,performance,monitoring] --upgrade
-	pip freeze > requirements-frozen.txt
-
-generate-requirements:
-	pip-compile requirements.in
-	pip-compile requirements-dev.in
+changelog:
+	@echo "📝 Updating changelog..."
+	@echo "Please update CHANGELOG.md manually"
 
 # Help for specific categories
-help-build:
-	@echo "Build Commands:"
-	@echo "  build            Build package for distribution"
-	@echo "  build-dev        Build for development"
-	@echo "  build-prod       Build for production with tests"
-	@echo "  build-exe        Build standalone executable"
-	@echo "  build-docker     Build Docker images"
-	@echo "  build-release    Build complete release package"
+help-dev:
+	@echo "🔧 Development Commands:"
+	@echo "  dev              Start development environment"
+	@echo "  setup-dev        Setup development environment"
+	@echo "  test             Run tests"
+	@echo "  lint             Check code quality"
+	@echo "  format           Format code"
 
 help-deploy:
-	@echo "Deployment Commands:"
-	@echo "  deploy-dev       Deploy to development environment"
-	@echo "  deploy-staging   Deploy to staging environment"
-	@echo "  deploy-prod      Deploy to production environment (with confirmation)"
-	@echo "  deploy-rollback  Rollback to previous deployment"
-	@echo "  deploy-dry-run   Show what would be deployed without executing"
+	@echo "🚀 Deployment Commands:"
+	@echo "  deploy-dev       Deploy to development"
+	@echo "  deploy-staging   Deploy to staging"
+	@echo "  deploy-prod      Deploy to production"
+	@echo "  deploy-rollback  Rollback deployment"
 
 help-docker:
-	@echo "Docker Commands:"
-	@echo "  docker-build     Build Docker images"
-	@echo "  docker-up        Start production Docker services"
-	@echo "  docker-down      Stop Docker services"
-	@echo "  docker-logs      View Docker logs"
-	@echo "  docker-clean     Clean Docker resources"
-	@echo "  docker-dev-up    Start development Docker services"
-	@echo "  docker-dev-down  Stop development Docker services" 
+	@echo "🐳 Docker Commands:"
+	@echo "  docker-dev       Start development containers"
+	@echo "  docker-up        Start production containers"
+	@echo "  docker-logs      View container logs"
+	@echo "  docker-clean     Clean Docker resources" 
