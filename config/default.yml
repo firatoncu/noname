@@ -1,0 +1,222 @@
+# n0name Trading Bot - Default Configuration
+# This file demonstrates the new Pydantic-based configuration structure
+
+# Application environment
+environment: development
+debug: true
+version: "2.0.0"
+
+# Core trading configuration
+trading:
+  # Initial capital for trading
+  capital: 10000.0
+  
+  # Leverage multiplier (1 = no leverage)
+  leverage: 1
+  
+  # Trading symbols (will be validated)
+  symbols:
+    - "BTCUSDT"
+    - "ETHUSDT"
+    - "ADAUSDT"
+    - "DOTUSDT"
+  
+  # Enable paper trading mode (recommended for testing)
+  paper_trading: true
+  
+  # Auto-start trading when application starts
+  auto_start: false
+  
+  # Strategy configuration
+  strategy:
+    name: "bollinger_rsi_strategy"
+    type: "bollinger_rsi"
+    enabled: true
+    symbols: []  # Empty means use trading.symbols
+    timeframe: "5m"
+    lookback_period: 500
+    parameters:
+      # Bollinger Bands parameters
+      bb_period: 20
+      bb_std_dev: 2.0
+      
+      # RSI parameters
+      rsi_period: 14
+      rsi_overbought: 70
+      rsi_oversold: 30
+      
+      # Signal confirmation
+      require_volume_confirmation: true
+      min_volume_ratio: 1.5
+  
+  # Risk management configuration
+  risk:
+    # Maximum position size as percentage of capital
+    max_position_size: 0.1  # 10%
+    
+    # Maximum daily loss limit
+    max_daily_loss: 0.05  # 5%
+    
+    # Maximum drawdown limit
+    max_drawdown: 0.2  # 20%
+    
+    # Risk per trade
+    risk_per_trade: 0.02  # 2%
+    
+    # Maximum number of open positions
+    max_open_positions: 5
+    
+    # Stop loss percentage
+    stop_loss_percentage: 0.02  # 2%
+    
+    # Take profit ratio (risk:reward)
+    take_profit_ratio: 2.0
+    
+    # Position sizing method
+    position_sizing_method: "fixed_percentage"
+
+# Exchange configuration
+exchange:
+  type: "binance"
+  
+  # API credentials (use environment variables in production)
+  api_key: "${BINANCE_API_KEY}"
+  api_secret: "${BINANCE_API_SECRET}"
+  
+  # Use testnet for development
+  testnet: true
+  sandbox: false
+  
+  # Rate limiting
+  rate_limit: 1200  # requests per minute
+  timeout: 30
+  retry_attempts: 3
+  retry_delay: 1.0
+
+# Database configuration
+database:
+  type: "sqlite"
+  url: "sqlite:///data/trading_bot.db"
+  
+  # Connection pool settings
+  pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+  pool_recycle: 3600
+  echo: false  # Set to true for SQL debugging
+
+# Cache configuration
+cache:
+  type: "memory"  # Options: memory, redis, memcached
+  
+  # Redis settings (if using redis)
+  # host: "localhost"
+  # port: 6379
+  # password: null
+  # database: 0
+  
+  max_connections: 10
+  timeout: 5
+  default_ttl: 3600  # 1 hour
+
+# Logging configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # File logging
+  file_path: "logs/trading_bot.log"
+  max_file_size: 10485760  # 10MB
+  backup_count: 5
+  
+  # Console output
+  console_output: true
+  
+  # Structured logging (JSON format)
+  structured_logging: true
+  
+  # Log to database
+  log_to_database: false
+
+# Security configuration
+security:
+  encryption_enabled: true
+  api_key_encryption: true
+  database_encryption: false
+  ssl_verify: true
+  rate_limiting: true
+  
+  # IP whitelist (empty = allow all)
+  ip_whitelist: []
+  
+  # Session settings
+  session_timeout: 3600  # 1 hour
+  max_login_attempts: 5
+
+# Notification configuration (optional)
+notifications:
+  enabled: true
+  types:
+    - "email"
+  
+  # Email settings
+  email:
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: "${EMAIL_USERNAME}"
+    password: "${EMAIL_PASSWORD}"
+    from_address: "${EMAIL_FROM}"
+    to_addresses:
+      - "${EMAIL_TO}"
+  
+  # Telegram settings (optional)
+  # telegram:
+  #   bot_token: "${TELEGRAM_BOT_TOKEN}"
+  #   chat_id: "${TELEGRAM_CHAT_ID}"
+
+# Monitoring configuration (optional)
+monitoring:
+  enabled: true
+  metrics_collection: true
+  performance_tracking: true
+  health_checks: true
+  
+  # Alert thresholds
+  alert_thresholds:
+    cpu_usage: 80.0
+    memory_usage: 85.0
+    error_rate: 5.0
+    latency: 1000.0  # milliseconds
+    position_count: 10
+    daily_pnl: -500.0  # negative for losses
+    drawdown: 15.0
+  
+  # Dashboard settings
+  dashboard_port: 8080
+  metrics_retention_days: 30
+
+# Web UI configuration (optional)
+web_ui:
+  enabled: true
+  host: "localhost"
+  port: 3000
+  debug: false
+  auto_reload: true
+  cors_enabled: true
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://127.0.0.1:3000"
+
+# Backtesting configuration (optional)
+backtest:
+  enabled: false
+  # start_date: "2023-01-01"
+  # end_date: "2023-12-31"
+  initial_capital: 10000.0
+  commission: 0.001  # 0.1%
+  slippage: 0.0005   # 0.05%
+
+# Directory settings
+data_directory: "data"
+log_directory: "logs"
+config_directory: "config" 
