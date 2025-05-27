@@ -21,35 +21,25 @@ __author__: Final[str] = "n0name Team"
 __email__: Final[str] = "contact@n0name.com"
 __license__: Final[str] = "MIT"
 
-# Core exports
-from .core.trading_engine import TradingEngine
-from .core.base_strategy import BaseStrategy, TradingSignal, MarketData
-from .core.position_manager import PositionManager
-from .core.order_manager import OrderManager
+# Import available modules
+try:
+    from .cli import main as cli_main
+except ImportError:
+    cli_main = None
 
-# Configuration exports
-from .config.models import TradingConfig, DatabaseConfig, SecurityConfig
-from .config.manager import ConfigManager
-
-# Service exports
-from .services.binance_service import BinanceService
-from .services.notification_service import NotificationService
-from .services.monitoring_service import MonitoringService
-
-# Dependency injection
-from .di.container import Container
-
-# Exceptions
-from .exceptions import (
-    TradingBotException,
-    NetworkException,
-    APIException,
-    ConfigurationException,
-    SystemException,
-)
-
-# Main application
-from .main import TradingBotApplication
+try:
+    from .exceptions import (
+        TradingBotException,
+        NetworkException,
+        APIException,
+        ConfigurationException,
+        SystemException,
+    )
+except ImportError:
+    # Define basic exceptions if the module doesn't exist
+    class TradingBotException(Exception):
+        """Base exception for trading bot errors."""
+        pass
 
 __all__ = [
     # Version info
@@ -57,30 +47,8 @@ __all__ = [
     "__author__",
     "__email__",
     "__license__",
-    # Core components
-    "TradingEngine",
-    "BaseStrategy",
-    "TradingSignal",
-    "MarketData",
-    "PositionManager",
-    "OrderManager",
-    # Configuration
-    "TradingConfig",
-    "DatabaseConfig",
-    "SecurityConfig",
-    "ConfigManager",
-    # Services
-    "BinanceService",
-    "NotificationService",
-    "MonitoringService",
-    # Dependency injection
-    "Container",
+    # Available functions
+    "cli_main",
     # Exceptions
     "TradingBotException",
-    "NetworkException",
-    "APIException",
-    "ConfigurationException",
-    "SystemException",
-    # Main application
-    "TradingBotApplication",
 ] 

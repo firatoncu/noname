@@ -1,0 +1,450 @@
+Metadata-Version: 2.4
+Name: n0name-trading-bot
+Version: 2.0.0
+Summary: Advanced algorithmic trading bot with modern architecture
+Author-email: n0name Team <contact@n0name.com>
+Maintainer-email: n0name Team <contact@n0name.com>
+License: MIT License
+        
+        Copyright (c) 2024 n0name Team
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE. 
+Project-URL: Homepage, https://github.com/n0name/trading-bot
+Project-URL: Documentation, https://n0name.readthedocs.io/
+Project-URL: Repository, https://github.com/n0name/trading-bot.git
+Project-URL: Bug Tracker, https://github.com/n0name/trading-bot/issues
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Financial and Insurance Industry
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Office/Business :: Financial :: Investment
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: python-binance>=1.0.19
+Requires-Dist: pandas>=2.0.0
+Requires-Dist: ta>=0.10.2
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: python-dotenv>=1.0.0
+Requires-Dist: watchdog>=3.0.0
+Requires-Dist: aiohttp>=3.8.0
+Requires-Dist: aiofiles>=23.0.0
+Requires-Dist: uvloop>=0.17.0
+Requires-Dist: aiodns>=3.0.0
+Requires-Dist: cchardet>=2.1.7
+Requires-Dist: brotlipy>=0.7.0
+Requires-Dist: fastapi>=0.104.0
+Requires-Dist: uvicorn[standard]>=0.24.0
+Requires-Dist: websockets>=12.0
+Requires-Dist: psutil>=5.9.0
+Requires-Dist: email-validator>=2.1.0
+Requires-Dist: dependency-injector>=4.41.0
+Requires-Dist: structlog>=23.0.0
+Requires-Dist: rich>=13.0.0
+Requires-Dist: typer>=0.9.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.12.0; extra == "dev"
+Requires-Dist: pytest-xdist>=3.3.0; extra == "dev"
+Requires-Dist: pytest-html>=4.0.0; extra == "dev"
+Requires-Dist: pytest-benchmark>=4.0.0; extra == "dev"
+Requires-Dist: pytest-timeout>=2.1.0; extra == "dev"
+Requires-Dist: pytest-randomly>=3.12.0; extra == "dev"
+Requires-Dist: pytest-sugar>=0.9.7; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: flake8>=6.0.0; extra == "dev"
+Requires-Dist: pre-commit>=3.0.0; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: factory-boy>=3.3.0; extra == "dev"
+Requires-Dist: freezegun>=1.2.0; extra == "dev"
+Requires-Dist: responses>=0.24.0; extra == "dev"
+Requires-Dist: aioresponses>=0.7.4; extra == "dev"
+Requires-Dist: httpx>=0.25.0; extra == "dev"
+Requires-Dist: faker>=20.0.0; extra == "dev"
+Requires-Dist: coverage[toml]>=7.0.0; extra == "dev"
+Requires-Dist: tox>=4.0.0; extra == "dev"
+Provides-Extra: performance
+Requires-Dist: cython>=3.0.0; extra == "performance"
+Requires-Dist: numba>=0.58.0; extra == "performance"
+Requires-Dist: numpy>=1.24.0; extra == "performance"
+Provides-Extra: monitoring
+Requires-Dist: prometheus-client>=0.17.0; extra == "monitoring"
+Requires-Dist: grafana-api>=1.0.3; extra == "monitoring"
+Dynamic: license-file
+
+# n0name Trading Bot v2.0.0
+
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green.svg)](https://github.com/features/actions)
+
+A professional-grade automated cryptocurrency trading bot designed for Binance Futures trading. Built with Python, featuring modular architecture, comprehensive risk management, and extensive monitoring capabilities.
+
+## ⚠️ Disclaimer
+
+**The information provided by this bot is not intended to be and should not be construed as financial advice. Always conduct your own research and consult with a qualified financial advisor before making any trading decisions. Trading in cryptocurrencies and futures involves a high level of risk and may not be suitable for all investors. You should carefully consider your financial situation and risk tolerance before engaging in such activities. There are no guarantees of profit or avoidance of losses when using this bot. Past performance is not indicative of future results. You are solely responsible for any trades executed using this bot. The developers and contributors of this project are not liable for any financial losses or damages that may occur as a result of using this bot. Ensure that your use of this bot complies with all applicable laws and regulations in your jurisdiction.**
+
+## 🚀 Quick Start
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/your-username/n0name-trading-bot.git
+cd n0name-trading-bot
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys and settings
+
+# Run the bot
+python n0name.py
+```
+
+### Docker Quick Start
+```bash
+# Using Docker Compose (Recommended)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f n0name-bot
+```
+
+## 📚 Documentation
+
+Our comprehensive documentation is organized to help both users and developers:
+
+### 🎯 For Users
+- **[Installation Guide](docs/user-guide/installation.md)** - Complete setup instructions
+- **[Configuration Guide](docs/user-guide/configuration.md)** - Configuration reference
+- **[Trading Strategies](docs/user-guide/trading-strategies.md)** - Available strategies and usage
+- **[Troubleshooting](docs/user-guide/troubleshooting.md)** - Common issues and solutions
+
+### 🔧 For Developers
+- **[Architecture Overview](docs/developer-guide/architecture.md)** - System design and components
+- **[Contributing Guidelines](docs/developer-guide/contributing.md)** - How to contribute
+- **[Testing Guide](docs/developer-guide/testing.md)** - Testing framework and practices
+- **[Performance Guide](docs/developer-guide/performance.md)** - Optimization techniques
+- **[Security Guidelines](docs/developer-guide/security.md)** - Security best practices
+
+### 🚀 For DevOps
+- **[Docker Deployment](docs/deployment/docker.md)** - Container deployment guide
+- **[Monitoring Setup](docs/deployment/monitoring.md)** - Monitoring and alerting
+- **[Backup & Recovery](docs/deployment/backup-recovery.md)** - Data protection
+
+### 🔌 API Reference
+- **[API Endpoints](docs/api/endpoints.md)** - REST API documentation
+- **[API Manager](docs/api/manager.md)** - API client libraries
+- **[Authentication](docs/api/authentication.md)** - API security
+
+### 📖 Migration & Guides
+- **[Migration Guides](docs/guides/migration/)** - Upgrade and migration instructions
+- **[Optimization Guides](docs/guides/optimization/)** - Performance optimization
+- **[Modernization Guides](docs/guides/modernization/)** - Code modernization
+
+## ✨ Key Features
+
+### 🎯 Trading Capabilities
+- **Multiple Strategies**: MACD-Fibonacci, Bollinger-RSI, and custom strategies
+- **Risk Management**: Advanced position sizing, stop-loss, and take-profit
+- **Paper Trading**: Test strategies without real money
+- **Multi-Timeframe**: Support for various timeframes (1m to 1d)
+- **Multi-Asset**: Trade multiple cryptocurrency pairs simultaneously
+
+### 🛡️ Security & Safety
+- **Encrypted Configuration**: Secure API key storage
+- **Risk Limits**: Configurable drawdown and position limits
+- **Emergency Stop**: Immediate trading halt functionality
+- **Audit Logging**: Comprehensive trade and system logging
+
+### 📊 Monitoring & Analytics
+- **Real-time Dashboard**: Web-based monitoring interface
+- **Performance Metrics**: Detailed trading statistics
+- **Alerting System**: Email, Slack, and Telegram notifications
+- **Database Integration**: InfluxDB for time-series data
+
+### 🔧 Technical Excellence
+- **Modular Architecture**: Clean, maintainable codebase
+- **Async Processing**: High-performance async operations
+- **Docker Support**: Containerized deployment
+- **CI/CD Pipeline**: Automated testing and deployment
+- **Comprehensive Testing**: Unit, integration, and performance tests
+
+## 🏗️ Project Structure
+
+```
+n0name-trading-bot/
+├── 📁 src/                    # Source code
+│   └── n0name/               # Main package
+│       ├── core/             # Core business logic
+│       ├── strategies/       # Trading strategies
+│       ├── indicators/       # Technical indicators
+│       ├── api/             # REST API
+│       ├── monitoring/      # Monitoring system
+│       ├── utils/           # Utilities
+│       ├── security/        # Security components
+│       └── backtesting/     # Backtesting framework
+├── 📁 tests/                 # Test suite
+│   ├── unit/                # Unit tests
+│   ├── integration/         # Integration tests
+│   ├── performance/         # Performance tests
+│   └── security/            # Security tests
+├── 📁 config/               # Configuration files
+│   ├── environments/        # Environment-specific configs
+│   ├── strategies/          # Strategy configurations
+│   └── infrastructure/      # Infrastructure configs
+├── 📁 docs/                 # Documentation
+│   ├── user-guide/          # User documentation
+│   ├── developer-guide/     # Developer documentation
+│   ├── deployment/          # Deployment guides
+│   ├── api/                 # API documentation
+│   └── guides/              # Specialized guides
+├── 📁 scripts/              # Automation scripts
+│   ├── build/               # Build scripts
+│   ├── deployment/          # Deployment scripts
+│   ├── development/         # Development scripts
+│   ├── maintenance/         # Maintenance scripts
+│   └── utilities/           # Utility scripts
+├── 📁 tools/                # Development tools
+│   ├── build/               # Build tools
+│   ├── docker/              # Docker utilities
+│   ├── monitoring/          # Monitoring tools
+│   └── security/            # Security tools
+├── 📁 examples/             # Example configurations
+├── 📁 archive/              # Archived/legacy files
+└── 📁 data/                 # Runtime data (gitignored)
+```
+
+## 🎯 Available Strategies
+
+### 1. MACD Fibonacci Strategy
+- **Type**: Trend-following
+- **Best for**: Trending markets, medium to long-term trades
+- **Indicators**: MACD crossovers + Fibonacci retracements
+- **Risk Management**: Configurable stop-loss and take-profit
+
+### 2. Bollinger Bands RSI Strategy
+- **Type**: Mean reversion
+- **Best for**: Range-bound markets, high volatility
+- **Indicators**: Bollinger Bands + RSI confirmation
+- **Risk Management**: Dynamic position sizing
+
+### 3. Custom Strategy Framework
+- **Extensible**: Create your own strategies
+- **Template**: Base strategy class with common functionality
+- **Backtesting**: Built-in backtesting support
+
+## ⚙️ Configuration
+
+### Environment Variables
+```env
+# Trading Configuration
+TRADING_MODE=paper          # paper or live
+EXCHANGE=binance
+API_KEY=your_api_key
+API_SECRET=your_api_secret
+
+# Database
+DATABASE_URL=sqlite:///n0name.db
+
+# Monitoring
+INFLUXDB_URL=http://localhost:8086
+GRAFANA_URL=http://localhost:3000
+```
+
+### Strategy Configuration
+```yaml
+# config/environments/production.yml
+strategy:
+  name: macd_fibonacci
+  parameters:
+    risk_management:
+      max_position_size: 0.02  # 2% per trade
+      stop_loss: 0.015         # 1.5%
+      take_profit: 0.045       # 4.5%
+      max_drawdown: 0.10       # 10%
+
+trading:
+  pairs: ["BTC/USDT", "ETH/USDT"]
+  timeframe: "1h"
+  max_concurrent_trades: 3
+```
+
+## 🚀 Deployment Options
+
+### Local Development
+```bash
+# Install dependencies
+pip install -r requirements-dev.txt
+
+# Run tests
+python -m pytest tests/
+
+# Start development server
+python n0name.py --mode paper
+```
+
+### Docker Production
+```bash
+# Production deployment
+docker-compose -f docker-compose.yml up -d
+
+# With monitoring stack
+docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+```
+
+### Cloud Deployment
+- **AWS**: ECS/EKS deployment guides
+- **Google Cloud**: GKE deployment
+- **Azure**: AKS deployment
+- **DigitalOcean**: Droplet deployment
+
+## 📊 Monitoring & Metrics
+
+### Key Metrics
+- **Performance**: Win rate, profit factor, Sharpe ratio
+- **Risk**: Maximum drawdown, position exposure
+- **System**: CPU, memory, API latency
+- **Trading**: Order fill rates, slippage
+
+### Dashboards
+- **Grafana**: Real-time trading dashboard
+- **Web UI**: Built-in monitoring interface
+- **Mobile**: Responsive design for mobile monitoring
+
+### Alerts
+- **Email**: Trade notifications and system alerts
+- **Slack**: Team notifications
+- **Telegram**: Personal alerts
+- **Webhook**: Custom integrations
+
+## 🛠️ Development
+
+### Prerequisites
+- Python 3.8+
+- Docker & Docker Compose
+- Git
+
+### Development Setup
+```bash
+# Clone and setup
+git clone https://github.com/your-username/n0name-trading-bot.git
+cd n0name-trading-bot
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+# or venv\Scripts\activate  # Windows
+
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run tests
+make test
+
+# Start development server
+make dev
+```
+
+### Available Commands
+```bash
+# Development
+make dev              # Start development server
+make test             # Run test suite
+make lint             # Run linting
+make format           # Format code
+
+# Building
+make build            # Build Python package
+make docker-build     # Build Docker image
+make docs             # Generate documentation
+
+# Deployment
+make deploy-staging   # Deploy to staging
+make deploy-prod      # Deploy to production
+make backup           # Backup data
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](docs/developer-guide/contributing.md) for details.
+
+### Quick Contribution Guide
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Add tests for new functionality
+5. Run the test suite (`make test`)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+### Getting Help
+- **Documentation**: Check our [comprehensive docs](docs/README.md)
+- **Issues**: [GitHub Issues](https://github.com/your-username/n0name-trading-bot/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-username/n0name-trading-bot/discussions)
+- **Community**: Join our Discord server
+
+### Reporting Issues
+When reporting issues, please include:
+- Operating system and Python version
+- Error messages and stack traces
+- Steps to reproduce the issue
+- Configuration (remove sensitive data)
+
+## 🔄 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
+
+## 🙏 Acknowledgments
+
+- **ccxt**: Cryptocurrency exchange library
+- **TA-Lib**: Technical analysis library
+- **FastAPI**: Modern web framework
+- **Docker**: Containerization platform
+- **Grafana**: Monitoring and visualization
+
+---
+
+**⚡ Ready to start trading?** Check out our [Installation Guide](docs/user-guide/installation.md) to get started!
+
+**🔧 Want to contribute?** Read our [Developer Guide](docs/developer-guide/architecture.md) to understand the architecture.
