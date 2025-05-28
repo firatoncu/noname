@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Save, 
-  RefreshCw, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
   Settings as SettingsIcon,
-  Database,
-  Shield,
   TrendingUp,
+  Shield,
+  Database,
+  FileText,
+  Bell,
+  Save,
+  Plus,
+  X,
+  AlertTriangle,
+  CheckCircle,
+  DollarSign,
+  Percent,
+  Clock,
+  BarChart3,
   Zap,
   Globe,
-  Bell
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 interface ConfigSection {
@@ -263,9 +272,9 @@ const Settings: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="flex items-center space-x-3 text-white">
-          <RefreshCw className="w-6 h-6 animate-spin" />
+      <div className="min-h-screen bg-dark-bg-primary flex items-center justify-center">
+        <div className="flex items-center space-x-3 text-dark-text-primary">
+          <div className="w-6 h-6 border-2 border-dark-accent-primary border-t-transparent rounded-full animate-spin"></div>
           <span>Loading configuration...</span>
         </div>
       </div>
@@ -274,13 +283,13 @@ const Settings: React.FC = () => {
 
   if (!config) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center text-white">
-          <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+      <div className="min-h-screen bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-center text-dark-text-primary">
+          <AlertTriangle className="w-12 h-12 text-dark-accent-error mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Failed to Load Configuration</h2>
           <button
             onClick={loadConfig}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            className="px-4 py-2 bg-dark-accent-primary hover:bg-dark-accent-secondary rounded-lg transition-colors"
           >
             Retry
           </button>
@@ -290,34 +299,26 @@ const Settings: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-dark-bg-primary">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-10 animate-fade-in-up">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <SettingsIcon className="w-8 h-8 text-blue-400" />
+            <div className="flex items-center space-x-3 animate-slide-in-left">
+              <SettingsIcon className="w-8 h-8 text-dark-accent-primary" />
               <div>
-                <h1 className="text-3xl font-bold">Bot Configuration</h1>
-                <p className="text-gray-400">Manage your trading bot settings</p>
+                <h1 className="text-4xl font-bold text-dark-text-primary">Bot Configuration</h1>
+                <p className="text-dark-text-muted text-lg">Manage your trading bot settings</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={loadConfig}
-                disabled={loading}
-                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors flex items-center space-x-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                <span>Reload</span>
-              </button>
+            <div className="flex items-center space-x-3 animate-slide-in-right">
               <button
                 onClick={saveConfig}
                 disabled={saving || !hasChanges}
-                className={`px-6 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-glow-sm hover:shadow-glow-md text-dark-text-primary font-medium ${
                   hasChanges
-                    ? 'bg-blue-600 hover:bg-blue-700'
-                    : 'bg-gray-600 cursor-not-allowed'
+                    ? 'bg-dark-accent-primary hover:bg-dark-accent-secondary'
+                    : 'bg-dark-bg-disabled cursor-not-allowed'
                 }`}
               >
                 <Save className={`w-4 h-4 ${saving ? 'animate-pulse' : ''}`} />
@@ -328,8 +329,10 @@ const Settings: React.FC = () => {
 
           {/* Status Messages */}
           {message && (
-            <div className={`mt-4 p-4 rounded-lg flex items-center space-x-2 ${
-              message.type === 'success' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+            <div className={`mt-6 p-4 rounded-xl flex items-center space-x-2 border backdrop-blur-sm transition-all duration-300 ${
+              message.type === 'success' 
+                ? 'bg-dark-accent-success/20 text-dark-accent-success border-dark-accent-success/30' 
+                : 'bg-dark-accent-error/20 text-dark-accent-error border-dark-accent-error/30'
             }`}>
               {message.type === 'success' ? (
                 <CheckCircle className="w-5 h-5" />
@@ -339,7 +342,7 @@ const Settings: React.FC = () => {
               <span>{message.text}</span>
               <button
                 onClick={() => setMessage(null)}
-                className="ml-auto text-gray-400 hover:text-white"
+                className="ml-auto text-dark-text-muted hover:text-dark-text-primary transition-colors"
               >
                 ×
               </button>
@@ -348,7 +351,7 @@ const Settings: React.FC = () => {
 
           {/* Changes Indicator */}
           {hasChanges && (
-            <div className="mt-4 p-3 bg-yellow-900 text-yellow-300 rounded-lg flex items-center space-x-2">
+            <div className="mt-4 p-3 bg-dark-accent-warning/20 text-dark-accent-warning rounded-xl flex items-center space-x-2 border border-dark-accent-warning/30 backdrop-blur-sm">
               <AlertTriangle className="w-5 h-5" />
               <span>You have unsaved changes</span>
             </div>
@@ -358,8 +361,8 @@ const Settings: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-gray-800 rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-4">Configuration Sections</h3>
+            <div className="bg-dark-bg-secondary/80 backdrop-blur-sm rounded-2xl p-6 border border-dark-border-primary shadow-glass">
+              <h3 className="text-lg font-semibold mb-4 text-dark-text-primary">Configuration Sections</h3>
               <nav className="space-y-2">
                 {configSections.map((section) => {
                   const Icon = section.icon;
@@ -367,16 +370,20 @@ const Settings: React.FC = () => {
                     <button
                       key={section.id}
                       onClick={() => setActiveSection(section.id)}
-                      className={`w-full text-left p-3 rounded-lg transition-colors flex items-start space-x-3 ${
+                      className={`w-full text-left p-3 rounded-xl transition-all duration-300 flex items-start space-x-3 ${
                         activeSection === section.id
-                          ? 'bg-blue-600 text-white'
-                          : 'hover:bg-gray-700 text-gray-300'
+                          ? 'bg-dark-accent-primary text-dark-text-primary shadow-glow-sm'
+                          : 'hover:bg-dark-bg-hover text-dark-text-secondary hover:text-dark-text-primary'
                       }`}
                     >
                       <Icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
                       <div>
                         <div className="font-medium">{section.title}</div>
-                        <div className="text-xs text-gray-400 mt-1">
+                        <div className={`text-xs mt-1 ${
+                          activeSection === section.id
+                            ? 'text-white'
+                            : 'text-dark-text-disabled'
+                        }`}>
                           {section.description}
                         </div>
                       </div>
@@ -389,7 +396,7 @@ const Settings: React.FC = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="bg-gray-800 rounded-lg p-6">
+            <div className="bg-dark-bg-secondary/80 backdrop-blur-sm rounded-2xl p-6 border border-dark-border-primary shadow-glass">
               {activeSection === 'trading' && (
                 <TradingSection config={config} updateConfig={updateConfig} addSymbol={addSymbol} removeSymbol={removeSymbol} />
               )}
@@ -426,10 +433,10 @@ const TradingSection: React.FC<{
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-bold flex items-center space-x-2">
-          <TrendingUp className="w-6 h-6 text-blue-400" />
-          <span>Trading Configuration</span>
+          <TrendingUp className="w-6 h-6 text-dark-accent-primary" />
+          <span className="text-dark-text-primary">Trading Configuration</span>
         </h2>
-        <div className="text-center text-gray-400">
+        <div className="text-center text-dark-text-muted">
           <p>Loading trading configuration...</p>
         </div>
       </div>
@@ -439,45 +446,45 @@ const TradingSection: React.FC<{
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold flex items-center space-x-2">
-        <TrendingUp className="w-6 h-6 text-blue-400" />
-        <span>Trading Configuration</span>
+        <TrendingUp className="w-6 h-6 text-dark-accent-primary" />
+        <span className="text-dark-text-primary">Trading Configuration</span>
       </h2>
 
       {/* Basic Settings */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Capital (USDT)</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Capital (USDT)</label>
           <input
             type="number"
             value={config.trading.capital || 0}
             onChange={(e) => updateConfig('trading.capital', parseFloat(e.target.value) || 0)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Leverage</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Leverage</label>
           <input
             type="number"
             min="1"
             max="125"
             value={config.trading.leverage || 1}
             onChange={(e) => updateConfig('trading.leverage', parseInt(e.target.value) || 1)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
       </div>
 
       {/* Margin Configuration */}
       {config.trading.margin && (
-        <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4">Margin Configuration</h3>
+        <div className="bg-dark-bg-tertiary/50 rounded-xl p-4 border border-dark-border-secondary">
+          <h3 className="text-lg font-semibold mb-4 text-dark-text-primary">Margin Configuration</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Margin Mode</label>
+              <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Margin Mode</label>
               <select
                 value={config.trading.margin.mode || 'fixed'}
                 onChange={(e) => updateConfig('trading.margin.mode', e.target.value)}
-                className="w-full p-3 bg-gray-600 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-dark-bg-primary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
               >
                 <option value="fixed">Fixed Amount</option>
                 <option value="full">Full Margin</option>
@@ -485,34 +492,34 @@ const TradingSection: React.FC<{
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Fixed Amount (USDT)</label>
+              <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Fixed Amount (USDT)</label>
               <input
                 type="number"
                 value={config.trading.margin.fixed_amount || 0}
                 onChange={(e) => updateConfig('trading.margin.fixed_amount', parseFloat(e.target.value) || 0)}
-                className="w-full p-3 bg-gray-600 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-dark-bg-primary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary disabled:opacity-50"
                 disabled={config.trading.margin.mode !== 'fixed'}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Percentage (%)</label>
+              <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Percentage (%)</label>
               <input
                 type="number"
                 min="1"
                 max="100"
                 value={config.trading.margin.percentage || 50}
                 onChange={(e) => updateConfig('trading.margin.percentage', parseFloat(e.target.value) || 50)}
-                className="w-full p-3 bg-gray-600 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-dark-bg-primary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary disabled:opacity-50"
                 disabled={config.trading.margin.mode !== 'percentage'}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">User Response Timeout (seconds)</label>
+              <label className="block text-sm font-medium mb-2 text-dark-text-secondary">User Response Timeout (seconds)</label>
               <input
                 type="number"
                 value={config.trading.margin.user_response_timeout || 30}
                 onChange={(e) => updateConfig('trading.margin.user_response_timeout', parseInt(e.target.value) || 30)}
-                className="w-full p-3 bg-gray-600 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-dark-bg-primary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
               />
             </div>
           </div>
@@ -522,30 +529,30 @@ const TradingSection: React.FC<{
                 type="checkbox"
                 checked={config.trading.margin.ask_user_selection || false}
                 onChange={(e) => updateConfig('trading.margin.ask_user_selection', e.target.checked)}
-                className="rounded bg-gray-600 border-gray-500"
+                className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
               />
-              <span>Ask user for margin selection at startup</span>
+              <span className="text-dark-text-primary">Ask user for margin selection at startup</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={config.trading.margin.default_to_full_margin || false}
                 onChange={(e) => updateConfig('trading.margin.default_to_full_margin', e.target.checked)}
-                className="rounded bg-gray-600 border-gray-500"
+                className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
               />
-              <span>Default to full margin on timeout</span>
+              <span className="text-dark-text-primary">Default to full margin on timeout</span>
             </label>
           </div>
         </div>
       )}
 
       {/* Trading Symbols */}
-      <div className="bg-gray-700 rounded-lg p-4">
+      <div className="bg-dark-bg-tertiary/50 rounded-xl p-4 border border-dark-border-secondary">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Trading Symbols</h3>
+          <h3 className="text-lg font-semibold text-dark-text-primary">Trading Symbols</h3>
           <button
             onClick={addSymbol}
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm transition-colors"
+            className="px-3 py-1 bg-dark-accent-primary hover:bg-dark-accent-secondary rounded-lg text-sm transition-colors text-dark-text-primary font-medium"
           >
             Add Symbol
           </button>
@@ -554,12 +561,12 @@ const TradingSection: React.FC<{
           {(config.trading.symbols || []).map((symbol) => (
             <div
               key={symbol}
-              className="flex items-center space-x-2 bg-gray-600 px-3 py-1 rounded-lg"
+              className="flex items-center space-x-2 bg-dark-bg-primary px-3 py-1 rounded-lg border border-dark-border-secondary"
             >
-              <span>{symbol}</span>
+              <span className="text-dark-text-primary">{symbol}</span>
               <button
                 onClick={() => removeSymbol(symbol)}
-                className="text-red-400 hover:text-red-300"
+                className="text-dark-accent-error hover:text-red-300 transition-colors"
               >
                 ×
               </button>
@@ -570,24 +577,24 @@ const TradingSection: React.FC<{
 
       {/* Strategy Settings */}
       {config.trading.strategy && (
-        <div className="bg-gray-700 rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4">Strategy Configuration</h3>
+        <div className="bg-dark-bg-tertiary/50 rounded-xl p-4 border border-dark-border-secondary">
+          <h3 className="text-lg font-semibold mb-4 text-dark-text-primary">Strategy Configuration</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Strategy Name</label>
+              <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Strategy Name</label>
               <input
                 type="text"
                 value={config.trading.strategy.name || ''}
                 onChange={(e) => updateConfig('trading.strategy.name', e.target.value)}
-                className="w-full p-3 bg-gray-600 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-dark-bg-primary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Timeframe</label>
+              <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Timeframe</label>
               <select
                 value={config.trading.strategy.timeframe || '5m'}
                 onChange={(e) => updateConfig('trading.strategy.timeframe', e.target.value)}
-                className="w-full p-3 bg-gray-600 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-dark-bg-primary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
               >
                 <option value="1m">1 Minute</option>
                 <option value="5m">5 Minutes</option>
@@ -598,12 +605,12 @@ const TradingSection: React.FC<{
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Lookback Period</label>
+              <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Lookback Period</label>
               <input
                 type="number"
                 value={config.trading.strategy.lookback_period || 500}
                 onChange={(e) => updateConfig('trading.strategy.lookback_period', parseInt(e.target.value) || 500)}
-                className="w-full p-3 bg-gray-600 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-dark-bg-primary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
               />
             </div>
           </div>
@@ -613,27 +620,27 @@ const TradingSection: React.FC<{
                 type="checkbox"
                 checked={config.trading.strategy.enabled || false}
                 onChange={(e) => updateConfig('trading.strategy.enabled', e.target.checked)}
-                className="rounded bg-gray-600 border-gray-500"
+                className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
               />
-              <span>Strategy Enabled</span>
+              <span className="text-dark-text-primary">Strategy Enabled</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={config.trading.paper_trading || false}
                 onChange={(e) => updateConfig('trading.paper_trading', e.target.checked)}
-                className="rounded bg-gray-600 border-gray-500"
+                className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
               />
-              <span>Paper Trading Mode</span>
+              <span className="text-dark-text-primary">Paper Trading Mode</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 checked={config.trading.auto_start || false}
                 onChange={(e) => updateConfig('trading.auto_start', e.target.checked)}
-                className="rounded bg-gray-600 border-gray-500"
+                className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
               />
-              <span>Auto Start Trading</span>
+              <span className="text-dark-text-primary">Auto Start Trading</span>
             </label>
           </div>
         </div>
@@ -653,10 +660,10 @@ const RiskSection: React.FC<{
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-bold flex items-center space-x-2">
-          <Shield className="w-6 h-6 text-blue-400" />
-          <span>Risk Management</span>
+          <Shield className="w-6 h-6 text-dark-accent-primary" />
+          <span className="text-dark-text-primary">Risk Management</span>
         </h2>
-        <div className="text-center text-gray-400">
+        <div className="text-center text-dark-text-muted">
           <p>Loading risk management configuration...</p>
         </div>
       </div>
@@ -666,13 +673,13 @@ const RiskSection: React.FC<{
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold flex items-center space-x-2">
-        <Shield className="w-6 h-6 text-blue-400" />
-        <span>Risk Management</span>
+        <Shield className="w-6 h-6 text-dark-accent-primary" />
+        <span className="text-dark-text-primary">Risk Management</span>
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Max Position Size (%)</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Max Position Size (%)</label>
           <input
             type="number"
             min="0"
@@ -680,11 +687,11 @@ const RiskSection: React.FC<{
             step="0.01"
             value={(config.trading.risk.max_position_size || 0) * 100}
             onChange={(e) => updateConfig('trading.risk.max_position_size', (parseFloat(e.target.value) || 0) / 100)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Max Daily Loss (%)</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Max Daily Loss (%)</label>
           <input
             type="number"
             min="0"
@@ -692,11 +699,11 @@ const RiskSection: React.FC<{
             step="0.01"
             value={(config.trading.risk.max_daily_loss || 0) * 100}
             onChange={(e) => updateConfig('trading.risk.max_daily_loss', (parseFloat(e.target.value) || 0) / 100)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Max Drawdown (%)</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Max Drawdown (%)</label>
           <input
             type="number"
             min="0"
@@ -704,11 +711,11 @@ const RiskSection: React.FC<{
             step="0.01"
             value={(config.trading.risk.max_drawdown || 0) * 100}
             onChange={(e) => updateConfig('trading.risk.max_drawdown', (parseFloat(e.target.value) || 0) / 100)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Risk Per Trade (%)</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Risk Per Trade (%)</label>
           <input
             type="number"
             min="0"
@@ -716,22 +723,22 @@ const RiskSection: React.FC<{
             step="0.01"
             value={(config.trading.risk.risk_per_trade || 0) * 100}
             onChange={(e) => updateConfig('trading.risk.risk_per_trade', (parseFloat(e.target.value) || 0) / 100)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Max Open Positions</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Max Open Positions</label>
           <input
             type="number"
             min="1"
             max="20"
             value={config.trading.risk.max_open_positions || 5}
             onChange={(e) => updateConfig('trading.risk.max_open_positions', parseInt(e.target.value) || 5)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Stop Loss (%)</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Stop Loss (%)</label>
           <input
             type="number"
             min="0"
@@ -739,11 +746,11 @@ const RiskSection: React.FC<{
             step="0.01"
             value={(config.trading.risk.stop_loss_percentage || 0) * 100}
             onChange={(e) => updateConfig('trading.risk.stop_loss_percentage', (parseFloat(e.target.value) || 0) / 100)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Take Profit Ratio</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Take Profit Ratio</label>
           <input
             type="number"
             min="0.1"
@@ -751,7 +758,7 @@ const RiskSection: React.FC<{
             step="0.1"
             value={config.trading.risk.take_profit_ratio || 2.0}
             onChange={(e) => updateConfig('trading.risk.take_profit_ratio', parseFloat(e.target.value) || 2.0)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
       </div>
@@ -769,10 +776,10 @@ const ExchangeSection: React.FC<{
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-bold flex items-center space-x-2">
-          <Globe className="w-6 h-6 text-blue-400" />
-          <span>Exchange Settings</span>
+          <Globe className="w-6 h-6 text-dark-accent-primary" />
+          <span className="text-dark-text-primary">Exchange Settings</span>
         </h2>
-        <div className="text-center text-gray-400">
+        <div className="text-center text-dark-text-muted">
           <p>Loading exchange configuration...</p>
         </div>
       </div>
@@ -782,48 +789,48 @@ const ExchangeSection: React.FC<{
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold flex items-center space-x-2">
-        <Globe className="w-6 h-6 text-blue-400" />
-        <span>Exchange Settings</span>
+        <Globe className="w-6 h-6 text-dark-accent-primary" />
+        <span className="text-dark-text-primary">Exchange Settings</span>
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Exchange Type</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Exchange Type</label>
           <input
             type="text"
             value={config.exchange.type || 'binance'}
             onChange={(e) => updateConfig('exchange.type', e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
             readOnly
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Rate Limit (requests/min)</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Rate Limit (requests/min)</label>
           <input
             type="number"
             value={config.exchange.rate_limit || 1200}
             onChange={(e) => updateConfig('exchange.rate_limit', parseInt(e.target.value) || 1200)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Timeout (seconds)</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Timeout (seconds)</label>
           <input
             type="number"
             value={config.exchange.timeout || 30}
             onChange={(e) => updateConfig('exchange.timeout', parseInt(e.target.value) || 30)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Retry Attempts</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Retry Attempts</label>
           <input
             type="number"
             min="1"
             max="10"
             value={config.exchange.retry_attempts || 3}
             onChange={(e) => updateConfig('exchange.retry_attempts', parseInt(e.target.value) || 3)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           />
         </div>
       </div>
@@ -834,9 +841,9 @@ const ExchangeSection: React.FC<{
             type="checkbox"
             checked={config.exchange.testnet || false}
             onChange={(e) => updateConfig('exchange.testnet', e.target.checked)}
-            className="rounded bg-gray-600 border-gray-500"
+            className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
           />
-          <span>Use Testnet</span>
+          <span className="text-dark-text-primary">Use Testnet</span>
         </label>
       </div>
     </div>
@@ -853,10 +860,10 @@ const LoggingSection: React.FC<{
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-bold flex items-center space-x-2">
-          <Database className="w-6 h-6 text-blue-400" />
-          <span>Logging & Debug</span>
+          <Database className="w-6 h-6 text-dark-accent-primary" />
+          <span className="text-dark-text-primary">Logging & Debug</span>
         </h2>
-        <div className="text-center text-gray-400">
+        <div className="text-center text-dark-text-muted">
           <p>Loading logging configuration...</p>
         </div>
       </div>
@@ -866,17 +873,17 @@ const LoggingSection: React.FC<{
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold flex items-center space-x-2">
-        <Database className="w-6 h-6 text-blue-400" />
-        <span>Logging & Debug</span>
+        <Database className="w-6 h-6 text-dark-accent-primary" />
+        <span className="text-dark-text-primary">Logging & Debug</span>
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Log Level</label>
+          <label className="block text-sm font-medium mb-2 text-dark-text-secondary">Log Level</label>
           <select
             value={config.logging.level || 'INFO'}
             onChange={(e) => updateConfig('logging.level', e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            className="w-full p-3 bg-dark-bg-tertiary rounded-xl border border-dark-border-secondary focus:border-dark-accent-primary focus:outline-none focus:ring-2 focus:ring-dark-accent-primary/20 transition-all duration-300 text-dark-text-primary"
           >
             <option value="DEBUG">DEBUG</option>
             <option value="INFO">INFO</option>
@@ -893,18 +900,18 @@ const LoggingSection: React.FC<{
             type="checkbox"
             checked={config.logging.console_output || false}
             onChange={(e) => updateConfig('logging.console_output', e.target.checked)}
-            className="rounded bg-gray-600 border-gray-500"
+            className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
           />
-          <span>Console Output</span>
+          <span className="text-dark-text-primary">Console Output</span>
         </label>
         <label className="flex items-center space-x-2">
           <input
             type="checkbox"
             checked={config.logging.structured_logging || false}
             onChange={(e) => updateConfig('logging.structured_logging', e.target.checked)}
-            className="rounded bg-gray-600 border-gray-500"
+            className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
           />
-          <span>Structured Logging (JSON)</span>
+          <span className="text-dark-text-primary">Structured Logging (JSON)</span>
         </label>
       </div>
     </div>
@@ -921,10 +928,10 @@ const NotificationsSection: React.FC<{
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-bold flex items-center space-x-2">
-          <Bell className="w-6 h-6 text-blue-400" />
-          <span>Notifications</span>
+          <Bell className="w-6 h-6 text-dark-accent-primary" />
+          <span className="text-dark-text-primary">Notifications</span>
         </h2>
-        <div className="text-center text-gray-400">
+        <div className="text-center text-dark-text-muted">
           <p>Loading notifications configuration...</p>
         </div>
       </div>
@@ -934,8 +941,8 @@ const NotificationsSection: React.FC<{
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold flex items-center space-x-2">
-        <Bell className="w-6 h-6 text-blue-400" />
-        <span>Notifications</span>
+        <Bell className="w-6 h-6 text-dark-accent-primary" />
+        <span className="text-dark-text-primary">Notifications</span>
       </h2>
 
       <div className="space-y-3">
@@ -944,9 +951,9 @@ const NotificationsSection: React.FC<{
             type="checkbox"
             checked={config.notifications.enabled || false}
             onChange={(e) => updateConfig('notifications.enabled', e.target.checked)}
-            className="rounded bg-gray-600 border-gray-500"
+            className="rounded bg-dark-bg-primary border-dark-border-secondary text-dark-accent-primary focus:ring-dark-accent-primary/20"
           />
-          <span>Enable Notifications</span>
+          <span className="text-dark-text-primary">Enable Notifications</span>
         </label>
       </div>
     </div>

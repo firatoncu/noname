@@ -48,25 +48,27 @@ function TradingConditionChart() {
   }, [symbol]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <button
-          onClick={() => navigate('/trading-conditions')}
-          className="flex items-center space-x-2 text-gray-300 hover:text-white"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back to Trading Conditions</span>
-        </button>
-      </div>
-
-      <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold text-white">
-            {symbol} Chart
-          </h2>
+    <div className="min-h-screen bg-dark-bg-primary">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <button
+            onClick={() => navigate('/trading-conditions')}
+            className="flex items-center space-x-2 text-gray-300 hover:text-white"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Trading Conditions</span>
+          </button>
         </div>
 
-        <div ref={containerRef} id="tradingview-widget" className="rounded-lg overflow-hidden" />
+        <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-white">
+              {symbol} Chart
+            </h2>
+          </div>
+
+          <div ref={containerRef} id="tradingview-widget" className="rounded-lg overflow-hidden" />
+        </div>
       </div>
     </div>
   );

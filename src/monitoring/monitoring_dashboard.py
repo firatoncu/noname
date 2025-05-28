@@ -220,7 +220,7 @@ class MonitoringDashboard:
         .status-unknown { background-color: #6b7280; }
         
         .container {
-            max-width: 1400px;
+            width: 100%;
             margin: 0 auto;
             padding: 2rem;
         }

@@ -43,6 +43,15 @@ async def get_current_position_ui(client):
         positions = await client.futures_position_information()
         current_positions = []
         
+        # Load leverage from configuration
+        try:
+            from utils.load_config import load_config
+            config = load_config()
+            leverage = config.get('trading', {}).get('leverage') or config.get('symbols', {}).get('leverage', 5)
+        except Exception as e:
+            print(f"Warning: Could not load leverage from config: {e}")
+            leverage = 5  # Default leverage
+        
         for pos in positions:
             # Only include positions with non-zero amount
             if float(pos['positionAmt']) != 0:
@@ -67,7 +76,8 @@ async def get_current_position_ui(client):
                     'markPrice': pos['markPrice'],
                     'entryTime': unix_milliseconds_to_datetime(pos['updateTime']),
                     'takeProfitPrice': take_profit_price,
-                    'stopLossPrice': stop_loss_price
+                    'stopLossPrice': stop_loss_price,
+                    'leverage': leverage
                 })
         
         return current_positions

@@ -8,6 +8,7 @@ export interface Position {
   entryTime: string;
   takeProfitPrice?: string;
   stopLossPrice?: string;
+  leverage?: number;
 }
 
 export interface HistoricalPosition {

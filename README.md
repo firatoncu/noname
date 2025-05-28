@@ -1,4 +1,4 @@
-# n0name Trading Bot v2.4.0
+# n0name Trading Bot v2.4.5
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -77,12 +77,16 @@ Our comprehensive documentation is organized to help both users and developers:
 ## ✨ Key Features
 
 ### 🌐 Modern Web Interface
-- **Dashboard**: Real-time trading overview with live position updates
-- **Trading Conditions**: Monitor market conditions and strategy signals for all symbols
-- **Position Analysis**: Comprehensive performance analytics with interactive charts and metrics
-- **Settings**: Easy configuration management through web interface
-- **Symbol Charts**: Click any symbol to view interactive TradingView-style charts
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+- **Enhanced Dashboard**: Real-time trading overview with improved visual design and live position updates
+- **Refined Trading Conditions**: Monitor market conditions and strategy signals with better UX and visual clarity
+- **Advanced Position Analysis**: Comprehensive performance analytics with enhanced interactive charts and improved metrics display
+- **Streamlined Settings**: Intuitive configuration management through redesigned web interface
+- **Interactive Symbol Charts**: Click any symbol to view enhanced TradingView-style charts with improved performance
+- **Responsive Design**: Optimized experience across desktop, tablet, and mobile devices with better touch interactions
+- **Performance Optimized**: Faster loading times, smoother animations, and improved overall responsiveness
+- **Accessibility Enhanced**: Better keyboard navigation, screen reader support, and inclusive design principles
+- **Visual Polish**: Updated color schemes, typography, icons, and spacing for a more professional appearance
+- **Improved Error Handling**: User-friendly error messages and better recovery workflows
 
 ### 🎯 Trading Capabilities
 - **Multiple Strategies**: MACD-Fibonacci, Bollinger-RSI, and custom strategies
@@ -260,15 +264,15 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 - **Trading**: Order fill rates, slippage
 
 ### Dashboards
-- **Grafana**: Real-time trading dashboard
-- **Web UI**: Built-in monitoring interface with React frontend
-- **Position Analysis**: Interactive performance analytics with:
-  - Performance metrics with explanatory tooltips
-  - Symbol performance breakdown
-  - Trade history with detailed filtering
-  - Interactive charts (P&L over time, symbol distribution, win rates)
-  - Clickable symbols that open chart popups
-- **Mobile**: Responsive design for mobile monitoring
+- **Grafana**: Real-time trading dashboard with enhanced visualizations
+- **Enhanced Web UI**: Built-in monitoring interface with improved React frontend and modern design
+- **Advanced Position Analysis**: Interactive performance analytics with enhanced UI featuring:
+  - Redesigned performance metrics with improved tooltips and visual hierarchy
+  - Enhanced symbol performance breakdown with better data visualization
+  - Improved trade history with streamlined filtering and better UX
+  - Upgraded interactive charts (P&L over time, symbol distribution, win rates) with better performance
+  - Refined clickable symbols with smoother chart popup animations and improved responsiveness
+- **Mobile Optimized**: Enhanced responsive design with better touch interactions and mobile-first approach
 
 ### Alerts
 - **Email**: Trade notifications and system alerts
@@ -361,7 +365,28 @@ When reporting issues, please include:
 
 ## 🔄 Changelog
 
-### Version 2.4.0 - Latest Release 🎉
+### Version 2.4.5 - Latest Release 🎉
+
+#### 🎨 UI Updates & Improvements
+- **Enhanced User Interface**: Refined visual design with improved color schemes and typography
+- **Improved Responsiveness**: Better mobile and tablet experience with optimized layouts
+- **Performance Optimizations**: Faster page load times and smoother animations
+- **Accessibility Enhancements**: Better keyboard navigation and screen reader support
+- **Visual Polish**: Updated icons, improved spacing, and enhanced visual hierarchy
+- **User Experience**: Streamlined workflows and more intuitive navigation patterns
+- **Chart Improvements**: Enhanced chart rendering performance and visual clarity
+- **Loading States**: Better loading indicators and skeleton screens for improved perceived performance
+- **Error Handling**: More user-friendly error messages and recovery options
+- **Theme Consistency**: Unified design language across all components and pages
+
+#### 🔧 Technical Improvements
+- **Frontend Optimization**: Reduced bundle size and improved rendering performance
+- **Component Refactoring**: Cleaner, more maintainable React components
+- **CSS Optimization**: Streamlined stylesheets and improved CSS performance
+- **API Response Handling**: Enhanced error handling and data validation
+- **Memory Management**: Better cleanup and resource management in the frontend
+
+### Version 2.4.0 - Previous Release
 
 #### 🌟 Major Features
 - **Position Analysis Dashboard**: Comprehensive trading performance analytics
