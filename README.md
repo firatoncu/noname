@@ -1,4 +1,4 @@
-# n0name Trading Bot v2.0.0
+# n0name Trading Bot v2.4.0
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -28,6 +28,9 @@ cp .env.example .env
 
 # Run the bot
 python n0name.py
+
+# Access the web interface
+# Open http://localhost:5173 in your browser
 ```
 
 ### Docker Quick Start
@@ -73,6 +76,14 @@ Our comprehensive documentation is organized to help both users and developers:
 
 ## ✨ Key Features
 
+### 🌐 Modern Web Interface
+- **Dashboard**: Real-time trading overview with live position updates
+- **Trading Conditions**: Monitor market conditions and strategy signals for all symbols
+- **Position Analysis**: Comprehensive performance analytics with interactive charts and metrics
+- **Settings**: Easy configuration management through web interface
+- **Symbol Charts**: Click any symbol to view interactive TradingView-style charts
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
+
 ### 🎯 Trading Capabilities
 - **Multiple Strategies**: MACD-Fibonacci, Bollinger-RSI, and custom strategies
 - **Risk Management**: Advanced position sizing, stop-loss, and take-profit
@@ -81,67 +92,59 @@ Our comprehensive documentation is organized to help both users and developers:
 - **Multi-Asset**: Trade multiple cryptocurrency pairs simultaneously
 
 ### 🛡️ Security & Safety
-- **Encrypted Configuration**: Secure API key storage
+- **Encrypted Configuration**: Secure API key storage with simplified config system
 - **Risk Limits**: Configurable drawdown and position limits
 - **Emergency Stop**: Immediate trading halt functionality
-- **Audit Logging**: Comprehensive trade and system logging
+- **Audit Logging**: Comprehensive trade and system logging with ERROR level by default
+- **Production Mode**: Secure production configuration with real API keys
+- **Full Balance Trading**: Support for using 100% of futures balance with leverage
 
 ### 📊 Monitoring & Analytics
-- **Real-time Dashboard**: Web-based monitoring interface
-- **Performance Metrics**: Detailed trading statistics
+- **Real-time Dashboard**: Modern web-based monitoring interface with React
+- **Position Analysis**: Comprehensive trading performance analytics with interactive charts
+- **Performance Metrics**: Detailed trading statistics with hover tooltips and explanations
+- **Symbol Chart Integration**: Click any symbol to view interactive charts in popup modals
 - **Alerting System**: Email, Slack, and Telegram notifications
 - **Database Integration**: InfluxDB for time-series data
 
 ### 🔧 Technical Excellence
-- **Modular Architecture**: Clean, maintainable codebase
+- **Modular Architecture**: Clean, maintainable codebase with simplified configuration system
+- **Modern Web UI**: React-based frontend with TypeScript and Tailwind CSS
 - **Async Processing**: High-performance async operations
 - **Docker Support**: Containerized deployment
 - **CI/CD Pipeline**: Automated testing and deployment
 - **Comprehensive Testing**: Unit, integration, and performance tests
+- **Production Ready**: Full balance trading with 5x leverage support
 
 ## 🏗️ Project Structure
 
 ```
 n0name-trading-bot/
-├── 📁 src/                    # Source code
-│   └── n0name/               # Main package
-│       ├── core/             # Core business logic
-│       ├── strategies/       # Trading strategies
-│       ├── indicators/       # Technical indicators
-│       ├── api/             # REST API
-│       ├── monitoring/      # Monitoring system
-│       ├── utils/           # Utilities
-│       ├── security/        # Security components
-│       └── backtesting/     # Backtesting framework
-├── 📁 tests/                 # Test suite
-│   ├── unit/                # Unit tests
-│   ├── integration/         # Integration tests
-│   ├── performance/         # Performance tests
-│   └── security/            # Security tests
-├── 📁 config/               # Configuration files
-│   ├── environments/        # Environment-specific configs
-│   ├── strategies/          # Strategy configurations
-│   └── infrastructure/      # Infrastructure configs
+├── 📁 utils/                 # Core utilities and components
+│   ├── web_ui/              # Modern React web interface
+│   │   └── project/         # React TypeScript frontend
+│   │       ├── src/         # React source code
+│   │       │   ├── components/  # Reusable UI components
+│   │       │   ├── pages/       # Main application pages
+│   │       │   └── api/         # FastAPI backend
+│   │       └── public/      # Static assets
+│   ├── config_manager.py    # Configuration management
+│   ├── enhanced_logging.py  # Advanced logging system
+│   ├── load_config.py       # Simplified config loader
+│   └── config_models.py     # Pydantic configuration models
+├── 📁 tests/                # Test suite
 ├── 📁 docs/                 # Documentation
-│   ├── user-guide/          # User documentation
-│   ├── developer-guide/     # Developer documentation
-│   ├── deployment/          # Deployment guides
-│   ├── api/                 # API documentation
-│   └── guides/              # Specialized guides
 ├── 📁 scripts/              # Automation scripts
-│   ├── build/               # Build scripts
-│   ├── deployment/          # Deployment scripts
-│   ├── development/         # Development scripts
-│   ├── maintenance/         # Maintenance scripts
-│   └── utilities/           # Utility scripts
 ├── 📁 tools/                # Development tools
-│   ├── build/               # Build tools
-│   ├── docker/              # Docker utilities
-│   ├── monitoring/          # Monitoring tools
-│   └── security/            # Security tools
 ├── 📁 examples/             # Example configurations
 ├── 📁 archive/              # Archived/legacy files
-└── 📁 data/                 # Runtime data (gitignored)
+├── 📁 logs/                 # Application logs
+├── 📁 auth/                 # Authentication files
+├── config.yml               # Main configuration file
+├── n0name.py               # Main trading bot application
+├── requirements.txt        # Python dependencies
+├── docker-compose.yml      # Docker deployment
+└── README.md               # This file
 ```
 
 ## 🎯 Available Strategies
@@ -183,20 +186,40 @@ GRAFANA_URL=http://localhost:3000
 
 ### Strategy Configuration
 ```yaml
-# config/environments/production.yml
-strategy:
-  name: macd_fibonacci
-  parameters:
-    risk_management:
-      max_position_size: 0.02  # 2% per trade
-      stop_loss: 0.015         # 1.5%
-      take_profit: 0.045       # 4.5%
-      max_drawdown: 0.10       # 10%
-
+# config.yml - Simplified single configuration file
 trading:
-  pairs: ["BTC/USDT", "ETH/USDT"]
-  timeframe: "1h"
-  max_concurrent_trades: 3
+  capital: -999  # Use full balance
+  leverage: 5
+  symbols: ["BTCUSDT", "ETHUSDT", "XRPUSDT", "SOLUSDT", "ADAUSDT", "DOGEUSDT"]
+  paper_trading: false
+  auto_start: true
+  strategy:
+    name: "bollinger_rsi"
+    type: "mean_reversion"
+    enabled: true
+    timeframe: "1h"
+    lookback_period: 20
+  risk:
+    max_position_size: 1.0  # 100% of balance
+    max_open_positions: 1   # One position at a time
+    risk_per_trade: 1.0
+    stop_loss_percentage: 2.0
+    take_profit_ratio: 2.0
+
+exchange:
+  type: "binance"
+  testnet: false  # Production mode
+  rate_limit: 1200
+  timeout: 30
+  retry_attempts: 3
+
+logging:
+  level: "ERROR"  # Minimal logging for production
+  console_output: true
+  structured_logging: false
+
+notifications:
+  enabled: true
 ```
 
 ## 🚀 Deployment Options
@@ -238,7 +261,13 @@ docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
 
 ### Dashboards
 - **Grafana**: Real-time trading dashboard
-- **Web UI**: Built-in monitoring interface
+- **Web UI**: Built-in monitoring interface with React frontend
+- **Position Analysis**: Interactive performance analytics with:
+  - Performance metrics with explanatory tooltips
+  - Symbol performance breakdown
+  - Trade history with detailed filtering
+  - Interactive charts (P&L over time, symbol distribution, win rates)
+  - Clickable symbols that open chart popups
 - **Mobile**: Responsive design for mobile monitoring
 
 ### Alerts
@@ -331,6 +360,43 @@ When reporting issues, please include:
 - Configuration (remove sensitive data)
 
 ## 🔄 Changelog
+
+### Version 2.4.0 - Latest Release 🎉
+
+#### 🌟 Major Features
+- **Position Analysis Dashboard**: Comprehensive trading performance analytics
+  - Interactive performance metrics with explanatory tooltips
+  - Symbol performance breakdown and comparison
+  - Trade history with advanced filtering (timeframe, symbol)
+  - Multiple view modes: Overview, Detailed table, Interactive charts
+  - Real-time data integration with API endpoints
+
+#### 📊 Enhanced Web Interface
+- **Symbol Chart Integration**: Click any symbol to view interactive charts
+  - Modal popup with embedded TradingView-style charts
+  - External link option to open charts in new tabs
+  - Smooth animations and professional UI/UX
+- **Improved Navigation**: Streamlined navigation with Dashboard, Trading Conditions, Position Analysis, and Settings
+- **Responsive Design**: Optimized for all device sizes
+
+#### ⚙️ Configuration System Overhaul
+- **Simplified Configuration**: Single `config.yml` file replaces complex multi-file system
+- **No Default Values**: All configuration must be explicitly defined
+- **Production Ready**: Full balance trading with leverage support
+- **Web-based Settings**: Configure bot through web interface
+- **Real-time Updates**: Configuration changes reflect immediately
+
+#### 🔧 Technical Improvements
+- **Enhanced Logging**: Configurable log levels with ERROR default for production
+- **API Optimization**: Improved endpoint performance and error handling
+- **State Management**: Better handling of trading conditions and position updates
+- **Error Suppression**: Intelligent handling of harmless connection reset errors
+
+#### 🛡️ Security & Stability
+- **Production Mode**: Secure configuration for live trading
+- **API Key Management**: Improved security for sensitive credentials
+- **Recovery System**: Enhanced error recovery and exception handling
+- **Connection Management**: Better handling of network interruptions
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 
