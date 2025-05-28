@@ -4,13 +4,13 @@ import asyncio
 from colorama import Fore, Style, init
 import random
 import os
-from utils.logging import logger_func
+from utils.enhanced_logging import get_logger
 from utils.position_opt import funding_fee_controller
 from utils.influxdb.db_status_check import db_status_check
 from src.check_condition import check_buy_conditions, check_sell_conditions
 from src.check_trending import trend_checker
 
-logger = logger_func()
+logger = get_logger(__name__)
 
 async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logger):
     try: 

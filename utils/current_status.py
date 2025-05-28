@@ -2,9 +2,9 @@ from utils.globals import get_buyconda, get_buycondb, get_buycondc, get_sellcond
 from colorama import init, Fore, Style
 from utils.cursor_movement import logger_move_cursor_up, clean_line
 import asyncio
-from utils.logging import error_logger_func
+from utils.enhanced_logging import get_logger
 
-logger = error_logger_func()
+logger = get_logger(__name__)
 
 init()
 

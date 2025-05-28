@@ -1,5 +1,30 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import fs from 'fs';
+import path from 'path';
+
+// Generate self-signed certificate for local development
+const getSslConfig = () => {
+  const certDir = path.join(__dirname, 'certs');
+  const keyPath = path.join(certDir, 'localhost-key.pem');
+  const certPath = path.join(certDir, 'localhost-cert.pem');
+
+  // Check if SSL certificates exist
+  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+    try {
+      return {
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
+      };
+    } catch (error) {
+      console.warn('Could not read SSL certificates. Falling back to HTTP.');
+      return false;
+    }
+  }
+  
+  console.warn('SSL certificates not found. Run: python utils/web_ui/generate_certificates.py');
+  return false;
+};
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,17 +33,15 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
-    host: '0.0.0.0', // Allows access via n0name.local
-    port: 80,      // Ensure it’s running on port 5173 (default for Vite)
-    allowedHosts: [
-      'n0name', // Add your custom hostname here
-      'localhost'     // Optional: Keep localhost allowed
-    ],
+    host: 'localhost',
+    port: 5173,
+    https: false, // Disabled HTTPS for now
     proxy: {
       '/api': {
-        target: 'http://n0name:8000',  // Backend URL
+        target: 'http://localhost:8000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api')  // Keep /api prefix
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
   }

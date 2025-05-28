@@ -1,0 +1,16 @@
+username: firat
+api_keys:
+  api_key: Qht
+  api_secret: qDJ
+strategy_name: Bollinger Bands & RSI
+telegram:
+  token: '803'
+  chat_id: -100
+capital_tbu: -999.0
+db_status: n
+symbols:
+  leverage: 5
+  max_open_positions: 1
+  symbols:
+  - BTCUSDT
+  - ETHUSDT

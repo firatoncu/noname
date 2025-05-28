@@ -31,12 +31,26 @@ async def process_symbol(symbol, client, logger, stepSizes, quantityPrecisions, 
         logger.error(f"{symbol} işlenirken hata: {e}")
 
 # Main async function
-async def open_position(max_open_positions, symbols, logger, client, leverage):
+async def open_position(max_open_positions, symbols, logger, client, leverage, config=None):
+    """
+    Open trading positions based on market analysis.
+    
+    Args:
+        max_open_positions: Maximum number of concurrent positions
+        symbols: List of trading symbols
+        logger: Logger instance
+        client: Binance client
+        leverage: Trading leverage
+        config: Configuration dictionary for margin selection
+    """
     try:
         # Fetch static data once
         stepSizes, quantityPrecisions, pricePrecisions = await stepsize_precision(client, symbols)
         capital_tbu = get_capital_tbu()
-        position_value = await position_val(leverage, capital_tbu, max_open_positions, logger, client)
+        
+        # Calculate position value with margin selection support
+        position_value = await position_val(leverage, capital_tbu, max_open_positions, logger, client, config)
+        
         await position_checker(client, pricePrecisions, logger)
         
 

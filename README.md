@@ -1,113 +1,445 @@
+# n0name Trading Bot v2.4.0
 
-# n0name v0.9.6 by f0ncu
-This repository contains *project n0name* designed for automated Futures Trading on Binance. The bot leverages the Binance API to execute trades based on configurable parameters. Built with Python..
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://www.docker.com/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-green.svg)](https://github.com/features/actions)
 
-# Disclaimer
+A professional-grade automated cryptocurrency trading bot designed for Binance Futures trading. Built with Python, featuring modular architecture, comprehensive risk management, and extensive monitoring capabilities.
 
-*The information provided by this bot is not intended to be and should not be construed as financial advice. Always conduct your own research and consult with a qualified financial advisor before making any trading decisions.Trading in cryptocurrencies and futures involves a high level of risk and may not be suitable for all investors. You should carefully consider your financial situation and risk tolerance before engaging in such activities.There are no guarantees of profit or avoidance of losses when using this bot. Past performance is not indicative of future results.You are solely responsible for any trades executed using this bot. The developers and contributors of this project are not liable for any financial losses or damages that may occur as a result of using this bot.Ensure that your use of this bot complies with all applicable laws and regulations in your jurisdiction. It is your responsibility to understand and adhere to any legal requirements related to cryptocurrency trading.*
-#
+## ⚠️ Disclaimer
 
-# Description
-n0name is an automated, multi-layered technical analysis system developed for traders. Thanks to its ability to monitor 12 different highly volatile cryptocurrencies on minute-based charts, numerous trades can be executed in the market and investment opportunities are continuously evaluated. The system generates both buy and sell signals by combining various technical tools such as the MACD indicator, histogram analysis, and Fibonacci levels.
+**The information provided by this bot is not intended to be and should not be construed as financial advice. Always conduct your own research and consult with a qualified financial advisor before making any trading decisions. Trading in cryptocurrencies and futures involves a high level of risk and may not be suitable for all investors. You should carefully consider your financial situation and risk tolerance before engaging in such activities. There are no guarantees of profit or avoidance of losses when using this bot. Past performance is not indicative of future results. You are solely responsible for any trades executed using this bot. The developers and contributors of this project are not liable for any financial losses or damages that may occur as a result of using this bot. Ensure that your use of this bot complies with all applicable laws and regulations in your jurisdiction.**
 
-The system executes trades using 3x leverage and targets a 1% profit on each trade. With a success rate of approximately 88%, and by maintaining an average risk/reward ratio of 1.5:5 in its orders, this structure not only helps control risk but also maximizes potential profit. With all these features combined, the robot is expected to deliver a daily return of between 3-4%.
+## 🚀 Quick Start
 
-In its trading strategy, the robot utilizes the trend and momentum data provided by the MACD. Clean signal if price area updates itself and create new highs or lows. Additionally, the analysis of the last 500 data points of the histogram helps to control abrupt price movements and extreme conditions. Fibonacci levels play a critical role in identifying price retracement and reversal points. Thanks to the harmonious operation of these three methods, signals are activated only when all conditions are met, preventing erroneous buy or sell decisions.
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/your-username/n0name-trading-bot.git
+cd n0name-trading-bot
 
-# Key Features
+# Install dependencies
+pip install -r requirements.txt
 
-- Uses Python’s asyncio for non-blocking operations, enabling efficient handling of multiple symbols and tasks concurrently.
-- Loads settings from a config file, including trading symbols, leverage, capital allocation, and maximum open positions. Creates a default config if none exists.
-- Employs MACD (histogram breakout and signal line crossover) and Fibonacci retracement to determine trading signals.
-- Monitors open positions, calculates quantities, and sets stop-loss and take-profit levels dynamically.
-- Logs errors to a file and stops the bot after 3 errors to prevent erratic behavior.
-- Optionally stores real-time trading data in InfluxDB for analysis.
-- Displays real-time trading conditions and position statuses in the terminal using colored outputs.
-- Encrypts Binance API keys using AES-256-GCM with a user-provided password, stored in an encrypted_keys.bin file.
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys and settings
 
-# Strategy
+# Run the bot
+python n0name.py
 
-*The trading strategy relies on three conditions for both buying and selling, evaluated over the last 500 1-minute candles:*
+# Access the web interface
+# Open http://localhost:5173 in your browser
+```
 
-## Buy Conditions
-### MACD Histogram Breakout :
-The latest positive histogram value exceeds the 85th percentile of the last 500 positive histogram values, indicating strong upward momentum.
-### Fibonacci Retracement Confirmation:
-Price breaks above the 78.6% retracement level (from the lowest to highest price in the last 500 candles) with a significant gap (>1%) to the 61.8% level, confirming a bullish move.
-### First Wave Signal:
-Price breaks above highest value of current Fibonacci area . After an buy signal, price has to move at least %60 of current Fibonacci Area.
+### Docker Quick Start
+```bash
+# Using Docker Compose (Recommended)
+docker-compose up -d
 
-**Action: Opens a long position if all conditions are true and the max open positions limit isn’t reached.**
+# View logs
+docker-compose logs -f n0name-bot
+```
 
-## Sell Conditions
-### MACD Histogram Breakout:
-The latest negative histogram value falls below the 85th percentile of the last 500 negative histogram values (absolute), indicating strong downward momentum.
-### Fibonacci Retracement Confirmation:
-Price drops below the 23.6% retracement level with a significant gap (>1%) to the 38.2% level, confirming a bearish move.
-### First Wave Signal:
-Price dips below lowest value of current Fibonacci area. After an sell signal, price has to move at least %60 of current Fibonacci Area.
+## 📚 Documentation
 
-**Action: Opens a short position if all conditions are true and the max open positions limit isn’t reached.**
+Our comprehensive documentation is organized to help both users and developers:
 
-## Risk Management
+### 🎯 For Users
+- **[Installation Guide](docs/user-guide/installation.md)** - Complete setup instructions
+- **[Configuration Guide](docs/user-guide/configuration.md)** - Configuration reference
+- **[Trading Strategies](docs/user-guide/trading-strategies.md)** - Available strategies and usage
+- **[Troubleshooting](docs/user-guide/troubleshooting.md)** - Common issues and solutions
 
-### Stop-Loss:
-There are 2 types of Stop Loss values in new strategy.
-*Soft Stop Loss Point*: %5 (gets activated if there is an cross-side signal)
-*Hard Stop Loss Point*: %8.5
+### 🔧 For Developers
+- **[Architecture Overview](docs/developer-guide/architecture.md)** - System design and components
+- **[Contributing Guidelines](docs/developer-guide/contributing.md)** - How to contribute
+- **[Testing Guide](docs/developer-guide/testing.md)** - Testing framework and practices
+- **[Performance Guide](docs/developer-guide/performance.md)** - Optimization techniques
+- **[Security Guidelines](docs/developer-guide/security.md)** - Security best practices
 
+### 🚀 For DevOps
+- **[Docker Deployment](docs/deployment/docker.md)** - Container deployment guide
+- **[Monitoring Setup](docs/deployment/monitoring.md)** - Monitoring and alerting
+- **[Backup & Recovery](docs/deployment/backup-recovery.md)** - Data protection
 
-### Take-Profit:
-Profit goal for every position is **%1.5** (%1 after fees.)
+### 🔌 API Reference
+- **[API Endpoints](docs/api/endpoints.md)** - REST API documentation
+- **[API Manager](docs/api/manager.md)** - API client libraries
+- **[Authentication](docs/api/authentication.md)** - API security
 
+### 📖 Migration & Guides
+- **[Migration Guides](docs/guides/migration/)** - Upgrade and migration instructions
+- **[Optimization Guides](docs/guides/optimization/)** - Performance optimization
+- **[Modernization Guides](docs/guides/modernization/)** - Code modernization
 
-# Release Notes (0.9.6) 
-##### *[click for pre-production roadmap](https://github.com/users/firatoncu/projects/3/views/2?filterQuery=-status%3A%22In+review%22)*
-- Various UI improvements.
-- Released RSI & Bollinger Bands Strategy. 
-- Multistrategy support added.
-- Finalization of MACD Overlap & Fibonacci Retracement Strategy.
-- Enhancements on UI.
-- TradingView Integration completed. Added charts of open and historical positions.
-- Implemented trend checking logic and created a new strategy "Volatile Trading"
-- Big Strategy Update ! Wave prediction is way more stronger now.
-- Added wallet and historical positions data models
-- Enhance TradingConditionsCard with navigation buttons
-- Added initial web UI project setup with Tailwind CSS, Vite, and React.
-- Added Telegram Notification module.
+## ✨ Key Features
 
+### 🌐 Modern Web Interface
+- **Dashboard**: Real-time trading overview with live position updates
+- **Trading Conditions**: Monitor market conditions and strategy signals for all symbols
+- **Position Analysis**: Comprehensive performance analytics with interactive charts and metrics
+- **Settings**: Easy configuration management through web interface
+- **Symbol Charts**: Click any symbol to view interactive TradingView-style charts
+- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
 
-##
-### Older Releases (< 0.8.2)
-- InfluxDB integration and notification status management.
-- Positional improvements on condition table.
-- Implemented Enhanced Stop Loss strategy.
-- Streamline buy/sell condition checks while in-position status.
-- Time synchronization feature added.
-- Added Funding Fee management.
-- Added InfluxDB Integration & Setup Pipeline for real-time data logging !
-- Better Signal Initialization Logic for MACD conditions and clean Buy/Sell signals.
-- Upgraded PPL(*Position Processing Logic*) to utilize Dynamic Stoploss values.
-- Improved position value calculations and enhance balance checking.
-- Cold Start Condition Check feature went live!
-- Enhance backtesting pipeline with logging for input retrieval and strategy execution.
-- **Backtesting module** is Online!
-- Big Security Update! Implemented API keys encryption and decryption with AES-256-GCM with an encrypted password using PBKDF2 (with over 100.000 iterations.) 
-- Enhance backtesting pipeline with user-defined balance, leverage, and fee rate inputs; improve error handling and user prompts.
-- Now, Logger Module saves error logs on *error.log* file. 
-- Bug fixes and major improvements
-- Real-Time Strategy Tracking module & graphical updates on UI.
-- Added strategy explanation to terminal UI.
-- Enhanced position management to include Dynamic Capital Allocation.
-- User-friendly Configuration Setup Page.
-- Adaptive MACD & Signal Line Control.
-- Global signal management for Buy/Sell conditions.
-- Price values made more weighted than MACD values.
-- Added Fibonnaci Retratement Strategy.
-- Improvements in the code structure and execution logic.
-- Using Market Order instead of Limit Order to avoid being traced.
-- Windows Application released.
-- **Asynchronous Operation**, enhancing performance and responsiveness.
-- Update function definitions and logging for clarity.
-- Buy and Sell condition checks to utilize Histogram checker.
-- Improvements on Fibonacci logic for higher accuracy.
+### 🎯 Trading Capabilities
+- **Multiple Strategies**: MACD-Fibonacci, Bollinger-RSI, and custom strategies
+- **Risk Management**: Advanced position sizing, stop-loss, and take-profit
+- **Paper Trading**: Test strategies without real money
+- **Multi-Timeframe**: Support for various timeframes (1m to 1d)
+- **Multi-Asset**: Trade multiple cryptocurrency pairs simultaneously
+
+### 🛡️ Security & Safety
+- **Encrypted Configuration**: Secure API key storage with simplified config system
+- **Risk Limits**: Configurable drawdown and position limits
+- **Emergency Stop**: Immediate trading halt functionality
+- **Audit Logging**: Comprehensive trade and system logging with ERROR level by default
+- **Production Mode**: Secure production configuration with real API keys
+- **Full Balance Trading**: Support for using 100% of futures balance with leverage
+
+### 📊 Monitoring & Analytics
+- **Real-time Dashboard**: Modern web-based monitoring interface with React
+- **Position Analysis**: Comprehensive trading performance analytics with interactive charts
+- **Performance Metrics**: Detailed trading statistics with hover tooltips and explanations
+- **Symbol Chart Integration**: Click any symbol to view interactive charts in popup modals
+- **Alerting System**: Email, Slack, and Telegram notifications
+- **Database Integration**: InfluxDB for time-series data
+
+### 🔧 Technical Excellence
+- **Modular Architecture**: Clean, maintainable codebase with simplified configuration system
+- **Modern Web UI**: React-based frontend with TypeScript and Tailwind CSS
+- **Async Processing**: High-performance async operations
+- **Docker Support**: Containerized deployment
+- **CI/CD Pipeline**: Automated testing and deployment
+- **Comprehensive Testing**: Unit, integration, and performance tests
+- **Production Ready**: Full balance trading with 5x leverage support
+
+## 🏗️ Project Structure
+
+```
+n0name-trading-bot/
+├── 📁 utils/                 # Core utilities and components
+│   ├── web_ui/              # Modern React web interface
+│   │   └── project/         # React TypeScript frontend
+│   │       ├── src/         # React source code
+│   │       │   ├── components/  # Reusable UI components
+│   │       │   ├── pages/       # Main application pages
+│   │       │   └── api/         # FastAPI backend
+│   │       └── public/      # Static assets
+│   ├── config_manager.py    # Configuration management
+│   ├── enhanced_logging.py  # Advanced logging system
+│   ├── load_config.py       # Simplified config loader
+│   └── config_models.py     # Pydantic configuration models
+├── 📁 tests/                # Test suite
+├── 📁 docs/                 # Documentation
+├── 📁 scripts/              # Automation scripts
+├── 📁 tools/                # Development tools
+├── 📁 examples/             # Example configurations
+├── 📁 archive/              # Archived/legacy files
+├── 📁 logs/                 # Application logs
+├── 📁 auth/                 # Authentication files
+├── config.yml               # Main configuration file
+├── n0name.py               # Main trading bot application
+├── requirements.txt        # Python dependencies
+├── docker-compose.yml      # Docker deployment
+└── README.md               # This file
+```
+
+## 🎯 Available Strategies
+
+### 1. MACD Fibonacci Strategy
+- **Type**: Trend-following
+- **Best for**: Trending markets, medium to long-term trades
+- **Indicators**: MACD crossovers + Fibonacci retracements
+- **Risk Management**: Configurable stop-loss and take-profit
+
+### 2. Bollinger Bands RSI Strategy
+- **Type**: Mean reversion
+- **Best for**: Range-bound markets, high volatility
+- **Indicators**: Bollinger Bands + RSI confirmation
+- **Risk Management**: Dynamic position sizing
+
+### 3. Custom Strategy Framework
+- **Extensible**: Create your own strategies
+- **Template**: Base strategy class with common functionality
+- **Backtesting**: Built-in backtesting support
+
+## ⚙️ Configuration
+
+### Environment Variables
+```env
+# Trading Configuration
+TRADING_MODE=paper          # paper or live
+EXCHANGE=binance
+API_KEY=your_api_key
+API_SECRET=your_api_secret
+
+# Database
+DATABASE_URL=sqlite:///n0name.db
+
+# Monitoring
+INFLUXDB_URL=http://localhost:8086
+GRAFANA_URL=http://localhost:3000
+```
+
+### Strategy Configuration
+```yaml
+# config.yml - Simplified single configuration file
+trading:
+  capital: -999  # Use full balance
+  leverage: 5
+  symbols: ["BTCUSDT", "ETHUSDT", "XRPUSDT", "SOLUSDT", "ADAUSDT", "DOGEUSDT"]
+  paper_trading: false
+  auto_start: true
+  strategy:
+    name: "bollinger_rsi"
+    type: "mean_reversion"
+    enabled: true
+    timeframe: "1h"
+    lookback_period: 20
+  risk:
+    max_position_size: 1.0  # 100% of balance
+    max_open_positions: 1   # One position at a time
+    risk_per_trade: 1.0
+    stop_loss_percentage: 2.0
+    take_profit_ratio: 2.0
+
+exchange:
+  type: "binance"
+  testnet: false  # Production mode
+  rate_limit: 1200
+  timeout: 30
+  retry_attempts: 3
+
+logging:
+  level: "ERROR"  # Minimal logging for production
+  console_output: true
+  structured_logging: false
+
+notifications:
+  enabled: true
+```
+
+## 🚀 Deployment Options
+
+### Local Development
+```bash
+# Install dependencies
+pip install -r requirements-dev.txt
+
+# Run tests
+python -m pytest tests/
+
+# Start development server
+python n0name.py --mode paper
+```
+
+### Docker Production
+```bash
+# Production deployment
+docker-compose -f docker-compose.yml up -d
+
+# With monitoring stack
+docker-compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+```
+
+### Cloud Deployment
+- **AWS**: ECS/EKS deployment guides
+- **Google Cloud**: GKE deployment
+- **Azure**: AKS deployment
+- **DigitalOcean**: Droplet deployment
+
+## 📊 Monitoring & Metrics
+
+### Key Metrics
+- **Performance**: Win rate, profit factor, Sharpe ratio
+- **Risk**: Maximum drawdown, position exposure
+- **System**: CPU, memory, API latency
+- **Trading**: Order fill rates, slippage
+
+### Dashboards
+- **Grafana**: Real-time trading dashboard
+- **Web UI**: Built-in monitoring interface with React frontend
+- **Position Analysis**: Interactive performance analytics with:
+  - Performance metrics with explanatory tooltips
+  - Symbol performance breakdown
+  - Trade history with detailed filtering
+  - Interactive charts (P&L over time, symbol distribution, win rates)
+  - Clickable symbols that open chart popups
+- **Mobile**: Responsive design for mobile monitoring
+
+### Alerts
+- **Email**: Trade notifications and system alerts
+- **Slack**: Team notifications
+- **Telegram**: Personal alerts
+- **Webhook**: Custom integrations
+
+## 🛠️ Development
+
+### Prerequisites
+- Python 3.8+
+- Docker & Docker Compose
+- Git
+
+### Development Setup
+```bash
+# Clone and setup
+git clone https://github.com/your-username/n0name-trading-bot.git
+cd n0name-trading-bot
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+# or venv\Scripts\activate  # Windows
+
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Install pre-commit hooks
+pre-commit install
+
+# Run tests
+make test
+
+# Start development server
+make dev
+```
+
+### Available Commands
+```bash
+# Development
+make dev              # Start development server
+make test             # Run test suite
+make lint             # Run linting
+make format           # Format code
+
+# Building
+make build            # Build Python package
+make docker-build     # Build Docker image
+make docs             # Generate documentation
+
+# Deployment
+make deploy-staging   # Deploy to staging
+make deploy-prod      # Deploy to production
+make backup           # Backup data
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](docs/developer-guide/contributing.md) for details.
+
+### Quick Contribution Guide
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Add tests for new functionality
+5. Run the test suite (`make test`)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+### Getting Help
+- **Documentation**: Check our [comprehensive docs](docs/README.md)
+- **Issues**: [GitHub Issues](https://github.com/your-username/n0name-trading-bot/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-username/n0name-trading-bot/discussions)
+- **Community**: Join our Discord server
+
+### Reporting Issues
+When reporting issues, please include:
+- Operating system and Python version
+- Error messages and stack traces
+- Steps to reproduce the issue
+- Configuration (remove sensitive data)
+
+## 🔄 Changelog
+
+### Version 2.4.0 - Latest Release 🎉
+
+#### 🌟 Major Features
+- **Position Analysis Dashboard**: Comprehensive trading performance analytics
+  - Interactive performance metrics with explanatory tooltips
+  - Symbol performance breakdown and comparison
+  - Trade history with advanced filtering (timeframe, symbol)
+  - Multiple view modes: Overview, Detailed table, Interactive charts
+  - Real-time data integration with API endpoints
+
+#### 📊 Enhanced Web Interface
+- **Symbol Chart Integration**: Click any symbol to view interactive charts
+  - Modal popup with embedded TradingView-style charts
+  - External link option to open charts in new tabs
+  - Smooth animations and professional UI/UX
+- **Improved Navigation**: Streamlined navigation with Dashboard, Trading Conditions, Position Analysis, and Settings
+- **Responsive Design**: Optimized for all device sizes
+
+#### ⚙️ Configuration System Overhaul
+- **Simplified Configuration**: Single `config.yml` file replaces complex multi-file system
+- **No Default Values**: All configuration must be explicitly defined
+- **Production Ready**: Full balance trading with leverage support
+- **Web-based Settings**: Configure bot through web interface
+- **Real-time Updates**: Configuration changes reflect immediately
+
+#### 🔧 Technical Improvements
+- **Enhanced Logging**: Configurable log levels with ERROR default for production
+- **API Optimization**: Improved endpoint performance and error handling
+- **State Management**: Better handling of trading conditions and position updates
+- **Error Suppression**: Intelligent handling of harmless connection reset errors
+
+#### 🛡️ Security & Stability
+- **Production Mode**: Secure configuration for live trading
+- **API Key Management**: Improved security for sensitive credentials
+- **Recovery System**: Enhanced error recovery and exception handling
+- **Connection Management**: Better handling of network interruptions
+
+See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
+
+## 🙏 Acknowledgments
+
+- **ccxt**: Cryptocurrency exchange library
+- **TA-Lib**: Technical analysis library
+- **FastAPI**: Modern web framework
+- **Docker**: Containerization platform
+- **Grafana**: Monitoring and visualization
+
+## Windows-Specific Considerations
+
+### Connection Reset Errors
+
+On Windows, you may see harmless connection reset errors in the console:
+```
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+```
+
+These errors are **normal** and **harmless**. They occur when:
+- The Binance API server closes idle connections
+- Network timeouts occur during normal operation
+- Rate limiting is enforced by the exchange
+
+The application automatically suppresses these errors and continues operating normally. The error suppression system:
+- Catches and logs these errors at debug level only
+- Maintains statistics on suppressed errors
+- Ensures the application continues running without interruption
+
+### Event Loop Configuration
+
+The application automatically configures the optimal asyncio event loop for Windows:
+- Uses `WindowsProactorEventLoopPolicy` for better compatibility
+- Suppresses resource warnings that don't affect functionality
+- Handles connection cleanup gracefully
+
+### Monitoring Suppressed Errors
+
+You can monitor suppressed connection errors in the debug logs. The application will log a summary of suppressed errors on shutdown, helping you understand the frequency of these normal network events.
+
+---
+
+**⚡ Ready to start trading?** Check out our [Installation Guide](docs/user-guide/installation.md) to get started!
+
+**🔧 Want to contribute?** Read our [Developer Guide](docs/developer-guide/architecture.md) to understand the architecture.

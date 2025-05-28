@@ -1,73 +1,58 @@
-import yaml  # type: ignore
-import os
-import sys
-import time
+"""
+Simple configuration loading that only reads from config.yml.
+No defaults, no fallbacks - if config.yml doesn't exist or is missing values, an error is raised.
+"""
+import yaml
+from typing import Dict, Any, Optional
+from pathlib import Path
 
-def load_config(file_path='config.yml'):
-    os.system("cls" if os.name == "nt" else "clear") 
-    # Determine the base path (script dir or executable dir)
-    if getattr(sys, 'frozen', False):  # Running as PyInstaller executable
-        base_path = os.path.dirname(sys.executable)
-    else:  # Running as a Python script
-        base_path = os.path.dirname(os.path.abspath(__file__))
-    full_path = os.path.join(base_path, file_path)
 
-    try:
-        with open(full_path, 'r') as file:
-            config = yaml.safe_load(file)
-        return config
+def load_config(file_path: str = 'config.yml') -> Dict[str, Any]:
+    """
+    Load configuration from config.yml file.
     
-    except FileNotFoundError:
-        print(f"\nConfig file '{full_path}' not found. Let's create a new one. \n \n")
+    Args:
+        file_path: Path to the configuration file
         
-        # Get user inputs
-        config = {
-            'symbols': {},
-            'capital_tbu': float  # Default to use full balance 
-        }
+    Returns:
+        Configuration dictionary
         
-        # Symbols configuration
-        symbols_input = input("Enter symbols (comma-separated, e.g., ETHUSDT,SOLUSDT,XRPUSDT): " ).strip() or -999
-        time.sleep(1)
-        if symbols_input == -999:
-            print("No symbols entered, defaulting to BTCUSDT & ETHUSDT")
-            symbols_input = "BTCUSDT,ETHUSDT"
-        symbols_list = [s.strip() for s in symbols_input.split(',')]
-        config['symbols']['symbols'] = symbols_list
-        time.sleep(1)
-
-        leverage = int(input("\nEnter leverage (e.g., 3): ").strip() or -999)
-        time.sleep(1)
-        if leverage == -999:
-            leverage = 3
-            print("Defaulting to 3x leverage")
-        config['symbols']['leverage'] = leverage
-        time.sleep(1)
-
-        capital_tbu = float(input("\nCapital to be used (leave blank to use the full balance): ").strip() or -999) 
-        time.sleep(1)
-        if capital_tbu == -999:
-            print("Using full balance.. ")
-        config['capital_tbu'] = capital_tbu
-        time.sleep(1)
-
-        max_positions = int(input("\nEnter max open positions (e.g., 2): ").strip() or -999)
-        time.sleep(1)
-        if max_positions == -999:
-            max_positions = 2
-            print("Defaulting to 2 max open positions")
-        config['symbols']['max_open_positions'] = max_positions
-        time.sleep(1)        
-        # Save the new config file
-        try:
-            with open(full_path, 'w') as file:
-                yaml.safe_dump(config, file, default_flow_style=False)
-            print(f"New config file created at '{full_path}'")
-            return config
-        except Exception as e:
-            print(f"Error saving new config file: {e}")
-            return None
-            
+    Raises:
+        FileNotFoundError: If config file doesn't exist
+        ValueError: If config file is invalid or missing required values
+    """
+    # Get the project root (parent of utils directory)
+    project_root = Path(__file__).parent.parent
+    config_path = project_root / file_path
+    
+    if not config_path.exists():
+        raise FileNotFoundError(f"Configuration file not found: {config_path}")
+    
+    try:
+        with open(config_path, 'r', encoding='utf-8') as file:
+            config = yaml.safe_load(file)
     except yaml.YAMLError as e:
-        print(f"Error parsing YAML file (delete the config file and n0name will create a new one for you): {e}")
-        return None
+        raise ValueError(f"Invalid YAML in config file: {e}")
+    except Exception as e:
+        raise ValueError(f"Error reading config file: {e}")
+    
+    if config is None:
+        raise ValueError("Configuration file is empty")
+    
+    # Validate required keys exist
+    required_keys = ['symbols', 'capital_tbu', 'api_keys', 'strategy_name']
+    missing_keys = [key for key in required_keys if key not in config]
+    
+    if missing_keys:
+        raise ValueError(f"Missing required configuration keys: {', '.join(missing_keys)}")
+    
+    return config
+
+
+def get_db_status() -> str:
+    """Get database status from config."""
+    config = load_config()
+    db_status = config.get('db_status')
+    if db_status is None:
+        raise ValueError("db_status not found in configuration")
+    return db_status

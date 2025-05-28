@@ -1,15 +1,26 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { LayoutDashboard } from 'lucide-react';
-import { useTheme } from './contexts/ThemeContext';
+import { AppProvider } from './contexts/AppContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Navigation } from './components/Navigation';
 
 function App() {
-  const { isDarkMode } = useTheme();
-
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} transition-colors duration-200`}>
-      <Outlet context={{ isDarkMode }} />
-    </div>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AppProvider>
+          <div className="min-h-screen bg-gray-900 transition-colors duration-200">
+            <Navigation />
+            <main className="flex-1">
+              <ErrorBoundary>
+                <Outlet />
+              </ErrorBoundary>
+            </main>
+          </div>
+        </AppProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
