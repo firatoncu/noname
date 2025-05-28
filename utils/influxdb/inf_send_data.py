@@ -1,10 +1,10 @@
 from influxdb import InfluxDBClient
-from utils.logging import error_logger_func
+from utils.enhanced_logging import get_logger
 from datetime import datetime
 import pytz
 from utils.globals import set_last_timestamp, get_last_timestamp, get_buyconda, get_buycondb, get_buycondc, get_sellconda, get_sellcondb, get_sellcondc
 
-logger = error_logger_func()
+logger = get_logger()
 
 # InfluxDB istemcisi oluştur
 client = InfluxDBClient(host="localhost", port=8086, database="n0namedb")
@@ -22,7 +22,7 @@ async def write_live_data(last_candle, symbol):
         close_price = last_candle['close']
         volume = last_candle['volume']
 
-        # InfluxDB’ye veri yaz
+        # InfluxDB'ye veri yaz
         json_body = [
             {
                 "measurement": symbol,
@@ -56,7 +56,7 @@ async def write_live_conditions(timestamp, symbol):
         sellcond2 = get_sellcondb(symbol)
         sellcond3 = get_sellcondc(symbol)
 
-        # InfluxDB’ye veri yaz
+        # InfluxDB'ye veri yaz
         json_body = [
             {
                 "measurement": symbol,

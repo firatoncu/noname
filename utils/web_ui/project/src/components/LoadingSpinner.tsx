@@ -29,30 +29,45 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   className = '',
   fullScreen = false,
 }) => {
-  const spinnerContent = (
-    <div className={`flex flex-col items-center justify-center ${className}`}>
-      <Loader2 
-        className={`animate-spin ${sizeClasses[size]} ${variantClasses[variant]}`} 
-      />
-      {text && (
-        <p className={`mt-2 text-sm ${variantClasses[variant]}`}>
-          {text}
-        </p>
-      )}
-    </div>
-  );
-
   if (fullScreen) {
     return (
       <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-gray-800 rounded-lg p-8">
-          {spinnerContent}
+          <div className={`flex flex-col items-center justify-center ${className}`}>
+            <Loader2 
+              className={`animate-spin ${sizeClasses[size]} ${variantClasses[variant]}`} 
+            />
+            {text && (
+              <span className={`mt-2 text-sm ${variantClasses[variant]}`}>
+                {text}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
-  return spinnerContent;
+  // For inline usage, return just the spinner without wrapping div to avoid nesting issues
+  if (!text) {
+    return (
+      <Loader2 
+        className={`animate-spin ${sizeClasses[size]} ${variantClasses[variant]} ${className}`} 
+      />
+    );
+  }
+
+  // When text is provided, use a span container instead of div
+  return (
+    <span className={`inline-flex flex-col items-center justify-center ${className}`}>
+      <Loader2 
+        className={`animate-spin ${sizeClasses[size]} ${variantClasses[variant]}`} 
+      />
+      <span className={`mt-2 text-sm ${variantClasses[variant]}`}>
+        {text}
+      </span>
+    </span>
+  );
 };
 
 // Skeleton loading component for content placeholders

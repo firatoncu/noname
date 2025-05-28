@@ -588,10 +588,10 @@ async def update_ui(symbols, client):
     while True:
         try:
             # Get updated data
-            new_positions = await get_current_position_ui(symbols, client)
+            new_positions = await get_current_position_ui(client)
             new_conditions = await get_trading_conditions_ui(symbols)
             new_wallet = await get_wallet_info(client)
-            new_historical = await get_last_5_positions()
+            new_historical = await get_last_5_positions(client)
             
             # Update and broadcast
             await update_ui_values(new_positions, new_conditions, new_wallet, new_historical)

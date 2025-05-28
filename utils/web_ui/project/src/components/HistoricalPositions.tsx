@@ -13,7 +13,8 @@ export function HistoricalPositions({ positions, isDarkMode }: HistoricalPositio
   const [visiblePositions, setVisiblePositions] = useState(5);
 
   const handleViewChart = (position: HistoricalPosition) => {
-    navigate(`/position/${position.id}`, { state: { position } });
+    const positionId = `${position.symbol}-${position.closedAt}`;
+    navigate(`/position/${positionId}`, { state: { position } });
   }
 
   const handleShowMore = () => {

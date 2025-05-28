@@ -174,7 +174,7 @@ class SecureConfigManager:
         except Exception as e:
             self.logger.error(
                 f"Failed to initialize secure configuration: {e}",
-                category=ErrorCategory.SECURITY,
+                category=ErrorCategory.AUTHENTICATION,
                 severity=LogSeverity.CRITICAL
             )
             return False
@@ -216,7 +216,7 @@ class SecureConfigManager:
         except Exception as e:
             self.logger.error(
                 f"Failed to load secure configuration: {e}",
-                category=ErrorCategory.SECURITY,
+                category=ErrorCategory.AUTHENTICATION,
                 severity=LogSeverity.HIGH
             )
             return None
@@ -243,7 +243,7 @@ class SecureConfigManager:
         except Exception as e:
             self.logger.error(
                 f"Failed to update secure configuration: {e}",
-                category=ErrorCategory.SECURITY,
+                category=ErrorCategory.AUTHENTICATION,
                 severity=LogSeverity.HIGH
             )
             return False
@@ -282,7 +282,7 @@ class SecureConfigManager:
         except Exception as e:
             self.logger.error(
                 f"Failed to save secure configuration: {e}",
-                category=ErrorCategory.SECURITY,
+                category=ErrorCategory.AUTHENTICATION,
                 severity=LogSeverity.HIGH
             )
             return False
@@ -357,7 +357,7 @@ class SecureConfigManager:
         except Exception as e:
             self.logger.error(
                 f"Failed to rotate secrets: {e}",
-                category=ErrorCategory.SECURITY,
+                category=ErrorCategory.AUTHENTICATION,
                 severity=LogSeverity.HIGH
             )
             return False
@@ -406,7 +406,7 @@ class SecureConfigManager:
         except Exception as e:
             self.logger.error(
                 f"Failed to export backup: {e}",
-                category=ErrorCategory.SECURITY,
+                category=ErrorCategory.AUTHENTICATION,
                 severity=LogSeverity.HIGH
             )
             return False
@@ -424,7 +424,7 @@ class SecureConfigManager:
         except Exception as e:
             self.logger.error(
                 f"Configuration integrity check failed: {e}",
-                category=ErrorCategory.SECURITY,
+                category=ErrorCategory.AUTHENTICATION,
                 severity=LogSeverity.HIGH
             )
             return False

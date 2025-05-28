@@ -48,25 +48,54 @@ export const useApi = <T = any>(
   const retryTimeoutRef = useRef<number | null>(null);
   const isMountedRef = useRef(true);
 
-  const fetchData = useCallback(async (attempt = 1): Promise<void> => {
-    if (!isMountedRef.current) return;
+  // Ensure isMountedRef is set correctly - remove endpoint dependency to prevent remounting
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []); // Empty dependency array to run only once
 
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+  // Use refs for callbacks to avoid dependency issues
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
+
+  const fetchData = useCallback(async (attempt = 1): Promise<void> => {
+    // Minimal logging for performance
+    
+    // Check if component is still mounted
+    if (!isMountedRef.current) {
+      return;
     }
 
-    abortControllerRef.current = new AbortController();
-
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    // Create new AbortController only if we don't have one
+    if (!abortControllerRef.current || abortControllerRef.current.signal.aborted) {
+      abortControllerRef.current = new AbortController();
+    }
+    
+    // Only set loading to true if we don't have data yet (first load)
+    setState(prev => ({ 
+      ...prev, 
+      loading: prev.data === null, // Only loading on first fetch
+      error: null 
+    }));
 
     try {
-      const response = await fetch(createApiUrl(endpoint), {
+      const url = createApiUrl(endpoint);
+      
+      const response = await fetch(url, {
         signal: abortControllerRef.current.signal,
         headers: {
           'Content-Type': 'application/json',
         },
       });
+
+      // Response received successfully
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -74,43 +103,63 @@ export const useApi = <T = any>(
 
       const data = await response.json();
 
+      // Check if component is still mounted before updating state
       if (!isMountedRef.current) return;
 
-      setState({
-        data,
-        loading: false,
-        error: null,
-        lastFetch: Date.now(),
+      // Only update state if data has actually changed (deep comparison for arrays/objects)
+      setState(prevState => {
+        const dataChanged = JSON.stringify(prevState.data) !== JSON.stringify(data);
+        if (!dataChanged && !prevState.loading && !prevState.error) {
+          // Data hasn't changed and we're not in loading/error state, skip update
+          return prevState;
+        }
+        
+        return {
+          data,
+          loading: false,
+          error: null,
+          lastFetch: Date.now(),
+        };
       });
 
-      onSuccess?.(data);
-    } catch (error: any) {
-      if (!isMountedRef.current) return;
+      // Data updated successfully
+      onSuccessRef.current?.(data);
+          } catch (error: any) {
+        // Handle fetch errors
+      
+              // Check if component is still mounted before handling error
+        if (!isMountedRef.current) {
+          return;
+        }
 
-      // Don't treat abort as an error
-      if (error.name === 'AbortError') {
-        return;
-      }
+              // Don't treat abort as an error
+        if (error.name === 'AbortError') {
+          return;
+        }
 
-      const errorMessage = error.message || 'An unknown error occurred';
+        const errorMessage = error.message || 'An unknown error occurred';
 
-      // Retry logic
-      if (attempt < retryAttempts) {
-        retryTimeoutRef.current = window.setTimeout(() => {
-          fetchData(attempt + 1);
-        }, retryDelay * attempt);
-        return;
-      }
-
+        // Retry logic
+        if (attempt < retryAttempts) {
+          retryTimeoutRef.current = window.setTimeout(() => {
+            fetchData(attempt + 1);
+          }, retryDelay * attempt);
+          return;
+        }
       setState(prev => ({
         ...prev,
         loading: false,
         error: errorMessage,
       }));
 
-      onError?.(errorMessage);
+      onErrorRef.current?.(errorMessage);
     }
-  }, [endpoint, retryAttempts, retryDelay, onSuccess, onError]);
+  }, [endpoint, retryAttempts, retryDelay]);
+
+  // Debug: Log when fetchData is recreated (commented out for performance)
+  // useEffect(() => {
+  //   console.log(`🔄 [${new Date().toLocaleTimeString()}] fetchData function recreated for ${endpoint}`);
+  // }, [fetchData]);
 
   const refetch = useCallback(async (): Promise<void> => {
     await fetchData();
@@ -139,20 +188,26 @@ export const useApi = <T = any>(
     }
   }, [immediate, fetchData]);
 
-  // Polling interval
+  // Stable polling interval
   useEffect(() => {
     if (interval && interval > 0) {
-      intervalRef.current = window.setInterval(() => {
-        fetchData();
+      const intervalId = window.setInterval(() => {
+        // Use a stable reference to fetchData
+        if (isMountedRef.current) {
+          fetchData();
+        }
       }, interval);
+
+      intervalRef.current = intervalId;
 
       return () => {
         if (intervalRef.current) {
           window.clearInterval(intervalRef.current);
+          intervalRef.current = null;
         }
       };
     }
-  }, [interval, fetchData]);
+  }, [interval, endpoint]); // Only depend on interval and endpoint, not fetchData
 
   // Cleanup on unmount
   useEffect(() => {
@@ -172,17 +227,17 @@ export const useApi = <T = any>(
 
 // Specialized hooks for common API calls
 export const usePositions = (options?: UseApiOptions) => {
-  return useApi('/positions', { interval: 5000, ...options });
+  return useApi('/positions', { interval: 1000, ...options }); // 1 second for real-time trading
 };
 
 export const useTradingConditions = (options?: UseApiOptions) => {
-  return useApi('/trading-conditions', { interval: 1000, ...options });
+  return useApi('/trading-conditions', { interval: 5000, ...options }); // Reduced from 1s to 5s
 };
 
 export const useWallet = (options?: UseApiOptions) => {
-  return useApi('/wallet', { interval: 5000, ...options });
+  return useApi('/wallet', { interval: 2000, ...options }); // 2 seconds for PnL tracking
 };
 
 export const useHistoricalPositions = (options?: UseApiOptions) => {
-  return useApi('/historical-positions', { immediate: false, ...options });
+  return useApi('/historical-positions', { immediate: true, ...options });
 }; 

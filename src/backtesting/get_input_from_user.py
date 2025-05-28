@@ -176,18 +176,51 @@ def unix_milliseconds_to_datetime(unix_timestamp_ms):
     :param timezone: Desired timezone .
     :return: Timezone-aware datetime object.
     """
-    # Convert milliseconds to seconds
-    unix_timestamp_seconds = int(unix_timestamp_ms) / 1000
-    timezone = get_user_time_zone()
-    # Convert to datetime (UTC)
-    dt = datetime.fromtimestamp(unix_timestamp_seconds)
+    try:
+        # Convert milliseconds to seconds
+        unix_timestamp_seconds = int(unix_timestamp_ms) / 1000
+        timezone = get_user_time_zone()
+        
+        # Map common timezone abbreviations to proper pytz timezone names
+        timezone_mapping = {
+            'PST': 'US/Pacific',
+            'EST': 'US/Eastern',
+            'CST': 'US/Central',
+            'MST': 'US/Mountain',
+            'PDT': 'US/Pacific',
+            'EDT': 'US/Eastern',
+            'CDT': 'US/Central',
+            'MDT': 'US/Mountain',
+        }
+        
+        # Use mapping if timezone is an abbreviation, otherwise use as-is
+        if timezone in timezone_mapping:
+            timezone = timezone_mapping[timezone]
+        
+        # Convert to datetime (UTC)
+        dt = datetime.fromtimestamp(unix_timestamp_seconds)
 
-    # Attach the desired timezone
-    tz = pytz.timezone(timezone)
-    dt = dt.replace(tzinfo=pytz.utc).astimezone(tz)
-    dt = dt.strftime('%Y-%m-%d %H:%M:%S')
-
-    return dt
+        # Attach the desired timezone
+        try:
+            tz = pytz.timezone(timezone)
+            dt = dt.replace(tzinfo=pytz.utc).astimezone(tz)
+        except pytz.exceptions.UnknownTimeZoneError:
+            # Fallback to UTC if timezone is invalid
+            tz = pytz.UTC
+            dt = dt.replace(tzinfo=pytz.utc)
+        
+        dt = dt.strftime('%Y-%m-%d %H:%M:%S')
+        return dt
+        
+    except Exception as e:
+        # Fallback: return a simple datetime string without timezone conversion
+        try:
+            unix_timestamp_seconds = int(unix_timestamp_ms) / 1000
+            dt = datetime.fromtimestamp(unix_timestamp_seconds)
+            return dt.strftime('%Y-%m-%d %H:%M:%S')
+        except:
+            # Ultimate fallback: return current time
+            return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 def get_inputs_for_backtest():
 

@@ -35,12 +35,12 @@ export default defineConfig({
   server: {
     host: 'localhost',
     port: 5173,
-    https: getSslConfig(),
+    https: false, // Disabled HTTPS for now
     proxy: {
       '/api': {
-        target: 'https://localhost:8000',
+        target: 'http://localhost:8000',
         changeOrigin: true,
-        secure: false, // Allow self-signed certificates
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }

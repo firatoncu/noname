@@ -1,12 +1,14 @@
 // API configuration for the trading dashboard
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8000/api';
+// Use HTTP for development to avoid SSL certificate issues
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 const APP_TITLE = import.meta.env.VITE_APP_TITLE || 'n0name Trading Dashboard';
 
 export { API_BASE_URL, APP_TITLE };
 
 // Helper function to create API URLs
 export const createApiUrl = (endpoint: string): string => {
-  return `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  return url;
 };
 
 // API endpoints

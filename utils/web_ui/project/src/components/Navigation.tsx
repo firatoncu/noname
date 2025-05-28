@@ -6,8 +6,6 @@ import {
   Menu, 
   X, 
   TrendingUp,
-  Wallet,
-  History,
   Settings
 } from 'lucide-react';
 import { ConnectionStatus, ConnectionStatusCompact } from './ConnectionStatus';
@@ -34,22 +32,16 @@ const navItems: NavItem[] = [
     description: 'Real-time trading signals'
   },
   {
-    path: '/positions',
-    label: 'Positions',
+    path: '/analysis',
+    label: 'Position Analysis',
     icon: TrendingUp,
-    description: 'Active trading positions'
+    description: 'Performance analytics and detailed position analysis'
   },
   {
-    path: '/wallet',
-    label: 'Wallet',
-    icon: Wallet,
-    description: 'Account balance and PnL'
-  },
-  {
-    path: '/history',
-    label: 'History',
-    icon: History,
-    description: 'Historical positions'
+    path: '/settings',
+    label: 'Settings',
+    icon: Settings,
+    description: 'Bot configuration and settings'
   },
 ];
 

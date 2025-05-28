@@ -8,9 +8,9 @@ from Crypto.Hash import SHA256
 from colorama import Fore, Style, init
 import random
 from time import sleep
-from utils.logging import error_logger_func
+from utils.enhanced_logging import get_logger
 
-logger = error_logger_func()
+logger = get_logger()
 
 init()
 

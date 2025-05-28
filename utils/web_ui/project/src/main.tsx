@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard';
 import PositionChart from './pages/PositionChart';
 import TradingConditionsPage from './pages/TradingConditionsPage';
 import TradingConditionChart from './pages/TradingConditionChart';
+import PositionAnalysis from './pages/PositionAnalysis';
+import Settings from './pages/Settings';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -22,6 +24,10 @@ const router = createBrowserRouter([
         element: <TradingConditionsPage />,
       },
       {
+        path: "/analysis",
+        element: <PositionAnalysis />,
+      },
+      {
         path: "/positions",
         element: <Dashboard />, // For now, redirect to dashboard
       },
@@ -32,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "/history",
         element: <Dashboard />, // For now, redirect to dashboard
+      },
+      {
+        path: "/settings",
+        element: <Settings />,
       },
       {
         path: "/position/:id",

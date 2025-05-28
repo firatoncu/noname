@@ -42,7 +42,7 @@ from binance import AsyncClient
 from binance.exceptions import BinanceAPIException, BinanceRequestException
 
 # Local imports - Configuration and utilities
-from utils.load_config import load_config
+from utils.load_config import load_config, get_db_status
 from utils.initial_adjustments import initial_adjustments
 
 # Enhanced logging and exception handling
@@ -51,7 +51,7 @@ from utils.enhanced_logging import (
     ErrorCategory, 
     LogSeverity, 
     log_performance,
-    PerformanceLogger
+    EnhancedLogger
 )
 from utils.exceptions import (
     TradingBotException,
@@ -93,7 +93,7 @@ POSITION_CHECK_INTERVAL = 5  # seconds
 async def initialize_binance_client(
     api_key: str, 
     api_secret: str, 
-    logger: PerformanceLogger,
+    logger: EnhancedLogger,
     testnet: bool = False
 ) -> AsyncClient:
     """
@@ -164,24 +164,14 @@ async def initialize_binance_client(
             )
         except BinanceAPIException as e:
             if e.code == -2014:  # API key format invalid
-                raise ConfigurationException(
-                    "Invalid API key format",
-                    config_key="api_key",
-                    original_exception=e
-                )
+                logger.error("Invalid API key format")
+                raise Exception("Invalid API key format - please check your API credentials")
             elif e.code == -1022:  # Signature verification failed
-                raise ConfigurationException(
-                    "Invalid API secret or signature verification failed",
-                    config_key="api_secret", 
-                    original_exception=e
-                )
+                logger.error("Invalid API secret or signature verification failed")
+                raise Exception("Invalid API secret - please check your API credentials")
             else:
-                raise APIException(
-                    f"Binance API error: {e.message}",
-                    api_name="binance",
-                    api_response={"code": e.code, "message": e.message},
-                    original_exception=e
-                )
+                logger.error(f"Binance API error: {e.message} (code: {e.code})")
+                raise Exception(f"Binance API error: {e.message}")
         
         return client
         
@@ -211,7 +201,7 @@ async def initialize_binance_client(
 
 
 @handle_exceptions(fallback_value=None)
-async def load_and_validate_config(logger: PerformanceLogger) -> Dict[str, Any]:
+async def load_and_validate_config(logger: EnhancedLogger) -> Dict[str, Any]:
     """
     Load and validate configuration with comprehensive error handling.
     
@@ -239,8 +229,7 @@ async def load_and_validate_config(logger: PerformanceLogger) -> Dict[str, Any]:
         
         # Validate required configuration keys
         required_keys = [
-            'symbols', 'capital_tbu', 'api_keys', 'strategy_name',
-            'max_open_positions', 'leverage'
+            'symbols', 'capital_tbu', 'api_keys', 'strategy_name'
         ]
         
         missing_keys = []
@@ -262,15 +251,43 @@ async def load_and_validate_config(logger: PerformanceLogger) -> Dict[str, Any]:
         # Validate configuration values
         validation_errors = []
         
-        # Validate symbols
-        if not isinstance(config['symbols'], list) or len(config['symbols']) == 0:
-            validation_errors.append("symbols must be a non-empty list")
+        # Validate symbols structure
+        if not isinstance(config['symbols'], dict):
+            validation_errors.append("symbols must be a dictionary")
+        else:
+            symbols_config = config['symbols']
+            
+            # Check for symbols list
+            if 'symbols' not in symbols_config or not isinstance(symbols_config['symbols'], list) or len(symbols_config['symbols']) == 0:
+                validation_errors.append("symbols.symbols must be a non-empty list")
+            
+            # Check for max_open_positions
+            if 'max_open_positions' not in symbols_config:
+                validation_errors.append("symbols.max_open_positions is required")
+            else:
+                try:
+                    max_positions = int(symbols_config['max_open_positions'])
+                    if max_positions <= 0:
+                        validation_errors.append("symbols.max_open_positions must be positive")
+                except (ValueError, TypeError):
+                    validation_errors.append("symbols.max_open_positions must be a valid integer")
+            
+            # Check for leverage
+            if 'leverage' not in symbols_config:
+                validation_errors.append("symbols.leverage is required")
+            else:
+                try:
+                    leverage = int(symbols_config['leverage'])
+                    if leverage < 1 or leverage > 125:  # Binance futures leverage limits
+                        validation_errors.append("symbols.leverage must be between 1 and 125")
+                except (ValueError, TypeError):
+                    validation_errors.append("symbols.leverage must be a valid integer")
         
         # Validate capital
         try:
             capital = float(config['capital_tbu'])
-            if capital <= 0:
-                validation_errors.append("capital_tbu must be positive")
+            if capital != -999.0 and capital <= 0:
+                validation_errors.append("capital_tbu must be positive or -999 for full balance")
         except (ValueError, TypeError):
             validation_errors.append("capital_tbu must be a valid number")
         
@@ -279,22 +296,6 @@ async def load_and_validate_config(logger: PerformanceLogger) -> Dict[str, Any]:
             validation_errors.append(
                 f"strategy_name must be one of: {', '.join(SUPPORTED_STRATEGIES)}"
             )
-        
-        # Validate max_open_positions
-        try:
-            max_positions = int(config['max_open_positions'])
-            if max_positions <= 0:
-                validation_errors.append("max_open_positions must be positive")
-        except (ValueError, TypeError):
-            validation_errors.append("max_open_positions must be a valid integer")
-        
-        # Validate leverage
-        try:
-            leverage = int(config['leverage'])
-            if leverage < 1 or leverage > 125:  # Binance futures leverage limits
-                validation_errors.append("leverage must be between 1 and 125")
-        except (ValueError, TypeError):
-            validation_errors.append("leverage must be a valid integer")
         
         if validation_errors:
             raise ConfigurationException(
@@ -305,6 +306,12 @@ async def load_and_validate_config(logger: PerformanceLogger) -> Dict[str, Any]:
                     additional_data={"validation_errors": validation_errors}
                 )
             )
+        
+        # Flatten the configuration for backward compatibility
+        # Extract nested values to top level for easier access
+        config['max_open_positions'] = config['symbols']['max_open_positions']
+        config['leverage'] = config['symbols']['leverage']
+        config['symbols'] = config['symbols']['symbols']  # Extract the actual symbols list
         
         logger.info(
             "Configuration loaded and validated successfully",
@@ -331,7 +338,7 @@ async def load_and_validate_config(logger: PerformanceLogger) -> Dict[str, Any]:
 
 
 @handle_exceptions()
-async def setup_strategy(strategy_name: str, logger: PerformanceLogger) -> None:
+async def setup_strategy(strategy_name: str, logger: EnhancedLogger) -> None:
     """
     Setup and validate trading strategy configuration.
     
@@ -390,7 +397,7 @@ async def setup_strategy(strategy_name: str, logger: PerformanceLogger) -> None:
 async def initialize_services(
     symbols: List[str], 
     client: AsyncClient, 
-    logger: PerformanceLogger
+    logger: EnhancedLogger
 ) -> Tuple[Any, Any, Any, Any]:
     """
     Initialize all required services for the trading bot.
@@ -477,7 +484,8 @@ async def trading_iteration(
     symbols: List[str],
     client: AsyncClient,
     leverage: int,
-    logger: PerformanceLogger
+    logger: EnhancedLogger,
+    config: Dict[str, Any] = None
 ) -> None:
     """
     Execute a single trading iteration with comprehensive error handling.
@@ -492,6 +500,7 @@ async def trading_iteration(
         client: Binance client for API operations
         leverage: Trading leverage to use
         logger: Enhanced logger instance for structured logging
+        config: Configuration dictionary for margin selection
         
     Raises:
         NetworkException: If network connectivity issues occur
@@ -504,12 +513,13 @@ async def trading_iteration(
         ...     symbols=["BTCUSDT", "ETHUSDT"],
         ...     client=binance_client,
         ...     leverage=10,
-        ...     logger=logger
+        ...     logger=logger,
+        ...     config=config
         ... )
     """
     try:
-        # Execute the main trading logic
-        await open_position(max_open_positions, symbols, logger, client, leverage)
+        # Execute the main trading logic with config for margin selection
+        await open_position(max_open_positions, symbols, logger, client, leverage, config)
         
     except Exception as e:
         # Convert to custom exception for better handling
@@ -551,7 +561,7 @@ async def trading_iteration(
 
 async def health_check_loop(
     client: AsyncClient,
-    logger: PerformanceLogger,
+    logger: EnhancedLogger,
     check_interval: int = HEALTH_CHECK_INTERVAL
 ) -> None:
     """
@@ -583,8 +593,9 @@ async def health_check_loop(
             except Exception:
                 api_status = "unhealthy"
             
-            # Check database status
-            db_status = await db_status_check()
+            # Check database status - get db_status from config
+            db_status_config = get_db_status()
+            db_status = await db_status_check(db_status_config)
             
             # Log health status
             logger.info(
@@ -633,15 +644,8 @@ async def main() -> None:
         This function runs indefinitely until interrupted by user or system.
         Use Ctrl+C to gracefully shutdown the bot.
     """
-    # Initialize enhanced logger with context
-    logger = get_logger(
-        __name__,
-        context={
-            "component": "main",
-            "version": "2.0.0",
-            "startup_time": time.time()
-        }
-    )
+    # Initialize enhanced logger
+    logger = get_logger(__name__)
     
     # Initialize recovery manager for handling critical errors
     recovery_manager = RecoveryManager(logger=logger)
@@ -691,21 +695,42 @@ async def main() -> None:
         # Step 3: Initialize API credentials
         logger.info("Step 3: Initializing API credentials...")
         try:
-            api_key, api_secret = decrypt_api_keys(config['api_keys'])
+            # Extract API credentials from configuration
+            api_keys_config = config['api_keys']
+            api_key = api_keys_config.get('api_key', '').strip()
+            api_secret = api_keys_config.get('api_secret', '').strip()
+            
+            # Validate API credentials
             if not api_key or not api_secret:
                 raise ConfigurationException(
-                    "Failed to decrypt API credentials",
+                    "API credentials are missing or empty",
                     config_key="api_keys"
                 )
+            
+            # Basic validation of API key format
+            if len(api_key) < 10 or len(api_secret) < 10:
+                raise ConfigurationException(
+                    "API credentials appear to be invalid (too short)",
+                    config_key="api_keys"
+                )
+                
+            logger.info(
+                "API credentials loaded successfully",
+                extra={
+                    "api_key_length": len(api_key),
+                    "api_secret_length": len(api_secret)
+                }
+            )
+            
         except Exception as e:
             logger.error(
-                "Failed to decrypt API credentials",
+                "Failed to load API credentials",
                 category=ErrorCategory.SECURITY,
                 severity=LogSeverity.CRITICAL,
                 extra={"error": str(e)}
             )
             raise ConfigurationException(
-                "API credential decryption failed",
+                "API credential loading failed",
                 original_exception=e
             )
         
@@ -715,13 +740,19 @@ async def main() -> None:
             api_key=api_key,
             api_secret=api_secret,
             logger=logger,
-            testnet=config.get('testnet', False)
+            testnet=config.get('exchange', {}).get('testnet', False)
         )
         
         # Step 5: Perform initial adjustments and validations
         logger.info("Step 5: Performing initial system adjustments...")
         try:
-            await initial_adjustments(client, symbols, logger)
+            await initial_adjustments(
+                leverage=leverage,
+                symbols=symbols,
+                capital_tbu=capital_tbu,
+                client=client,
+                error_logger=logger
+            )
         except Exception as e:
             logger.warning(
                 "Initial adjustments failed - continuing with caution",
@@ -788,7 +819,8 @@ async def main() -> None:
                     symbols=symbols,
                     client=client,
                     leverage=leverage,
-                    logger=logger
+                    logger=logger,
+                    config=config
                 )
                 
                 # Log iteration performance
@@ -865,7 +897,7 @@ async def main() -> None:
                 )
                 
                 # Use recovery manager for critical errors
-                if not await recovery_manager.handle_error(e):
+                if not await recovery_manager.handle_exception(e, lambda: None):
                     logger.critical("Recovery failed - shutting down")
                     break
                 
@@ -956,6 +988,33 @@ async def main() -> None:
             )
 
 
+async def run_with_error_suppression():
+    """Run the main application with Windows error suppression."""
+    # Set up error suppression for the current event loop
+    if sys.platform.startswith('win'):
+        from utils.windows_asyncio_fixes import WindowsAsyncioErrorSuppressor
+        
+        loop = asyncio.get_running_loop()
+        error_suppressor = WindowsAsyncioErrorSuppressor()
+        loop.set_exception_handler(error_suppressor.exception_handler)
+        
+        # Suppress resource warnings
+        import warnings
+        warnings.filterwarnings("ignore", category=ResourceWarning)
+        
+        print("✓ Windows asyncio error suppression activated")
+    else:
+        error_suppressor = None
+    
+    try:
+        # Run the main application
+        await main()
+    finally:
+        # Log suppression summary if available
+        if error_suppressor:
+            error_suppressor.log_suppression_summary()
+
+
 if __name__ == "__main__":
     """
     Entry point when script is run directly.
@@ -964,12 +1023,12 @@ if __name__ == "__main__":
     for the main application function.
     """
     try:
-        # Set up event loop policy for Windows compatibility
+        # Configure Windows event loop policy
         if sys.platform.startswith('win'):
             asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
         
-        # Run the main application
-        asyncio.run(main())
+        # Run the main application with error suppression
+        asyncio.run(run_with_error_suppression())
         
     except KeyboardInterrupt:
         print("\nShutdown requested by user")

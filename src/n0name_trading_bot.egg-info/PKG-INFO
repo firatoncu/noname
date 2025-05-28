@@ -1,4 +1,4 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.1
 Name: n0name-trading-bot
 Version: 2.0.0
 Summary: Advanced algorithmic trading bot with modern architecture
@@ -42,62 +42,10 @@ Classifier: Topic :: Office/Business :: Financial :: Investment
 Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Requires-Python: >=3.9
 Description-Content-Type: text/markdown
-License-File: LICENSE
-Requires-Dist: pyyaml>=6.0
-Requires-Dist: python-binance>=1.0.19
-Requires-Dist: pandas>=2.0.0
-Requires-Dist: ta>=0.10.2
-Requires-Dist: pydantic>=2.0.0
-Requires-Dist: python-dotenv>=1.0.0
-Requires-Dist: watchdog>=3.0.0
-Requires-Dist: aiohttp>=3.8.0
-Requires-Dist: aiofiles>=23.0.0
-Requires-Dist: uvloop>=0.17.0
-Requires-Dist: aiodns>=3.0.0
-Requires-Dist: cchardet>=2.1.7
-Requires-Dist: brotlipy>=0.7.0
-Requires-Dist: fastapi>=0.104.0
-Requires-Dist: uvicorn[standard]>=0.24.0
-Requires-Dist: websockets>=12.0
-Requires-Dist: psutil>=5.9.0
-Requires-Dist: email-validator>=2.1.0
-Requires-Dist: dependency-injector>=4.41.0
-Requires-Dist: structlog>=23.0.0
-Requires-Dist: rich>=13.0.0
-Requires-Dist: typer>=0.9.0
 Provides-Extra: dev
-Requires-Dist: pytest>=7.0.0; extra == "dev"
-Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
-Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
-Requires-Dist: pytest-mock>=3.12.0; extra == "dev"
-Requires-Dist: pytest-xdist>=3.3.0; extra == "dev"
-Requires-Dist: pytest-html>=4.0.0; extra == "dev"
-Requires-Dist: pytest-benchmark>=4.0.0; extra == "dev"
-Requires-Dist: pytest-timeout>=2.1.0; extra == "dev"
-Requires-Dist: pytest-randomly>=3.12.0; extra == "dev"
-Requires-Dist: pytest-sugar>=0.9.7; extra == "dev"
-Requires-Dist: black>=23.0.0; extra == "dev"
-Requires-Dist: isort>=5.12.0; extra == "dev"
-Requires-Dist: mypy>=1.0.0; extra == "dev"
-Requires-Dist: flake8>=6.0.0; extra == "dev"
-Requires-Dist: pre-commit>=3.0.0; extra == "dev"
-Requires-Dist: ruff>=0.1.0; extra == "dev"
-Requires-Dist: factory-boy>=3.3.0; extra == "dev"
-Requires-Dist: freezegun>=1.2.0; extra == "dev"
-Requires-Dist: responses>=0.24.0; extra == "dev"
-Requires-Dist: aioresponses>=0.7.4; extra == "dev"
-Requires-Dist: httpx>=0.25.0; extra == "dev"
-Requires-Dist: faker>=20.0.0; extra == "dev"
-Requires-Dist: coverage[toml]>=7.0.0; extra == "dev"
-Requires-Dist: tox>=4.0.0; extra == "dev"
 Provides-Extra: performance
-Requires-Dist: cython>=3.0.0; extra == "performance"
-Requires-Dist: numba>=0.58.0; extra == "performance"
-Requires-Dist: numpy>=1.24.0; extra == "performance"
 Provides-Extra: monitoring
-Requires-Dist: prometheus-client>=0.17.0; extra == "monitoring"
-Requires-Dist: grafana-api>=1.0.3; extra == "monitoring"
-Dynamic: license-file
+License-File: LICENSE
 
 # n0name Trading Bot v2.0.0
 

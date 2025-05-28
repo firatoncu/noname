@@ -1,10 +1,18 @@
 import sys
 import os
 import asyncio
-from utils.logging import logger_func
 import webbrowser
 
-logger = logger_func()
+# Add parent directory to path to find utils module
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
+try:
+    from utils.enhanced_logging import get_logger
+    logger = get_logger(__name__)
+except ImportError:
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
 # Start npm run dev in the background
 
 async def run_npm_dev():
@@ -25,8 +33,8 @@ async def run_npm_dev():
         )
         
         # Open localhost URL instead of custom domain
-        webbrowser.open("https://localhost:5173")
-        logger.info("Started npm run dev - Opening https://localhost:5173")
+        webbrowser.open("http://localhost:5173")
+        logger.info("Started npm run dev - Opening http://localhost:5173")
         return process
 
     except Exception as e:

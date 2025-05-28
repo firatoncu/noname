@@ -1,51 +1,94 @@
 import React, { useEffect } from 'react';
-import { PositionCard } from '../components/PositionCard';
+import PositionCard from '../components/PositionCard';
 import { WalletCard } from '../components/WalletCard';
 import { HistoricalPositions } from '../components/HistoricalPositions';
 import { LoadingSpinner, CardSkeleton } from '../components/LoadingSpinner';
 import { useAppContext } from '../contexts/AppContext';
-import { usePositions, useWallet, useTradingConditions } from '../hooks/useApi';
+import { usePositions, useWallet, useTradingConditions, useHistoricalPositions } from '../hooks/useApi';
 import { RefreshCw, AlertCircle, TrendingUp, Wallet, BarChart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 function Dashboard() {
   const { state, actions } = useAppContext();
-  const { positions, wallet, loading, errors, lastUpdate } = state;
+  const { errors } = state;
 
-  // API hooks with automatic polling
+  // API hooks with automatic polling - use data directly from hooks
   const positionsApi = usePositions({
-    onSuccess: (data) => actions.setPositions(data),
-    onError: (error) => actions.addError(`Positions: ${error}`),
+    onError: (error) => {
+      console.error('Positions API Error:', error);
+      actions.addError(`Positions: ${error}`);
+    },
   });
 
   const walletApi = useWallet({
-    onSuccess: (data) => actions.setWallet(data),
-    onError: (error) => actions.addError(`Wallet: ${error}`),
+    onError: (error) => {
+      console.error('Wallet API Error:', error);
+      actions.addError(`Wallet: ${error}`);
+    },
   });
 
   const tradingConditionsApi = useTradingConditions({
-    onSuccess: (data) => actions.setTradingConditions(data),
-    onError: (error) => actions.addError(`Trading Conditions: ${error}`),
+    onSuccess: (data) => {
+      console.log('Trading Conditions loaded:', data?.length || 0, 'items');
+      actions.setTradingConditions(data);
+    },
+    onError: (error) => {
+      console.error('Trading Conditions API Error:', error);
+      actions.addError(`Trading Conditions: ${error}`);
+    },
   });
 
-  // Set loading states
-  useEffect(() => {
-    actions.setLoading('positions', positionsApi.loading);
-  }, [positionsApi.loading, actions]);
+  // Add historical positions hook
+  const historicalPositionsApi = useHistoricalPositions({
+    onSuccess: (data) => {
+      console.log('Historical Positions loaded:', data?.length || 0, 'items');
+      actions.setHistoricalPositions(data);
+    },
+    onError: (error) => {
+      console.error('Historical Positions API Error:', error);
+      actions.addError(`Historical Positions: ${error}`);
+    },
+  });
 
-  useEffect(() => {
-    actions.setLoading('wallet', walletApi.loading);
-  }, [walletApi.loading, actions]);
+  // Use data directly from API hooks instead of AppContext
+  const positions = positionsApi.data || [];
+  const wallet = walletApi.data || {
+    totalBalance: '0',
+    availableBalance: '0',
+    unrealizedPnL: '0',
+    dailyPnL: '0',
+    weeklyPnL: '0',
+    marginRatio: '0',
+  };
 
-  useEffect(() => {
-    actions.setLoading('tradingConditions', tradingConditionsApi.loading);
-  }, [tradingConditionsApi.loading, actions]);
+  // Debug logging (commented out for performance)
+  // console.log(`🔍 [Dashboard] Positions API:`, {
+  //   data: positionsApi.data,
+  //   loading: positionsApi.loading,
+  //   error: positionsApi.error,
+  //   lastFetch: positionsApi.lastFetch
+  // });
+  
+  const loading = {
+    positions: positionsApi.loading,
+    wallet: walletApi.loading,
+    tradingConditions: tradingConditionsApi.loading,
+    historicalPositions: historicalPositionsApi.loading,
+  };
+
+  const lastUpdate = Math.max(
+    positionsApi.lastFetch || 0,
+    walletApi.lastFetch || 0,
+    tradingConditionsApi.lastFetch || 0,
+    historicalPositionsApi.lastFetch || 0
+  ) || null;
 
   const handleRefresh = () => {
     actions.clearErrors();
     positionsApi.refetch();
     walletApi.refetch();
     tradingConditionsApi.refetch();
+    historicalPositionsApi.refetch();
   };
 
   const formatLastUpdate = (timestamp: number | null) => {
@@ -77,9 +120,17 @@ function Dashboard() {
             
             <div className="mt-4 sm:mt-0 flex items-center space-x-4">
               {lastUpdate && (
-                <span className="text-sm text-gray-500">
-                  Last update: {formatLastUpdate(lastUpdate)}
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500">
+                    Last update: {formatLastUpdate(lastUpdate)}
+                  </span>
+                  {(loading.positions || loading.wallet) && (
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-green-400 ml-1">Live</span>
+                    </div>
+                  )}
+                </div>
               )}
               
               <button
@@ -131,7 +182,7 @@ function Dashboard() {
               <div>
                 <p className="text-gray-400 text-sm">Active Positions</p>
                 <p className="text-2xl font-bold text-white">
-                  {loading.positions ? (
+                  {loading.positions && positions.length === 0 ? (
                     <LoadingSpinner size="sm" variant="white" />
                   ) : (
                     positions.length
@@ -147,7 +198,7 @@ function Dashboard() {
               <div>
                 <p className="text-gray-400 text-sm">Total Balance</p>
                 <p className="text-2xl font-bold text-white">
-                  {loading.wallet ? (
+                  {loading.wallet && !wallet.totalBalance ? (
                     <LoadingSpinner size="sm" variant="white" />
                   ) : (
                     `$${parseFloat(wallet.totalBalance).toLocaleString()}`
@@ -165,7 +216,7 @@ function Dashboard() {
                 <p className={`text-2xl font-bold ${
                   parseFloat(wallet.dailyPnL) >= 0 ? 'text-green-400' : 'text-red-400'
                 }`}>
-                  {loading.wallet ? (
+                  {loading.wallet && !wallet.dailyPnL ? (
                     <LoadingSpinner size="sm" variant="white" />
                   ) : (
                     `${parseFloat(wallet.dailyPnL) >= 0 ? '+' : ''}$${parseFloat(wallet.dailyPnL).toLocaleString()}`
@@ -180,7 +231,7 @@ function Dashboard() {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Wallet Card */}
           <div className="xl:col-span-1">
-            {loading.wallet ? (
+            {loading.wallet && !wallet.totalBalance ? (
               <CardSkeleton />
             ) : (
               <WalletCard wallet={wallet} isDarkMode={true} />
@@ -191,22 +242,24 @@ function Dashboard() {
           <div className="xl:col-span-2">
             <div className="bg-gray-800 rounded-lg border border-gray-700">
               <div className="p-6 border-b border-gray-700">
-                <h2 className="text-xl font-semibold text-white">
-                  Active Positions
-                </h2>
-                <p className="text-gray-400 text-sm mt-1">
-                  Current trading positions and their performance
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-white">
+                      Active Positions
+                    </h2>
+                    <p className="text-gray-400 text-sm mt-1">
+                      Current trading positions and their performance
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-400">Real-time (1s)</span>
+                  </div>
+                </div>
               </div>
               
               <div className="p-6">
-                {loading.positions ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <CardSkeleton key={i} />
-                    ))}
-                  </div>
-                ) : positions.length === 0 ? (
+                {positions.length === 0 && !loading.positions ? (
                   <div className="text-center py-12">
                     <TrendingUp className="w-12 h-12 text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-400">No active positions</p>
@@ -214,9 +267,15 @@ function Dashboard() {
                       Positions will appear here when you have active trades
                     </p>
                   </div>
+                ) : loading.positions && positions.length === 0 ? (
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <CardSkeleton key={i} />
+                    ))}
+                  </div>
                 ) : (
                   <div className="space-y-4">
-                    {positions.map((position, index) => {
+                    {positions.map((position: any, index: number) => {
                       const PRICE_PRECISION: { [key: string]: number } = {
                         'BTCUSDT': 2,
                         'ETHUSDT': 2,
@@ -228,7 +287,7 @@ function Dashboard() {
                       
                       return (
                         <PositionCard 
-                          key={`${position.symbol}-${index}`} 
+                          key={position.symbol}
                           position={position} 
                           pricePrecision={PRICE_PRECISION[position.symbol] || 2}
                         />

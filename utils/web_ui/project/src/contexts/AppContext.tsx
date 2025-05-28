@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { Position, TradingConditions, WalletInfo, HistoricalPosition } from '../types';
 import { useWebSocket, WebSocketMessage } from '../hooks/useWebSocket';
 import { API_BASE_URL } from '../config/api';
@@ -227,8 +227,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [lastMessage]);
 
-  // Action creators
-  const actions = {
+  // Action creators - memoized to prevent infinite re-renders
+  const actions = useMemo(() => ({
     setPositions: (positions: Position[]) => {
       dispatch({ type: 'SET_POSITIONS', payload: positions });
     },
@@ -256,9 +256,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         sendMessage({ type: 'refresh_data' });
       }
     },
-  };
+  }), [isConnected, sendMessage]);
 
-  const contextValue: AppContextType = {
+  const contextValue: AppContextType = useMemo(() => ({
     state,
     dispatch,
     actions,
@@ -267,7 +267,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       reconnect,
       sendMessage,
     },
-  };
+  }), [state, actions, isConnected, reconnect, sendMessage]);
 
   return (
     <AppContext.Provider value={contextValue}>

@@ -342,6 +342,36 @@ See [CHANGELOG.md](CHANGELOG.md) for a detailed history of changes.
 - **Docker**: Containerization platform
 - **Grafana**: Monitoring and visualization
 
+## Windows-Specific Considerations
+
+### Connection Reset Errors
+
+On Windows, you may see harmless connection reset errors in the console:
+```
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+```
+
+These errors are **normal** and **harmless**. They occur when:
+- The Binance API server closes idle connections
+- Network timeouts occur during normal operation
+- Rate limiting is enforced by the exchange
+
+The application automatically suppresses these errors and continues operating normally. The error suppression system:
+- Catches and logs these errors at debug level only
+- Maintains statistics on suppressed errors
+- Ensures the application continues running without interruption
+
+### Event Loop Configuration
+
+The application automatically configures the optimal asyncio event loop for Windows:
+- Uses `WindowsProactorEventLoopPolicy` for better compatibility
+- Suppresses resource warnings that don't affect functionality
+- Handles connection cleanup gracefully
+
+### Monitoring Suppressed Errors
+
+You can monitor suppressed connection errors in the debug logs. The application will log a summary of suppressed errors on shutdown, helping you understand the frequency of these normal network events.
+
 ---
 
 **⚡ Ready to start trading?** Check out our [Installation Guide](docs/user-guide/installation.md) to get started!

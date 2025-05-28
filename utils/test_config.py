@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """
-Simple test script for the new configuration management system.
-This verifies basic functionality and compatibility.
+Simple test script for the simplified configuration management system.
+This verifies that config.yml can be loaded without any defaults.
 """
 import os
 import sys
-import tempfile
-import shutil
 from pathlib import Path
 
 # Add the parent directory to the path so we can import utils
@@ -17,16 +15,15 @@ def test_basic_functionality():
     print("🧪 Testing basic functionality...")
     
     try:
-        from utils.config_models import AppConfig, ConfigDefaults
-        from utils.config_manager import ConfigManager, ConfigurationError
+        from utils.load_config import load_config
         
-        # Test default configuration
-        default_config = ConfigDefaults.get_default_config()
-        config = AppConfig(**default_config)
+        # Test configuration loading from config.yml
+        config = load_config()
         
-        print("✅ Default configuration validation passed")
-        print(f"   Username: {config.username}")
-        print(f"   Symbols: {config.symbols.symbols}")
+        print("✅ Configuration loaded successfully")
+        print(f"   Username: {config['username']}")
+        print(f"   Symbols: {config['symbols']['symbols']}")
+        print(f"   Logging level: {config['logging']['level']}")
         
         return True
         
@@ -35,193 +32,68 @@ def test_basic_functionality():
         return False
 
 
-def test_validation():
-    """Test configuration validation."""
-    print("\n🧪 Testing validation...")
+def test_missing_config():
+    """Test that missing config file raises appropriate error."""
+    print("\n🧪 Testing missing config file...")
     
     try:
-        from utils.config_models import AppConfig
-        from pydantic import ValidationError
+        from utils.load_config import load_config
         
-        # Test invalid leverage
-        try:
-            AppConfig(
-                username="Test",
-                api_keys={"api_key": "test", "api_secret": "test"},
-                telegram={"token": "test", "chat_id": "123"},
-                symbols={"leverage": 200}  # Invalid: too high
-            )
-            print("❌ Validation should have failed for invalid leverage")
-            return False
-        except ValidationError:
-            print("✅ Validation correctly caught invalid leverage")
+        # Temporarily rename config file
+        config_path = Path(__file__).parent.parent / "config.yml"
+        backup_path = config_path.with_suffix('.yml.backup')
         
-        # Test invalid symbols
+        if config_path.exists():
+            config_path.rename(backup_path)
+        
         try:
-            AppConfig(
-                username="Test",
-                api_keys={"api_key": "test", "api_secret": "test"},
-                telegram={"token": "test", "chat_id": "123"},
-                symbols={"symbols": ["INVALID"]}  # Invalid: doesn't end with USDT
-            )
-            print("❌ Validation should have failed for invalid symbols")
+            config = load_config()
+            print("❌ Should have failed with missing config file")
             return False
-        except ValidationError:
-            print("✅ Validation correctly caught invalid symbols")
+        except FileNotFoundError:
+            print("✅ Correctly raised FileNotFoundError for missing config")
+            return True
+        finally:
+            # Restore config file
+            if backup_path.exists():
+                backup_path.rename(config_path)
+        
+    except Exception as e:
+        print(f"❌ Missing config test failed: {e}")
+        return False
+
+
+def test_enhanced_logging():
+    """Test enhanced logging reads from config."""
+    print("\n🧪 Testing enhanced logging...")
+    
+    try:
+        from utils.enhanced_logging import get_logger
+        
+        logger = get_logger("test_logger")
+        print("✅ Enhanced logger created successfully")
+        
+        # Test logging
+        logger.info("Test log message")
+        print("✅ Logging works correctly")
         
         return True
         
     except Exception as e:
-        print(f"❌ Validation test failed: {e}")
-        return False
-
-
-def test_environment_variables():
-    """Test environment variable configuration."""
-    print("\n🧪 Testing environment variables...")
-    
-    try:
-        from utils.config_manager import ConfigManager
-        
-        # Set test environment variables
-        test_env = {
-            "NONAME_USERNAME": "EnvTestUser",
-            "NONAME_LEVERAGE": "7",
-            "NONAME_SYMBOLS": "BTCUSDT,ETHUSDT"
-        }
-        
-        # Save original values
-        original_env = {}
-        for key in test_env:
-            original_env[key] = os.environ.get(key)
-            os.environ[key] = test_env[key]
-        
-        try:
-            # Create a temporary config file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as f:
-                f.write("""
-username: "FileUser"
-api_keys:
-  api_key: "test_key"
-  api_secret: "test_secret"
-telegram:
-  token: "test_token"
-  chat_id: 123456
-symbols:
-  leverage: 3
-  symbols:
-    - BTCUSDT
-""")
-                temp_config_file = f.name
-            
-            # Test that environment variables override file values
-            config_manager = ConfigManager(
-                config_file=temp_config_file,
-                env_prefix="NONAME_",
-                auto_create=False
-            )
-            
-            config = config_manager.get_config()
-            
-            # Check that env vars overrode file values
-            if config.username == "EnvTestUser" and config.symbols.leverage == 7:
-                print("✅ Environment variables correctly override file values")
-                result = True
-            else:
-                print(f"❌ Environment override failed: username={config.username}, leverage={config.symbols.leverage}")
-                result = False
-            
-        finally:
-            # Restore original environment
-            for key, value in original_env.items():
-                if value is None:
-                    os.environ.pop(key, None)
-                else:
-                    os.environ[key] = value
-            
-            # Clean up temp file
-            try:
-                os.unlink(temp_config_file)
-            except:
-                pass
-        
-        return result
-        
-    except Exception as e:
-        print(f"❌ Environment variable test failed: {e}")
-        return False
-
-
-def test_backward_compatibility():
-    """Test backward compatibility with old load_config function."""
-    print("\n🧪 Testing backward compatibility...")
-    
-    try:
-        # Create a temporary config file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as f:
-            f.write("""
-username: "BackwardCompatTest"
-api_keys:
-  api_key: "test_key"
-  api_secret: "test_secret"
-telegram:
-  token: "test_token"
-  chat_id: 123456
-symbols:
-  leverage: 3
-  symbols:
-    - BTCUSDT
-    - ETHUSDT
-""")
-            temp_config_file = f.name
-        
-        try:
-            # Change to temp directory to avoid conflicts
-            original_dir = os.getcwd()
-            temp_dir = os.path.dirname(temp_config_file)
-            config_filename = os.path.basename(temp_config_file)
-            
-            os.chdir(temp_dir)
-            
-            # Test old load_config function
-            import warnings
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", DeprecationWarning)
-                
-                from utils.load_config import load_config
-                config_dict = load_config(config_filename)
-            
-            if config_dict and config_dict.get('username') == 'BackwardCompatTest':
-                print("✅ Backward compatibility with load_config() works")
-                result = True
-            else:
-                print("❌ Backward compatibility test failed")
-                result = False
-                
-        finally:
-            os.chdir(original_dir)
-            try:
-                os.unlink(temp_config_file)
-            except:
-                pass
-        
-        return result
-        
-    except Exception as e:
-        print(f"❌ Backward compatibility test failed: {e}")
+        print(f"❌ Enhanced logging test failed: {e}")
         return False
 
 
 def main():
     """Run all tests."""
-    print("🎯 CONFIGURATION SYSTEM TESTS")
-    print("=" * 50)
+    print("=" * 60)
+    print("🚀 SIMPLIFIED CONFIGURATION SYSTEM TESTS")
+    print("=" * 60)
     
     tests = [
         test_basic_functionality,
-        test_validation,
-        test_environment_variables,
-        test_backward_compatibility
+        test_missing_config,
+        test_enhanced_logging,
     ]
     
     passed = 0
@@ -231,14 +103,14 @@ def main():
         if test():
             passed += 1
     
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print(f"📊 TEST RESULTS: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 All tests passed! The configuration system is working correctly.")
+        print("🎉 All tests passed!")
         return 0
     else:
-        print("❌ Some tests failed. Please check the implementation.")
+        print("❌ Some tests failed!")
         return 1
 
 

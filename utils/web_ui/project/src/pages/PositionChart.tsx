@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface PositionState {
   symbol: string;
@@ -21,7 +22,7 @@ interface PositionState {
 }
 
 function PositionChart() {
-  const { isDarkMode } = useOutletContext<{ isDarkMode: boolean }>();
+  const { isDarkMode } = useTheme();
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();

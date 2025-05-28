@@ -150,7 +150,8 @@ class EnhancedLogger:
         backup_count: int = 5,
         enable_console: bool = True,
         enable_json: bool = True,
-        enable_rotation: bool = True
+        enable_rotation: bool = True,
+        log_level: str = "INFO"  # Add log_level parameter
     ):
         """
         Initialize enhanced logger
@@ -163,6 +164,7 @@ class EnhancedLogger:
             enable_console: Enable console output
             enable_json: Enable JSON structured logging
             enable_rotation: Enable log rotation
+            log_level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         """
         self.name = name
         self.log_dir = Path(log_dir)
@@ -177,7 +179,8 @@ class EnhancedLogger:
         
         # Initialize logger
         self.logger = logging.getLogger(name)
-        self.logger.setLevel(LogLevel.TRACE.value)
+        # Set log level from config instead of hardcoded TRACE
+        self.set_log_level(log_level)
         self.logger.handlers.clear()
         
         # Initialize metrics
@@ -192,6 +195,26 @@ class EnhancedLogger:
         
         # Add custom log levels
         self._add_custom_levels()
+    
+    def set_log_level(self, level: str):
+        """Set the log level from string"""
+        level_map = {
+            "TRACE": LogLevel.TRACE.value,
+            "DEBUG": logging.DEBUG,
+            "INFO": logging.INFO,
+            "WARNING": logging.WARNING,
+            "ERROR": logging.ERROR,
+            "CRITICAL": logging.CRITICAL,
+            "AUDIT": LogLevel.AUDIT.value
+        }
+        
+        numeric_level = level_map.get(level.upper(), logging.INFO)
+        self.logger.setLevel(numeric_level)
+        
+        # Update console handler level if it exists
+        for handler in self.logger.handlers:
+            if isinstance(handler, logging.StreamHandler) and handler.stream.name == '<stdout>':
+                handler.setLevel(numeric_level)
     
     def _add_custom_levels(self):
         """Add custom log levels"""
@@ -215,7 +238,7 @@ class EnhancedLogger:
         # Console handler
         if self.enable_console:
             console_handler = logging.StreamHandler(sys.stdout)
-            console_handler.setLevel(logging.INFO)
+            console_handler.setLevel(self.logger.level)
             
             if self.enable_json:
                 console_handler.setFormatter(StructuredFormatter())
@@ -457,10 +480,26 @@ def get_logger(
     
     Returns:
         EnhancedLogger instance
+        
+    Raises:
+        ValueError: If log level cannot be read from config.yml
     """
     global _loggers, _default_logger
     
     if name not in _loggers:
+        # Get log level from config if not provided
+        if 'log_level' not in kwargs:
+            try:
+                from utils.load_config import load_config
+                config = load_config()
+                logging_config = config.get('logging', {})
+                log_level = logging_config.get('level')
+                if log_level is None:
+                    raise ValueError("logging.level not found in config.yml")
+                kwargs['log_level'] = log_level
+            except Exception as e:
+                raise ValueError(f"Cannot read log level from config.yml: {e}")
+        
         _loggers[name] = EnhancedLogger(name, **kwargs)
         
         if _default_logger is None:
