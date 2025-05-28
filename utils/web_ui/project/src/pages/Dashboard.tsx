@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import PositionCard from '../components/PositionCard';
-import { WalletCard } from '../components/WalletCard';
 import { HistoricalPositions } from '../components/HistoricalPositions';
 import { LoadingSpinner, CardSkeleton } from '../components/LoadingSpinner';
 import { useAppContext } from '../contexts/AppContext';
 import { usePositions, useWallet, useTradingConditions, useHistoricalPositions } from '../hooks/useApi';
-import { RefreshCw, AlertCircle, TrendingUp, Wallet, BarChart } from 'lucide-react';
+import { AlertCircle, TrendingUp, Wallet, BarChart, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 function Dashboard() {
@@ -76,97 +75,30 @@ function Dashboard() {
     historicalPositions: historicalPositionsApi.loading,
   };
 
-  const lastUpdate = Math.max(
-    positionsApi.lastFetch || 0,
-    walletApi.lastFetch || 0,
-    tradingConditionsApi.lastFetch || 0,
-    historicalPositionsApi.lastFetch || 0
-  ) || null;
-
-  const handleRefresh = () => {
-    actions.clearErrors();
-    positionsApi.refetch();
-    walletApi.refetch();
-    tradingConditionsApi.refetch();
-    historicalPositionsApi.refetch();
-  };
-
-  const formatLastUpdate = (timestamp: number | null) => {
-    if (!timestamp) return 'Never';
-    const now = Date.now();
-    const diff = now - timestamp;
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(seconds / 60);
-    
-    if (seconds < 60) return `${seconds}s ago`;
-    if (minutes < 60) return `${minutes}m ago`;
-    return new Date(timestamp).toLocaleTimeString();
-  };
-
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                Trading Dashboard
-              </h1>
-              <p className="text-gray-400">
-                Real-time overview of your trading positions and performance
-              </p>
-            </div>
-            
-            <div className="mt-4 sm:mt-0 flex items-center space-x-4">
-              {lastUpdate && (
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">
-                    Last update: {formatLastUpdate(lastUpdate)}
-                  </span>
-                  {(loading.positions || loading.wallet) && (
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-green-400 ml-1">Live</span>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              <button
-                onClick={handleRefresh}
-                disabled={loading.positions || loading.wallet}
-                className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg transition-colors"
-              >
-                <RefreshCw 
-                  className={`w-4 h-4 mr-2 ${(loading.positions || loading.wallet) ? 'animate-spin' : ''}`} 
-                />
-                Refresh
-              </button>
-            </div>
-          </div>
-        </div>
-
+    <div className="min-h-screen bg-dark-bg-primary">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Error Messages */}
         {errors.length > 0 && (
-          <div className="mb-6">
-            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-              <div className="flex items-center mb-2">
-                <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
-                <h3 className="text-red-400 font-semibold">
+          <div className="mb-8 animate-fade-in">
+            <div className="bg-dark-accent-error/10 backdrop-blur-sm border border-dark-accent-error/30 rounded-2xl p-6 shadow-glass">
+              <div className="flex items-center mb-4">
+                <AlertCircle className="w-6 h-6 text-dark-accent-error mr-3" />
+                <h3 className="text-dark-accent-error font-semibold text-lg">
                   {errors.length} Error{errors.length > 1 ? 's' : ''}
                 </h3>
                 <button
                   onClick={actions.clearErrors}
-                  className="ml-auto text-red-400 hover:text-red-300 text-sm"
+                  className="ml-auto text-dark-accent-error hover:text-dark-text-primary text-sm px-3 py-1 rounded-lg hover:bg-dark-accent-error/20 transition-all duration-300"
                 >
                   Clear
                 </button>
               </div>
-              <ul className="space-y-1">
+              <ul className="space-y-2">
                 {errors.map((error, index) => (
-                  <li key={index} className="text-red-300 text-sm">
-                    • {error}
+                  <li key={index} className="text-dark-text-secondary text-sm flex items-start">
+                    <span className="text-dark-accent-error mr-2">•</span>
+                    {error}
                   </li>
                 ))}
               </ul>
@@ -174,14 +106,16 @@ function Dashboard() {
           </div>
         )}
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="bg-dark-bg-secondary/80 backdrop-blur-sm rounded-2xl p-6 border border-dark-border-primary shadow-glass hover:shadow-glow-sm transition-all duration-300 animate-fade-in-up group">
             <div className="flex items-center">
-              <TrendingUp className="w-8 h-8 text-blue-400 mr-3" />
+              <div className="p-3 bg-dark-accent-primary/20 rounded-xl mr-4 group-hover:bg-dark-accent-primary/30 transition-colors duration-300">
+                <TrendingUp className="w-8 h-8 text-dark-accent-primary" />
+              </div>
               <div>
-                <p className="text-gray-400 text-sm">Active Positions</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-dark-text-muted text-sm font-medium">Active Positions</p>
+                <p className="text-3xl font-bold text-dark-text-primary mt-1">
                   {loading.positions && positions.length === 0 ? (
                     <LoadingSpinner size="sm" variant="white" />
                   ) : (
@@ -192,120 +126,118 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center">
-              <Wallet className="w-8 h-8 text-green-400 mr-3" />
-              <div>
-                <p className="text-gray-400 text-sm">Total Balance</p>
-                <p className="text-2xl font-bold text-white">
-                  {loading.wallet && !wallet.totalBalance ? (
-                    <LoadingSpinner size="sm" variant="white" />
-                  ) : (
-                    `$${parseFloat(wallet.totalBalance).toLocaleString()}`
-                  )}
-                </p>
+          <Link to="/wallet" className="block">
+            <div className="bg-dark-bg-secondary/80 backdrop-blur-sm rounded-2xl p-6 border border-dark-border-primary shadow-glass hover:shadow-glow-sm transition-all duration-300 animate-fade-in-up group cursor-pointer hover:border-dark-accent-success/50">
+              <div className="flex items-center">
+                <div className="p-3 bg-dark-accent-success/20 rounded-xl mr-4 group-hover:bg-dark-accent-success/30 transition-colors duration-300">
+                  <Wallet className="w-8 h-8 text-dark-accent-success" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-dark-text-muted text-sm font-medium">Total Balance</p>
+                    <span className="text-dark-accent-success text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      View Details →
+                    </span>
+                  </div>
+                  <p className="text-3xl font-bold text-dark-text-primary mt-1">
+                    {loading.wallet ? (
+                      <LoadingSpinner size="sm" variant="white" />
+                    ) : (
+                      `$${parseFloat(wallet.totalBalance).toLocaleString()}`
+                    )}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center">
-              <BarChart className="w-8 h-8 text-purple-400 mr-3" />
-              <div>
-                <p className="text-gray-400 text-sm">Daily PnL</p>
-                <p className={`text-2xl font-bold ${
-                  parseFloat(wallet.dailyPnL) >= 0 ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {loading.wallet && !wallet.dailyPnL ? (
-                    <LoadingSpinner size="sm" variant="white" />
-                  ) : (
-                    `${parseFloat(wallet.dailyPnL) >= 0 ? '+' : ''}$${parseFloat(wallet.dailyPnL).toLocaleString()}`
-                  )}
-                </p>
+          <Link to="/analysis" className="block">
+            <div className="bg-dark-bg-secondary/80 backdrop-blur-sm rounded-2xl p-6 border border-dark-border-primary shadow-glass hover:shadow-glow-sm transition-all duration-300 animate-fade-in-up group cursor-pointer hover:border-dark-accent-info/50">
+              <div className="flex items-center">
+                <div className="p-3 bg-dark-accent-info/20 rounded-xl mr-4 group-hover:bg-dark-accent-info/30 transition-colors duration-300">
+                  <BarChart className="w-8 h-8 text-dark-accent-info" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-dark-text-muted text-sm font-medium">Daily P&L</p>
+                    <span className="text-dark-accent-info text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      View Analysis →
+                    </span>
+                  </div>
+                  <p className={`text-3xl font-bold mt-1 ${
+                    parseFloat(wallet.dailyPnL) >= 0 
+                      ? 'text-dark-accent-success' 
+                      : 'text-dark-accent-error'
+                  }`}>
+                    {loading.wallet ? (
+                      <LoadingSpinner size="sm" variant="white" />
+                    ) : (
+                      `${parseFloat(wallet.dailyPnL) >= 0 ? '+' : ''}$${parseFloat(wallet.dailyPnL).toLocaleString()}`
+                    )}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Wallet Card */}
-          <div className="xl:col-span-1">
-            {loading.wallet && !wallet.totalBalance ? (
-              <CardSkeleton />
+        <div className="space-y-8">
+          {/* Active Positions Section */}
+          <div className="animate-fade-in-up">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-dark-text-primary">Active Positions</h2>
+            </div>
+
+            {loading.positions && positions.length === 0 ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <CardSkeleton key={i} />
+                ))}
+              </div>
+            ) : positions.length === 0 ? (
+              <div className="bg-dark-bg-secondary/50 backdrop-blur-sm rounded-2xl p-8 border border-dark-border-primary text-center">
+                <TrendingUp className="w-16 h-16 text-dark-text-muted mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-dark-text-primary mb-2">No Active Positions</h3>
+                <p className="text-dark-text-muted">
+                  Your trading positions will appear here when you have active trades.
+                </p>
+              </div>
             ) : (
-              <WalletCard wallet={wallet} isDarkMode={true} />
+              <div className="space-y-4">
+                {positions.map((position: any, index: number) => {
+                  const PRICE_PRECISION: { [key: string]: number } = {
+                    'BTCUSDT': 2,
+                    'ETHUSDT': 2,
+                    'SOLUSDT': 3,
+                    'XRPUSDT': 4,
+                    'REDUSDT': 4,
+                    'BMTUSDT': 4,
+                  };
+                  
+                  return (
+                    <div 
+                      key={position.symbol} 
+                      className="animate-fade-in-up"
+                    >
+                      <PositionCard 
+                        position={position} 
+                        pricePrecision={PRICE_PRECISION[position.symbol] || 2}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
 
-          {/* Positions */}
-          <div className="xl:col-span-2">
-            <div className="bg-gray-800 rounded-lg border border-gray-700">
-              <div className="p-6 border-b border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold text-white">
-                      Active Positions
-                    </h2>
-                    <p className="text-gray-400 text-sm mt-1">
-                      Current trading positions and their performance
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-400">Real-time (1s)</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="p-6">
-                {positions.length === 0 && !loading.positions ? (
-                  <div className="text-center py-12">
-                    <TrendingUp className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                    <p className="text-gray-400">No active positions</p>
-                    <p className="text-gray-500 text-sm mt-1">
-                      Positions will appear here when you have active trades
-                    </p>
-                  </div>
-                ) : loading.positions && positions.length === 0 ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <CardSkeleton key={i} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {positions.map((position: any, index: number) => {
-                      const PRICE_PRECISION: { [key: string]: number } = {
-                        'BTCUSDT': 2,
-                        'ETHUSDT': 2,
-                        'SOLUSDT': 3,
-                        'XRPUSDT': 4,
-                        'REDUSDT': 4,
-                        'BMTUSDT': 4,
-                      };
-                      
-                      return (
-                        <PositionCard 
-                          key={position.symbol}
-                          position={position} 
-                          pricePrecision={PRICE_PRECISION[position.symbol] || 2}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+          {/* Historical Positions Section */}
+          <div className="animate-fade-in-up">
+            <HistoricalPositions 
+              positions={state.historicalPositions} 
+              loading={loading.historicalPositions} 
+            />
           </div>
-        </div>
-
-        {/* Historical Positions */}
-        <div className="mt-8">
-          <HistoricalPositions 
-            positions={state.historicalPositions} 
-            isDarkMode={true} 
-          />
         </div>
       </div>
     </div>

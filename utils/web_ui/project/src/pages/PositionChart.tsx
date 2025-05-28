@@ -140,8 +140,33 @@ function PositionChart() {
 
   if (!position) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex items-center">
+      <div className="min-h-screen bg-dark-bg-primary">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-6 flex items-center">
+            <button
+              onClick={() => navigate('/')}
+              className={`flex items-center space-x-2 ${
+                isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
+          <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 shadow-lg`}>
+            <div className="text-red-500 text-center">
+              Position not found
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-dark-bg-primary">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6 flex items-center justify-between">
           <button
             onClick={() => navigate('/')}
             className={`flex items-center space-x-2 ${
@@ -152,37 +177,16 @@ function PositionChart() {
             <span>Back to Dashboard</span>
           </button>
         </div>
+
         <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 shadow-lg`}>
-          <div className="text-red-500 text-center">
-            Position not found
+          <div className="mb-4">
+            <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              {position.symbol} Chart
+            </h2>
           </div>
+
+          <div ref={containerRef} id="tradingview-widget" className="rounded-lg overflow-hidden" />
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <button
-          onClick={() => navigate('/')}
-          className={`flex items-center space-x-2 ${
-            isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back to Dashboard</span>
-        </button>
-      </div>
-
-      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg p-6 shadow-lg`}>
-        <div className="mb-4">
-          <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-            {position.symbol} Chart
-          </h2>
-        </div>
-
-        <div ref={containerRef} id="tradingview-widget" className="rounded-lg overflow-hidden" />
       </div>
     </div>
   );

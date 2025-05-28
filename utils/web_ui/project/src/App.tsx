@@ -10,9 +10,9 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <AppProvider>
-          <div className="min-h-screen bg-gray-900 transition-colors duration-200">
+          <div className="min-h-screen bg-dark-bg-primary transition-all duration-300 ease-in-out">
             <Navigation />
-            <main className="flex-1">
+            <main className="flex-1 animate-fade-in">
               <ErrorBoundary>
                 <Outlet />
               </ErrorBoundary>

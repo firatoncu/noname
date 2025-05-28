@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App';
 import Dashboard from './pages/Dashboard';
+import WalletOverview from './pages/WalletOverview';
 import PositionChart from './pages/PositionChart';
 import TradingConditionsPage from './pages/TradingConditionsPage';
 import TradingConditionChart from './pages/TradingConditionChart';
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
+        path: "/wallet",
+        element: <WalletOverview />,
+      },
+      {
         path: "/trading-conditions",
         element: <TradingConditionsPage />,
       },
@@ -29,10 +34,6 @@ const router = createBrowserRouter([
       },
       {
         path: "/positions",
-        element: <Dashboard />, // For now, redirect to dashboard
-      },
-      {
-        path: "/wallet",
         element: <Dashboard />, // For now, redirect to dashboard
       },
       {

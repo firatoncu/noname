@@ -129,6 +129,7 @@ class Position(BaseModel):
     entryTime: str
     takeProfitPrice: Optional[str] = None
     stopLossPrice: Optional[str] = None
+    leverage: Optional[int] = None
 
 class TradingConditions(BaseModel):
     symbol: str
@@ -417,7 +418,7 @@ async def update_config(config: dict):
         from pathlib import Path
         
         # Get the project root (parent of utils directory)
-        project_root = Path(__file__).parent.parent.parent.parent.parent
+        project_root = Path(__file__).parent.parent.parent.parent
         config_path = project_root / "config.yml"
         
         print(f"Updating config file at: {config_path}")  # Debug logging

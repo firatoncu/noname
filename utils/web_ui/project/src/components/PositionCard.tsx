@@ -1,7 +1,6 @@
 import React, { useState, useEffect, memo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, TrendingUp, TrendingDown, LineChart, X, Target, AlertCircle, Clock } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { DollarSign, TrendingUp, TrendingDown, LineChart, X, Target, AlertCircle, Clock, Zap } from 'lucide-react';
 
 interface PositionCardProps {
     position: {
@@ -14,13 +13,13 @@ interface PositionCardProps {
         entryTime: string;
         takeProfitPrice?: string;
         stopLossPrice?: string;
+        leverage?: number;
     };
     pricePrecision: number;
 }
 
 export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePrecision }) => {
     const navigate = useNavigate();
-    const { isDarkMode } = useTheme();
     const [isClosing, setIsClosing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
@@ -166,8 +165,8 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
     const hardstopLoss = isLong
     ? (entryPrice * 0.993).toFixed(pricePrecision)
     : (entryPrice * 1.007).toFixed(pricePrecision);
+    
     // Add useEffect to pre-fill TP/SL values when dialog opens
-    // Use refs to track previous values to prevent unnecessary updates
     const prevDialogOpenRef = useRef(false);
     const prevTpPriceRef = useRef(position.takeProfitPrice);
     const prevSlPriceRef = useRef(position.stopLossPrice);
@@ -202,270 +201,337 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
     }, [getDialogState().showTPSLDialog, position.takeProfitPrice, position.stopLossPrice, entryPrice, setDialogState]);
 
     return (
-        <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-6 mb-4 transition-colors duration-200`}>
-            {/* Header with Symbol, Side, and Action Buttons */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                    <span className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                        {position.symbol}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        isLong 
-                            ? isDarkMode ? 'bg-green-900 text-green-200' : 'bg-green-100 text-green-800'
-                            : isDarkMode ? 'bg-red-900 text-red-200' : 'bg-red-100 text-red-800'
-                    }`}>
-                        {isLong ? 'LONG' : 'SHORT'}
-                    </span>
-                    <div className="flex items-center">
-                        <DollarSign className={`w-5 h-5 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'} mr-1`} />
-                        <span className={`font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                            ${Math.abs(parseFloat(position.notional)).toFixed(2)}
-                        </span>
-                    </div>
-                    {/* Opened Time */}
-                    <div className="flex items-center space-x-2 bg-opacity-10 px-3 py-1.5 rounded-md ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}">
-                        <Clock className={`w-4 h-4 ${isDarkMode ? 'text-blue-400' : 'text-blue-500'}`} />
-                        <div className="flex flex-col">
-                            <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Opened</span>
-                            <span className={`text-sm font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                                {new Date(position.entryTime).toLocaleString(undefined, {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
+        <div className="bg-dark-bg-secondary/80 backdrop-blur-sm rounded-2xl border border-dark-border-primary shadow-glass hover:shadow-glow-sm transition-all duration-300 overflow-hidden group animate-scale-in">
+            {/* Header Section */}
+            <div className="bg-dark-bg-tertiary/50 px-6 py-4 border-b border-dark-border-secondary">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        {/* Symbol and Side */}
+                        <div className="flex items-center space-x-3">
+                            <h3 className="text-2xl font-bold text-dark-text-primary">
+                                {position.symbol}
+                            </h3>
+                            <span className={`px-3 py-1 rounded-full text-sm font-semibold transition-colors duration-300 ${
+                                isLong 
+                                    ? 'bg-dark-accent-success/20 text-dark-accent-success border border-dark-accent-success/30'
+                                    : 'bg-dark-accent-error/20 text-dark-accent-error border border-dark-accent-error/30'
+                            }`}>
+                                {isLong ? 'LONG' : 'SHORT'}
+                            </span>
+                        </div>
+                        
+                        {/* Leverage Badge */}
+                        <div className="flex items-center space-x-1 bg-dark-accent-primary/20 px-3 py-1 rounded-full border border-dark-accent-primary/30">
+                            <Zap className="w-4 h-4 text-dark-accent-primary" />
+                            <span className="text-sm font-semibold text-dark-accent-primary">
+                                {position.leverage || 1}x
                             </span>
                         </div>
                     </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <button
-                        onClick={() => setDialogState({ showTPSLDialog: true })}
-                        className={`flex items-center space-x-1 px-3 py-1 rounded-md 
-                            ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white`}
-                        title="Set TP/SL"
-                    >
-                        <Target size={16} />
-                        <span>Set TP/SL</span>
-                    </button>
-                    <button
-                        onClick={() => setDialogState({ showCloseConfirm: true })}
-                        disabled={isClosing}
-                        className={`flex items-center space-x-1 px-3 py-1 rounded-md 
-                            ${isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white`}
-                        title="Close Position"
-                    >
-                        <X size={16} />
-                        <span>{isClosing ? 'Closing...' : 'Close Position'}</span>
-                    </button>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-2">
+                        <button
+                            onClick={() => setDialogState({ showTPSLDialog: true })}
+                            className="flex items-center space-x-2 px-4 py-2 bg-dark-accent-primary hover:bg-dark-accent-secondary text-dark-text-primary rounded-xl transition-all duration-300 shadow-glow-sm hover:shadow-glow-md"
+                            title="Set TP/SL"
+                        >
+                            <Target size={16} />
+                            <span>TP/SL</span>
+                        </button>
+                        <button
+                            onClick={() => navigate(`/position/current/${position.symbol}`, { 
+                                state: { 
+                                    position: {
+                                        ...position,
+                                        side: parseFloat(position.positionAmt) > 0 ? 'LONG' : 'SHORT',
+                                        isActive: true,
+                                        profit: position.unRealizedProfit,
+                                        currentPrice: position.markPrice
+                                    }
+                                }
+                            })}
+                            className="flex items-center space-x-2 px-4 py-2 bg-dark-bg-hover hover:bg-dark-accent-info/20 text-dark-text-secondary hover:text-dark-accent-info border border-dark-border-secondary hover:border-dark-accent-info rounded-xl transition-all duration-300"
+                        >
+                            <LineChart size={16} />
+                            <span>Chart</span>
+                        </button>
+                        <button
+                            onClick={() => setDialogState({ showCloseConfirm: true })}
+                            disabled={isClosing}
+                            className="flex items-center space-x-2 px-4 py-2 bg-dark-accent-error hover:bg-dark-accent-error/80 text-dark-text-primary rounded-xl transition-all duration-300 disabled:opacity-50 shadow-glow-sm hover:shadow-glow-md"
+                            title="Close Position"
+                        >
+                            <X size={16} />
+                            <span>{isClosing ? 'Closing...' : 'Close'}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {error && (
-                <div className={`mb-4 p-2 rounded-md ${isDarkMode ? 'bg-red-900/50 text-red-200' : 'bg-red-100 text-red-700'}`}>
-                    {error}
+                <div className="mx-6 mt-4 p-4 rounded-xl bg-dark-accent-error/10 text-dark-accent-error border border-dark-accent-error/30 backdrop-blur-sm animate-fade-in">
+                    <div className="flex items-center space-x-2">
+                        <AlertCircle size={16} />
+                        <span>{error}</span>
+                    </div>
                 </div>
             )}
 
-            {/* Position Details Grid */}
-            <div className="grid grid-cols-3 gap-6 mb-6">
-                {/* P&L Section */}
-                <div className="flex flex-col">
-                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>P&L</span>
-                    <div className="flex items-center">
-                        {isLong ? (
-                            <TrendingUp className={`w-5 h-5 ${pnl >= 0 ? 'text-green-500' : 'text-red-500'} mr-1`} />
-                        ) : (
-                            <TrendingDown className={`w-5 h-5 ${pnl >= 0 ? 'text-green-500' : 'text-red-500'} mr-1`} />
-                        )}
-                        <span className={`font-semibold ${pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            ${pnl.toFixed(2)} ({pnlPercentage.toFixed(2)}%)
-                        </span>
+            {/* Main Content */}
+            <div className="p-6 space-y-6">
+                {/* P&L and Performance Section */}
+                <div className="p-4 rounded-xl bg-dark-bg-tertiary/50 border border-dark-border-secondary hover:border-dark-border-accent transition-colors duration-300">
+                    <h4 className="text-sm font-semibold mb-4 text-dark-text-muted uppercase tracking-wide">
+                        Performance
+                    </h4>
+                    <div className="grid grid-cols-2 gap-6">
+                        {/* Regular P&L */}
+                        <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                                {isLong ? (
+                                    <TrendingUp className={`w-5 h-5 ${pnl >= 0 ? 'text-dark-accent-success' : 'text-dark-accent-error'}`} />
+                                ) : (
+                                    <TrendingDown className={`w-5 h-5 ${pnl >= 0 ? 'text-dark-accent-success' : 'text-dark-accent-error'}`} />
+                                )}
+                                <span className="text-sm text-dark-text-muted">Unrealized P&L</span>
+                            </div>
+                            <div className={`text-2xl font-bold ${pnl >= 0 ? 'text-dark-accent-success' : 'text-dark-accent-error'}`}>
+                                ${pnl.toFixed(2)}
+                            </div>
+                            <div className={`text-sm ${pnl >= 0 ? 'text-dark-accent-success' : 'text-dark-accent-error'}`}>
+                                {pnlPercentage >= 0 ? '+' : ''}{pnlPercentage.toFixed(2)}%
+                            </div>
+                        </div>
+
+                        {/* Leveraged P&L */}
+                        <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                                <Zap className={`w-5 h-5 ${pnl >= 0 ? 'text-dark-accent-success' : 'text-dark-accent-error'}`} />
+                                <span className="text-sm text-dark-text-muted">Leveraged P&L</span>
+                            </div>
+                            <div className={`text-2xl font-bold ${pnl >= 0 ? 'text-dark-accent-success' : 'text-dark-accent-error'}`}>
+                                ${(pnl * (position.leverage || 1)).toFixed(2)}
+                            </div>
+                            <div className="text-sm text-dark-text-disabled">
+                                {((pnl * (position.leverage || 1)) / Math.abs(parseFloat(position.notional)) * 100).toFixed(2)}% of notional
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Entry Price */}
-                <div className="flex flex-col">
-                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Entry Price</span>
-                    <span className={`font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
-                        ${parseFloat(position.entryPrice).toFixed(2)}
-                    </span>
-                </div>
+                {/* Position Details Section */}
+                <div className="p-4 rounded-xl bg-dark-bg-tertiary/50 border border-dark-border-secondary hover:border-dark-border-accent transition-colors duration-300">
+                    <h4 className="text-sm font-semibold mb-4 text-dark-text-muted uppercase tracking-wide">
+                        Position Details
+                    </h4>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Entry Price */}
+                        <div className="space-y-2">
+                            <span className="text-sm text-dark-text-muted">Entry Price</span>
+                            <div className="text-lg font-semibold text-dark-text-primary">
+                                ${parseFloat(position.entryPrice).toFixed(2)}
+                            </div>
+                        </div>
 
-                {/* Current Price */}
-                <div className="flex flex-col">
-                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Current Price</span>
-                    <span className={`font-semibold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                        ${parseFloat(position.markPrice).toFixed(2)}
-                    </span>
-                </div>
+                        {/* Current Price */}
+                        <div className="space-y-2">
+                            <span className="text-sm text-dark-text-muted">Current Price</span>
+                            <div className="text-lg font-semibold text-dark-accent-secondary">
+                                ${parseFloat(position.markPrice).toFixed(2)}
+                            </div>
+                        </div>
 
+                        {/* Position Size */}
+                        <div className="space-y-2">
+                            <span className="text-sm text-dark-text-muted">Position Size</span>
+                            <div className="text-lg font-semibold text-dark-text-primary">
+                                {Math.abs(parseFloat(position.positionAmt)).toFixed(6)}
+                            </div>
+                        </div>
 
-            </div>
-
-            {/* Market TP/SL Section */}
-            <div className="mb-6 p-4 rounded-lg bg-opacity-10 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}">
-                <h4 className={`text-sm font-semibold mb-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Market Take Profit / Stop Loss
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col">
-                        <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Take Profit</span>
-                        <span className={`font-semibold ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
-                            ${hardtakeProfit}
-                        </span>
+                        {/* Margin Used */}
+                        <div className="space-y-2">
+                            <span className="text-sm text-dark-text-muted">Margin Used</span>
+                            <div className="text-lg font-semibold text-dark-accent-warning">
+                                ${(Math.abs(parseFloat(position.notional)) / (position.leverage || 1)).toFixed(2)}
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex flex-col">
-                        <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Stop Loss</span>
-                        <span className={`font-semibold ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>
-                            ${hardstopLoss}
-                        </span>
+
+                    {/* Additional Info Row */}
+                    <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-dark-border-secondary">
+                        {/* Notional Value */}
+                        <div className="space-y-2">
+                            <span className="text-sm text-dark-text-muted">Notional Value</span>
+                            <div className="flex items-center space-x-2">
+                                <DollarSign className="w-4 h-4 text-dark-accent-info" />
+                                <span className="text-lg font-semibold text-dark-text-primary">
+                                    ${Math.abs(parseFloat(position.notional)).toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Opened Time */}
+                        <div className="space-y-2">
+                            <span className="text-sm text-dark-text-muted">Opened</span>
+                            <div className="flex items-center space-x-2">
+                                <Clock className="w-4 h-4 text-dark-accent-info" />
+                                <span className="text-lg font-semibold text-dark-text-primary">
+                                    {new Date(position.entryTime).toLocaleString(undefined, {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Custom TP/SL Section */}
-            {(position.takeProfitPrice || position.stopLossPrice) && (
-                <div className="mb-6 p-4 rounded-lg bg-opacity-10 ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-50'}">
-                    <div className="flex items-center gap-2 mb-3">
-                        <h4 className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                            Custom Take Profit / Stop Loss
+                {/* Take Profit / Stop Loss Section */}
+                <div className="space-y-4">
+                    {/* Market TP/SL */}
+                    <div className="p-4 rounded-xl bg-dark-bg-tertiary/50 border border-dark-border-secondary hover:border-dark-border-accent transition-colors duration-300">
+                        <h4 className="text-sm font-semibold mb-4 text-dark-text-muted uppercase tracking-wide">
+                            Market TP/SL (Default)
                         </h4>
-                        <button
-                            onClick={() => handleCloseLimitOrders()}
-                            disabled={getDialogState().isClosingLimit}
-                            className={`flex items-center space-x-1 px-2 py-1 rounded-md text-xs
-                                ${isDarkMode ? 'bg-red-900 hover:bg-red-800' : 'bg-red-800 hover:bg-red-700'} text-white`}
-                            title="Cancel All Orders"
-                        >
-                            <X size={14} />
-                            <span>{getDialogState().isClosingLimit ? 'Canceling...' : 'Cancel All'}</span>
-                        </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        {position.takeProfitPrice && (
-                            <div className="flex flex-col">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Take Profit</span>
-                                    <button
-                                        onClick={() => handleCloseLimitOrders('TP')}
-                                        disabled={getDialogState().isClosingTP}
-                                        className={`flex items-center space-x-1 px-1.5 py-0.5 rounded-md text-xs
-                                            ${isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white`}
-                                        title="Cancel Take Profit"
-                                    >
-                                        <X size={12} />
-                                        <span>{getDialogState().isClosingTP ? 'Canceling...' : 'Cancel'}</span>
-                                    </button>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <span className="text-sm text-dark-text-muted">Take Profit</span>
+                                <div className="text-lg font-semibold text-dark-text-primary">
+                                    ${hardtakeProfit}
                                 </div>
-                                <span className={`font-semibold ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
-                                    ${parseFloat(position.takeProfitPrice).toFixed(2)}
-                                </span>
                             </div>
-                        )}
-                        {position.stopLossPrice && (
-                            <div className="flex flex-col">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Stop Loss</span>
-                                    <button
-                                        onClick={() => handleCloseLimitOrders('SL')}
-                                        disabled={getDialogState().isClosingSL}
-                                        className={`flex items-center space-x-1 px-1.5 py-0.5 rounded-md text-xs
-                                            ${isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white`}
-                                        title="Cancel Stop Loss"
-                                    >
-                                        <X size={12} />
-                                        <span>{getDialogState().isClosingSL ? 'Canceling...' : 'Cancel'}</span>
-                                    </button>
+                            <div className="space-y-2">
+                                <span className="text-sm text-dark-text-muted">Stop Loss</span>
+                                <div className="text-lg font-semibold text-dark-text-primary">
+                                    ${hardstopLoss}
                                 </div>
-                                <span className={`font-semibold ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>
-                                    ${parseFloat(position.stopLossPrice).toFixed(2)}
-                                </span>
                             </div>
-                        )}
+                        </div>
                     </div>
-                </div>
-            )}
 
-            {/* View Chart Button */}
-            <div className="flex justify-end">
-                <button
-                    onClick={() => navigate(`/position/current/${position.symbol}`, { 
-                        state: { 
-                            position: {
-                                ...position,
-                                side: parseFloat(position.positionAmt) > 0 ? 'LONG' : 'SHORT',
-                                isActive: true,
-                                profit: position.unRealizedProfit,
-                                currentPrice: position.markPrice
-                            }
-                        }
-                    })}
-                    className={`flex items-center space-x-1 px-3 py-1 rounded-md 
-                        ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} text-white font-medium`}
-                >
-                    <LineChart className="w-4 h-4" />
-                    <span>View Chart</span>
-                </button>
+                    {/* Custom TP/SL */}
+                    {(position.takeProfitPrice || position.stopLossPrice) && (
+                        <div className="p-4 rounded-xl border-2 border-dark-border-accent bg-dark-bg-tertiary/50">
+                            <div className="flex items-center justify-between mb-3">
+                                <h4 className="text-sm font-semibold text-dark-text-muted uppercase tracking-wide">
+                                    Active TP/SL Orders
+                                </h4>
+                                <button
+                                    onClick={() => handleCloseLimitOrders()}
+                                    disabled={getDialogState().isClosingLimit}
+                                    className="flex items-center space-x-1 px-3 py-1 bg-dark-accent-error hover:bg-dark-accent-error/80 text-dark-text-primary rounded-md text-xs transition-colors duration-300"
+                                    title="Cancel All Orders"
+                                >
+                                    <X size={14} />
+                                    <span>{getDialogState().isClosingLimit ? 'Canceling...' : 'Cancel All'}</span>
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                {position.takeProfitPrice && (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-dark-text-muted">Take Profit</span>
+                                            <button
+                                                onClick={() => handleCloseLimitOrders('TP')}
+                                                disabled={getDialogState().isClosingTP}
+                                                className="flex items-center space-x-1 px-2 py-1 bg-dark-accent-error hover:bg-dark-accent-error/80 text-dark-text-primary rounded text-xs"
+                                                title="Cancel Take Profit"
+                                            >
+                                                <X size={10} />
+                                                <span>{getDialogState().isClosingTP ? 'Canceling...' : 'Cancel'}</span>
+                                            </button>
+                                        </div>
+                                        <div className="text-lg font-semibold text-dark-text-primary">
+                                            ${parseFloat(position.takeProfitPrice).toFixed(2)}
+                                        </div>
+                                    </div>
+                                )}
+                                {position.stopLossPrice && (
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-dark-text-muted">Stop Loss</span>
+                                            <button
+                                                onClick={() => handleCloseLimitOrders('SL')}
+                                                disabled={getDialogState().isClosingSL}
+                                                className="flex items-center space-x-1 px-2 py-1 bg-dark-accent-error hover:bg-dark-accent-error/80 text-dark-text-primary rounded text-xs"
+                                                title="Cancel Stop Loss"
+                                            >
+                                                <X size={10} />
+                                                <span>{getDialogState().isClosingSL ? 'Canceling...' : 'Cancel'}</span>
+                                            </button>
+                                        </div>
+                                        <div className="text-lg font-semibold text-dark-text-primary">
+                                            ${parseFloat(position.stopLossPrice).toFixed(2)}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* TP/SL Dialog */}
             {getDialogState().showTPSLDialog && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} w-96`}>
-                        <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <div className={`p-6 rounded-lg bg-dark-bg-secondary w-96`}>
+                        <h3 className={`text-lg font-semibold mb-4 text-dark-text-primary`}>
                             Set Take Profit / Stop Loss
                         </h3>
                         
                         <div className="space-y-4">
                             <div>
-                                <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className={`block text-sm font-medium text-dark-text-muted`}>
                                     Take Profit (%)
                                 </label>
                                 <input
                                     type="number"
                                     value={getDialogState().tpPercentage}
                                     onChange={(e) => setDialogState({ tpPercentage: e.target.value })}
-                                    className={`mt-1 block w-full rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2`}
+                                    className={`mt-1 block w-full rounded-md bg-dark-bg-tertiary text-dark-text-primary px-3 py-2`}
                                     placeholder="Enter percentage"
                                 />
                             </div>
                             
                             <div>
-                                <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className={`block text-sm font-medium text-dark-text-muted`}>
                                     Stop Loss (%)
                                 </label>
                                 <input
                                     type="number"
                                     value={getDialogState().slPercentage}
                                     onChange={(e) => setDialogState({ slPercentage: e.target.value })}
-                                    className={`mt-1 block w-full rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2`}
+                                    className={`mt-1 block w-full rounded-md bg-dark-bg-tertiary text-dark-text-primary px-3 py-2`}
                                     placeholder="Enter percentage"
                                 />
                             </div>
 
                             <div>
-                                <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className={`block text-sm font-medium text-dark-text-muted`}>
                                     Take Profit Price
                                 </label>
                                 <input
                                     type="number"
                                     value={getDialogState().tpPrice}
                                     onChange={(e) => setDialogState({ tpPrice: e.target.value })}
-                                    className={`mt-1 block w-full rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2`}
+                                    className={`mt-1 block w-full rounded-md bg-dark-bg-tertiary text-dark-text-primary px-3 py-2`}
                                     placeholder="Enter price"
                                 />
                             </div>
                             
                             <div>
-                                <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <label className={`block text-sm font-medium text-dark-text-muted`}>
                                     Stop Loss Price
                                 </label>
                                 <input
                                     type="number"
                                     value={getDialogState().slPrice}
                                     onChange={(e) => setDialogState({ slPrice: e.target.value })}
-                                    className={`mt-1 block w-full rounded-md ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2`}
+                                    className={`mt-1 block w-full rounded-md bg-dark-bg-tertiary text-dark-text-primary px-3 py-2`}
                                     placeholder="Enter price"
                                 />
                             </div>
@@ -474,14 +540,14 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
                         <div className="mt-6 flex justify-end space-x-3">
                             <button
                                 onClick={() => setDialogState({ showTPSLDialog: false })}
-                                className={`px-4 py-2 rounded-md ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} text-sm font-medium`}
+                                className={`px-4 py-2 rounded-md bg-dark-bg-tertiary text-dark-text-primary`}
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSetTPSL}
                                 disabled={getDialogState().isSettingTPSL}
-                                className={`px-4 py-2 rounded-md ${isDarkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white text-sm font-medium`}
+                                className={`px-4 py-2 rounded-md bg-dark-accent-primary text-dark-text-primary`}
                             >
                                 {getDialogState().isSettingTPSL ? 'Setting...' : 'Set TP/SL'}
                             </button>
@@ -493,27 +559,27 @@ export const PositionCard: React.FC<PositionCardProps> = ({ position, pricePreci
             {/* Close Position Confirmation Dialog */}
             {getDialogState().showCloseConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className={`p-6 rounded-lg ${isDarkMode ? 'bg-gray-800' : 'bg-white'} w-96`}>
+                    <div className={`p-6 rounded-lg bg-dark-bg-secondary w-96`}>
                         <div className="flex items-center space-x-3 mb-4">
-                            <AlertCircle className={`w-6 h-6 ${isDarkMode ? 'text-red-400' : 'text-red-500'}`} />
-                            <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            <AlertCircle className={`w-6 h-6 text-dark-accent-error`} />
+                            <h3 className={`text-lg font-semibold text-dark-text-primary`}>
                                 Close Position
                             </h3>
                         </div>
-                        <p className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <p className={`mb-6 text-dark-text-muted`}>
                             Are you sure you want to close your {position.symbol} {isLong ? 'LONG' : 'SHORT'} position?
                         </p>
                         <div className="flex justify-end space-x-3">
                             <button
                                 onClick={() => setDialogState({ showCloseConfirm: false })}
-                                className={`px-4 py-2 rounded-md ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} text-sm font-medium`}
+                                className={`px-4 py-2 rounded-md bg-dark-bg-tertiary text-dark-text-primary`}
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleClosePosition}
                                 disabled={isClosing}
-                                className={`px-4 py-2 rounded-md ${isDarkMode ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} text-white text-sm font-medium`}
+                                className={`px-4 py-2 rounded-md bg-dark-accent-error text-dark-text-primary`}
                             >
                                 {isClosing ? 'Closing...' : 'Close Position'}
                             </button>
