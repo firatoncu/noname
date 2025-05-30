@@ -10,10 +10,11 @@ from utils.influxdb.db_status_check import db_status_check
 from src.check_condition import check_buy_conditions, check_sell_conditions
 from src.check_trending import trend_checker
 
-logger = get_logger(__name__)
-
 async def initial_adjustments(leverage, symbols, capital_tbu, client, error_logger):
     try: 
+      # Initialize logger inside the function
+      logger = get_logger(__name__)
+      
       init(autoreset=True)
 
       # List of available foreground colors (excluding RESET)

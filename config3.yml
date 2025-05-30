@@ -1,0 +1,53 @@
+symbols:
+  symbols: &id001
+  - ETHUSDT
+  - ADAUSDT
+  - LINKUSDT
+  - DOTUSDT
+  max_open_positions: 3
+  leverage: 10
+capital_tbu: 100
+strategy_name: Bollinger Bands & RSI
+api_keys:
+  api_key: QhTibgCwZjaDl01g37XpRKtro2qL7cgSunrXndfnazt9KZ0Nbcno0FPrV9Ja0hQ9
+  api_secret: qDJAb8xpevCUjdUXrKr3XjmizCZDgNI0Oz8fkzN7qgyBqcGWrMoGLygL5iSxFhEz
+db_status: enabled
+trading:
+  capital: 100
+  leverage: 10
+  margin:
+    mode: percentage
+    fixed_amount: 100.0
+    percentage: 100.0
+    ask_user_selection: false
+    default_to_full_margin: true
+    user_response_timeout: 30
+  symbols: *id001
+  paper_trading: false
+  auto_start: true
+  strategy:
+    name: Bollinger Bands & RSI
+    type: technical_analysis
+    enabled: true
+    timeframe: 1h
+    lookback_period: 20
+  risk:
+    max_position_size: 1000.0
+    max_daily_loss: 5
+    max_drawdown: 10.0
+    risk_per_trade: 2.0
+    max_open_positions: 3
+    stop_loss_percentage: 2
+    take_profit_ratio: 2
+exchange:
+  type: binance
+  testnet: false
+  rate_limit: 1200
+  timeout: 30
+  retry_attempts: 3
+logging:
+  level: INFO
+  console_output: true
+  structured_logging: true
+notifications:
+  enabled: false

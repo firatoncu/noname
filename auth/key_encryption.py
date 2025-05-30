@@ -9,14 +9,19 @@ from colorama import Fore, Style, init
 import random
 from time import sleep
 from utils.enhanced_logging import get_logger
+from utils.load_config import load_config
+import base64
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import yaml
+from pathlib import Path
 
-logger = get_logger()
-
-init()
-
-
-
-def encrypt_api_keys():
+def encrypt_api_keys(api_key, api_secret, password):
+    """Encrypt API keys using a password"""
+    # Initialize logger inside the function
+    logger = get_logger()
+    
     try:
         sleep(1)
         print(

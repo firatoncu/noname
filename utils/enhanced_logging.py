@@ -481,8 +481,8 @@ def get_logger(
     Returns:
         EnhancedLogger instance
         
-    Raises:
-        ValueError: If log level cannot be read from config.yml
+    Note:
+        If config.yml is missing, defaults to INFO level to allow setup process
     """
     global _loggers, _default_logger
     
@@ -495,10 +495,13 @@ def get_logger(
                 logging_config = config.get('logging', {})
                 log_level = logging_config.get('level')
                 if log_level is None:
-                    raise ValueError("logging.level not found in config.yml")
+                    # Config exists but no logging level specified, use INFO
+                    log_level = "INFO"
                 kwargs['log_level'] = log_level
             except Exception as e:
-                raise ValueError(f"Cannot read log level from config.yml: {e}")
+                # Config file missing or invalid - use INFO level to allow setup
+                print(f"Warning: Cannot read log level from config.yml ({e}), using INFO level")
+                kwargs['log_level'] = "INFO"
         
         _loggers[name] = EnhancedLogger(name, **kwargs)
         

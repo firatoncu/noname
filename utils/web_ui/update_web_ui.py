@@ -39,6 +39,10 @@ async def get_trading_conditions_ui(symbols):
 
 
 async def get_current_position_ui(client):
+    # Handle setup mode when client is None
+    if client is None:
+        return []
+        
     if await client.futures_position_information():
         positions = await client.futures_position_information()
         current_positions = []
@@ -161,6 +165,10 @@ def extract_position(trades: List[Dict[str, Any]], start_index: int) -> Tuple[Hi
     return pos, i
 
 async def get_last_5_positions(client) -> List[HistoricalPosition]:
+    # Handle setup mode when client is None
+    if client is None:
+        return []
+        
     try:
         # Retrieve a sufficiently large batch of trades
         trades = await client.futures_account_trades(limit=500)
@@ -194,6 +202,17 @@ class WalletInfo(BaseModel):
 
 # Async function to get wallet information
 async def get_wallet_info(client):
+    # Handle setup mode when client is None
+    if client is None:
+        return {
+            "totalBalance": "0.00",
+            "availableBalance": "0.00",
+            "unrealizedPnL": "0.00",
+            "dailyPnL": "0.00",
+            "weeklyPnL": "0.00",
+            "marginRatio": "0.0"
+        }
+    
     # Initialize AsyncClient    
 
     # Fetch Futures account information
