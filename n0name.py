@@ -42,7 +42,7 @@ from binance import AsyncClient
 from binance.exceptions import BinanceAPIException, BinanceRequestException
 
 # Local imports - Configuration and utilities
-from utils.load_config import load_config, get_db_status
+from utils.load_config import load_config, get_db_status, check_config_status
 from utils.initial_adjustments import initial_adjustments
 
 # Enhanced logging and exception handling
@@ -413,7 +413,7 @@ async def initialize_services(
         
     Returns:
         Tuple containing:
-            - npm_process: Frontend process handle
+            - npm_process: Frontend process handle (or None if not available)
             - server_task: Backend server task
             - updater_task: Data updater task  
             - check_trend_task: Trend checking task
@@ -441,11 +441,22 @@ async def initialize_services(
         if npm_process:
             logger.info("Frontend service started successfully")
         else:
-            logger.warning("Frontend service failed to start")
+            logger.info("Frontend service not available (running as executable or missing dependencies)")
         
         # Start backend server and data updater
         logger.info("Starting backend services...")
-        server_task, updater_task = await start_server_and_updater(symbols, client)
+        server_and_updater_result = await start_server_and_updater(symbols, client)
+        if server_and_updater_result is None:
+            logger.error("Backend services failed to start")
+            raise SystemException(
+                "Backend services returned None",
+                context=create_error_context(
+                    component="service_manager",
+                    operation="initialize_backend_services"
+                )
+            )
+        
+        server_task, updater_task = server_and_updater_result
         logger.info("Backend server and data updater started successfully")
         
         # Start trend checking service
@@ -663,8 +674,95 @@ async def main() -> None:
             }
         )
         
-        # Step 1: Load and validate configuration
-        logger.info("Step 1: Loading configuration...")
+        # Step 1: Check configuration status
+        logger.info("Step 1: Checking configuration status...")
+        config_exists, config_valid, config_message = check_config_status()
+        
+        if not config_exists or not config_valid:
+            logger.warning(
+                f"Configuration issue detected: {config_message}",
+                extra={
+                    "config_exists": config_exists,
+                    "config_valid": config_valid,
+                    "setup_required": True
+                }
+            )
+            
+            # Start web UI in setup mode
+            logger.info("Starting web UI for configuration setup...")
+            try:
+                # Start frontend for setup
+                npm_process = None
+                try:
+                    from utils.web_ui.npm_run_dev import start_frontend
+                    npm_process = await start_frontend()
+                    logger.info("Frontend started for configuration setup")
+                except Exception as e:
+                    logger.warning(f"Failed to start frontend: {e}")
+                
+                # Start backend API for setup
+                server_task = None
+                try:
+                    from utils.web_ui.project.api.main import start_server_and_updater
+                    # Start with minimal symbols for setup mode
+                    server_task = asyncio.create_task(
+                        start_server_and_updater(symbols=["BTCUSDT"], client=None)
+                    )
+                    logger.info("Backend API started for configuration setup")
+                except Exception as e:
+                    logger.warning(f"Failed to start backend API: {e}")
+                
+                # Wait for configuration to be created
+                logger.info(
+                    "Configuration setup required. Please visit the web interface to complete setup.",
+                    extra={
+                        "frontend_url": "https://localhost:5173",
+                        "setup_url": "https://localhost:5173/setup",
+                        "reason": "missing" if not config_exists else "invalid"
+                    }
+                )
+                
+                # Keep the setup services running until config is created
+                setup_check_interval = 10  # Check every 10 seconds
+                while True:
+                    await asyncio.sleep(setup_check_interval)
+                    
+                    # Check if config has been created/fixed
+                    config_exists, config_valid, config_message = check_config_status()
+                    if config_exists and config_valid:
+                        logger.info("Configuration has been created successfully. Restarting bot...")
+                        
+                        # Clean up setup services
+                        if npm_process:
+                            try:
+                                npm_process.terminate()
+                                npm_process.wait(timeout=5)
+                            except:
+                                pass
+                        
+                        if server_task:
+                            server_task.cancel()
+                            try:
+                                await server_task
+                            except asyncio.CancelledError:
+                                pass
+                        
+                        # Restart the main function with valid config
+                        logger.info("Restarting with valid configuration...")
+                        await main()
+                        return
+                    
+                    logger.debug(f"Configuration still not ready: {config_message}")
+                    
+            except KeyboardInterrupt:
+                logger.info("Setup interrupted by user")
+                sys.exit(0)
+            except Exception as e:
+                logger.error(f"Error during setup mode: {e}")
+                sys.exit(1)
+        
+        # Step 2: Load and validate configuration (config is now confirmed to be valid)
+        logger.info("Step 2: Loading configuration...")
         config = await load_and_validate_config(logger)
         if not config:
             logger.critical("Failed to load configuration - exiting")
@@ -688,12 +786,12 @@ async def main() -> None:
             }
         )
         
-        # Step 2: Setup trading strategy
-        logger.info("Step 2: Setting up trading strategy...")
+        # Step 3: Setup trading strategy
+        logger.info("Step 3: Setting up trading strategy...")
         await setup_strategy(strategy_name, logger)
         
-        # Step 3: Initialize API credentials
-        logger.info("Step 3: Initializing API credentials...")
+        # Step 4: Initialize API credentials
+        logger.info("Step 4: Initializing API credentials...")
         try:
             # Extract API credentials from configuration
             api_keys_config = config['api_keys']
@@ -734,8 +832,8 @@ async def main() -> None:
                 original_exception=e
             )
         
-        # Step 4: Initialize Binance client
-        logger.info("Step 4: Initializing Binance client...")
+        # Step 5: Initialize Binance client
+        logger.info("Step 5: Initializing Binance client...")
         client = await initialize_binance_client(
             api_key=api_key,
             api_secret=api_secret,
@@ -743,8 +841,8 @@ async def main() -> None:
             testnet=config.get('exchange', {}).get('testnet', False)
         )
         
-        # Step 5: Perform initial adjustments and validations
-        logger.info("Step 5: Performing initial system adjustments...")
+        # Step 6: Perform initial adjustments and validations
+        logger.info("Step 6: Performing initial system adjustments...")
         try:
             await initial_adjustments(
                 leverage=leverage,
@@ -759,16 +857,16 @@ async def main() -> None:
                 extra={"error": str(e)}
             )
         
-        # Step 6: Initialize all services
-        logger.info("Step 6: Initializing services...")
+        # Step 7: Initialize all services
+        logger.info("Step 7: Initializing services...")
         npm_process, server_task, updater_task, check_trend_task = await initialize_services(
             symbols=symbols,
             client=client,
             logger=logger
         )
         
-        # Step 7: Start health monitoring
-        logger.info("Step 7: Starting health monitoring...")
+        # Step 8: Start health monitoring
+        logger.info("Step 8: Starting health monitoring...")
         health_task = asyncio.create_task(
             health_check_loop(client, logger, HEALTH_CHECK_INTERVAL)
         )
@@ -789,8 +887,8 @@ async def main() -> None:
             }
         )
         
-        # Step 8: Main trading loop
-        logger.info("Step 8: Starting main trading loop...")
+        # Step 9: Main trading loop
+        logger.info("Step 9: Starting main trading loop...")
         iteration_count = 0
         last_status_log = time.time()
         status_log_interval = 300  # Log status every 5 minutes

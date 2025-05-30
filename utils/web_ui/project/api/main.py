@@ -417,8 +417,8 @@ async def update_config(config: dict):
         from utils.load_config import load_config
         from pathlib import Path
         
-        # Get the project root (parent of utils directory)
-        project_root = Path(__file__).parent.parent.parent.parent
+        # Get the project root (5 levels up from utils/web_ui/project/api/main.py)
+        project_root = Path(__file__).parent.parent.parent.parent.parent
         config_path = project_root / "config.yml"
         
         print(f"Updating config file at: {config_path}")  # Debug logging
@@ -479,6 +479,200 @@ async def update_config(config: dict):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to update configuration: {str(e)}")
+
+@app.post("/api/config/setup")
+async def setup_config(config_data: dict):
+    """Create initial configuration file for first-time setup"""
+    try:
+        from pathlib import Path
+        import yaml
+        
+        # Get the project root (5 levels up from utils/web_ui/project/api/main.py)
+        project_root = Path(__file__).parent.parent.parent.parent.parent
+        config_path = project_root / "config.yml"
+        
+        print(f"Setting up config file at: {config_path}")  # Debug logging
+        print(f"Received setup data: {config_data}")  # Debug logging
+        
+        # Validate required fields
+        required_fields = ['symbols', 'capital_tbu', 'strategy_name', 'api_keys']
+        missing_fields = [field for field in required_fields if field not in config_data]
+        if missing_fields:
+            raise HTTPException(status_code=400, detail=f"Missing required fields: {', '.join(missing_fields)}")
+        
+        # Validate API keys
+        api_keys = config_data.get('api_keys', {})
+        if not api_keys.get('api_key') or not api_keys.get('api_secret'):
+            raise HTTPException(status_code=400, detail="API key and secret are required")
+        
+        # Validate symbols structure
+        symbols_config = config_data.get('symbols', {})
+        if not symbols_config.get('symbols') or not isinstance(symbols_config['symbols'], list):
+            raise HTTPException(status_code=400, detail="At least one trading symbol is required")
+        
+        # Create the complete configuration structure
+        complete_config = {
+            # Legacy format for backward compatibility
+            'symbols': {
+                'symbols': symbols_config['symbols'],
+                'max_open_positions': symbols_config.get('max_open_positions', 3),
+                'leverage': symbols_config.get('leverage', 10)
+            },
+            'capital_tbu': config_data['capital_tbu'],
+            'strategy_name': config_data['strategy_name'],
+            'api_keys': {
+                'api_key': api_keys['api_key'],
+                'api_secret': api_keys['api_secret']
+            },
+            'db_status': config_data.get('db_status', 'enabled'),
+            
+            # New structured format
+            'trading': {
+                'capital': config_data['capital_tbu'],
+                'leverage': symbols_config.get('leverage', 10),
+                'margin': {
+                    'mode': 'percentage',
+                    'fixed_amount': 100.0,
+                    'percentage': 100.0,
+                    'ask_user_selection': False,
+                    'default_to_full_margin': True,
+                    'user_response_timeout': 30
+                },
+                'symbols': symbols_config['symbols'],
+                'paper_trading': False,
+                'auto_start': True,
+                'strategy': {
+                    'name': config_data['strategy_name'],
+                    'type': 'technical_analysis',
+                    'enabled': True,
+                    'timeframe': '1h',
+                    'lookback_period': 20
+                },
+                'risk': {
+                    'max_position_size': 1000.0,
+                    'max_daily_loss': config_data.get('risk_management', {}).get('max_daily_loss', 5.0),
+                    'max_drawdown': 10.0,
+                    'risk_per_trade': 2.0,
+                    'max_open_positions': symbols_config.get('max_open_positions', 3),
+                    'stop_loss_percentage': config_data.get('risk_management', {}).get('stop_loss_percentage', 2.0),
+                    'take_profit_ratio': config_data.get('risk_management', {}).get('take_profit_ratio', 2.0)
+                }
+            },
+            'exchange': config_data.get('exchange', {
+                'type': 'binance',
+                'testnet': True,
+                'rate_limit': 1200,
+                'timeout': 30,
+                'retry_attempts': 3
+            }),
+            'logging': config_data.get('logging', {
+                'level': 'INFO',
+                'console_output': True,
+                'structured_logging': True
+            }),
+            'notifications': config_data.get('notifications', {
+                'enabled': False
+            })
+        }
+        
+        # Create backup of existing config if it exists
+        if config_path.exists():
+            backup_path = config_path.with_suffix('.yml.backup')
+            import shutil
+            shutil.copy2(config_path, backup_path)
+            print(f"Created backup of existing config at: {backup_path}")
+        
+        # Write the new configuration
+        with open(config_path, 'w', encoding='utf-8') as file:
+            yaml.dump(complete_config, file, default_flow_style=False, sort_keys=False)
+        
+        print("Configuration setup completed successfully")
+        return {"message": "Configuration created successfully", "config_path": str(config_path)}
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        print(f"Error setting up config: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to create configuration: {str(e)}")
+
+@app.get("/api/config/status")
+async def get_config_status():
+    """Check if configuration file exists and is valid"""
+    try:
+        from pathlib import Path
+        from utils.load_config import load_config
+        
+        # Get the project root (5 levels up from utils/web_ui/project/api/main.py)
+        project_root = Path(__file__).parent.parent.parent.parent.parent
+        config_path = project_root / "config.yml"
+        
+        print(f"DEBUG: Checking config at path: {config_path}")
+        print(f"DEBUG: Config file exists: {config_path.exists()}")
+        
+        if not config_path.exists():
+            return {
+                "exists": False,
+                "valid": False,
+                "message": "Configuration file not found",
+                "setup_required": True
+            }
+        
+        try:
+            # Try to load and validate the config
+            print("DEBUG: Attempting to load config...")
+            config = load_config()
+            print(f"DEBUG: Config loaded successfully. Keys: {list(config.keys())}")
+            
+            # Basic validation
+            required_keys = ['symbols', 'capital_tbu', 'api_keys', 'strategy_name']
+            missing_keys = [key for key in required_keys if key not in config]
+            
+            print(f"DEBUG: Required keys: {required_keys}")
+            print(f"DEBUG: Missing keys: {missing_keys}")
+            
+            if missing_keys:
+                return {
+                    "exists": True,
+                    "valid": False,
+                    "message": f"Configuration is missing required keys: {', '.join(missing_keys)}",
+                    "setup_required": True,
+                    "missing_keys": missing_keys
+                }
+            
+            print("DEBUG: All required keys found - config is valid")
+            return {
+                "exists": True,
+                "valid": True,
+                "message": "Configuration is valid",
+                "setup_required": False
+            }
+            
+        except Exception as e:
+            print(f"DEBUG: Exception while loading config: {type(e).__name__}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "exists": True,
+                "valid": False,
+                "message": f"Configuration file is invalid: {str(e)}",
+                "setup_required": True,
+                "error": str(e)
+            }
+            
+    except Exception as e:
+        print(f"DEBUG: Exception in get_config_status: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {
+            "exists": False,
+            "valid": False,
+            "message": f"Error checking configuration: {str(e)}",
+            "setup_required": True,
+            "error": str(e)
+        }
 
 # Position Analysis endpoints
 @app.get("/api/analysis/positions", response_model=List[PositionAnalysisData])
@@ -1056,7 +1250,32 @@ async def update_ui_values(new_positions, new_conditions, new_wallet, new_histor
 async def update_ui(symbols, client):
     while True:
         try:
-            # Read symbols dynamically from config to pick up changes
+            # Check if we're in setup mode (no client)
+            if client is None:
+                # In setup mode, provide empty/mock data
+                trading_conditions_data = []
+                current_position_data = []
+                wallet_data = {
+                    "totalBalance": "0.00",
+                    "availableBalance": "0.00",
+                    "unrealizedPnL": "0.00",
+                    "dailyPnL": "0.00",
+                    "weeklyPnL": "0.00",
+                    "marginRatio": "0.0"
+                }
+                historical_data = []
+                
+                await update_ui_values(
+                    current_position_data, 
+                    trading_conditions_data,
+                    wallet_data,
+                    historical_data)
+                
+                # In setup mode, check less frequently
+                await asyncio.sleep(5)
+                continue
+            
+            # Normal mode - read symbols dynamically from config to pick up changes
             try:
                 from utils.load_config import load_config
                 current_config = load_config()
@@ -1120,12 +1339,48 @@ def run_uvicorn():
 
 async def start_server_and_updater(symbols, client):
     """Start both the server and updater as background tasks"""
-    global binance_client
-    binance_client = client
-    server = run_uvicorn()
-    server_task = asyncio.create_task(server.serve())
-    updater_task = asyncio.create_task(update_ui(symbols, client))
-    return server_task, updater_task
+    try:
+        global binance_client
+        binance_client = client
+        
+        # Try to start the server, but handle failures gracefully
+        try:
+            server = run_uvicorn()
+            server_task = asyncio.create_task(server.serve())
+        except Exception as e:
+            print(f"Warning: Failed to start uvicorn server: {e}")
+            # Create a dummy task that completes immediately for compatibility
+            async def dummy_server():
+                print("Server task running in fallback mode (API endpoints not available)")
+                while True:
+                    await asyncio.sleep(60)  # Keep alive
+            server_task = asyncio.create_task(dummy_server())
+        
+        # Start the updater task
+        try:
+            updater_task = asyncio.create_task(update_ui(symbols, client))
+        except Exception as e:
+            print(f"Warning: Failed to start updater task: {e}")
+            # Create a dummy task for compatibility
+            async def dummy_updater():
+                print("Updater task running in fallback mode")
+                while True:
+                    await asyncio.sleep(60)  # Keep alive
+            updater_task = asyncio.create_task(dummy_updater())
+        
+        return server_task, updater_task
+        
+    except Exception as e:
+        print(f"Critical error in start_server_and_updater: {e}")
+        # Always return a tuple, even in case of complete failure
+        async def dummy_task():
+            while True:
+                await asyncio.sleep(60)
+        
+        dummy_server_task = asyncio.create_task(dummy_task())
+        dummy_updater_task = asyncio.create_task(dummy_task())
+        
+        return dummy_server_task, dummy_updater_task
 
 async def get_mock_analysis_positions(timeframe: str, symbol: str):
     """Fallback mock data generation"""

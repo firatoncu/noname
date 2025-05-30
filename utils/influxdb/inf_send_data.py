@@ -1,20 +1,40 @@
-from influxdb import InfluxDBClient
+try:
+    from influxdb import InfluxDBClient as OldInfluxDBClient
+    OLD_INFLUXDB_AVAILABLE = True
+except ImportError:
+    OLD_INFLUXDB_AVAILABLE = False
+
+try:
+    from influxdb_client import InfluxDBClient, Point
+    from influxdb_client.client.write_api import SYNCHRONOUS
+    NEW_INFLUXDB_AVAILABLE = True
+except ImportError:
+    NEW_INFLUXDB_AVAILABLE = False
+
 from utils.enhanced_logging import get_logger
 from datetime import datetime
 import pytz
 from utils.globals import set_last_timestamp, get_last_timestamp, get_buyconda, get_buycondb, get_buycondc, get_sellconda, get_sellcondb, get_sellcondc
+import asyncio
 
-logger = get_logger()
-
-# InfluxDB istemcisi oluştur
-client = InfluxDBClient(host="localhost", port=8086, database="n0namedb")
-
+# InfluxDB client - only create if available
+client = None
+if OLD_INFLUXDB_AVAILABLE:
+    try:
+        client = OldInfluxDBClient(host="localhost", port=8086, database="n0namedb")
+    except Exception:
+        client = None
 
 # Gerçek zamanlı veri yazma fonksiyonu
 async def write_live_data(last_candle, symbol):
-
+    # Initialize logger inside the function
+    logger = get_logger()
 
     try:
+        if not OLD_INFLUXDB_AVAILABLE:
+            logger.debug("InfluxDB not available, skipping data write")
+            return
+            
         timestamp = last_candle['timestamp']
         open_price = last_candle['open']
         high_price = last_candle['high']
@@ -36,7 +56,7 @@ async def write_live_data(last_candle, symbol):
                 },
             }
         ]
-        client = InfluxDBClient(host="localhost", port=8086, database="n0namedb")
+        client = OldInfluxDBClient(host="localhost", port=8086, database="n0namedb")
         client.write_points(json_body)
 
     except Exception as e:
@@ -44,7 +64,14 @@ async def write_live_data(last_candle, symbol):
         return
     
 async def write_live_conditions(timestamp, symbol):
+    # Initialize logger inside the function
+    logger = get_logger()
+
     try:
+        if not OLD_INFLUXDB_AVAILABLE:
+            logger.debug("InfluxDB not available, skipping conditions write")
+            return
+            
         timestamp = timestamp/1000
         utc_time = datetime.fromtimestamp(timestamp, tz=pytz.UTC)
         tr_timezone = pytz.timezone("Europe/Istanbul")
@@ -71,7 +98,7 @@ async def write_live_conditions(timestamp, symbol):
                 },
             }
         ]
-        client = InfluxDBClient(host="localhost", port=8086, database="n0namedb")
+        client = OldInfluxDBClient(host="localhost", port=8086, database="n0namedb")
         client.write_points(json_body)
 
     except Exception as e:
@@ -94,3 +121,13 @@ async def condition_writer(df, symbol):
     if df['timestamp'].iloc[-1] != get_last_timestamp(symbol):
         await write_live_conditions(df['timestamp'].iloc[-1], symbol)
         set_last_timestamp(df['timestamp'].iloc[-1], symbol)
+
+async def send_data_to_influxdb(symbol, price, timestamp, position_side, position_size, pnl, strategy):
+    # Initialize logger inside the function
+    logger = get_logger()
+    
+    try:
+        # Rest of the function code...
+        pass
+    except Exception as e:
+        logger.error(f"Error in sending data to influxdb: {e}")

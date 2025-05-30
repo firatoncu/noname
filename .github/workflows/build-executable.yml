@@ -1,0 +1,183 @@
+name: Build Executable
+
+on:
+  # Trigger on push to main branch
+  push:
+    branches: [ main, master ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  
+  # Trigger on pull request
+  pull_request:
+    branches: [ main, master ]
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - release
+        - debug
+        - onefile
+      
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-build.txt
+    
+    - name: Build executable (Release)
+      if: github.event.inputs.build_type == 'release' || github.event.inputs.build_type == ''
+      run: |
+        python build_exe.py --clean
+    
+    - name: Build executable (Debug)
+      if: github.event.inputs.build_type == 'debug'
+      run: |
+        python build_exe.py --debug --clean
+    
+    - name: Build executable (Single File)
+      if: github.event.inputs.build_type == 'onefile'
+      run: |
+        python build_exe.py --onefile --clean
+    
+    - name: Test executable
+      run: |
+        if (Test-Path "dist\n0name_trading_bot_distribution\n0name_trading_bot.exe") {
+          Write-Host "✓ Executable created successfully"
+          Get-ChildItem "dist\n0name_trading_bot_distribution" | Select-Object Name, Length
+        } else {
+          Write-Host "✗ Executable not found"
+          exit 1
+        }
+      shell: powershell
+    
+    - name: Create release archive
+      run: |
+        Compress-Archive -Path "dist\n0name_trading_bot_distribution\*" -DestinationPath "n0name_trading_bot_windows.zip"
+      shell: powershell
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: n0name-trading-bot-windows
+        path: |
+          dist/n0name_trading_bot_distribution/
+          n0name_trading_bot_windows.zip
+        retention-days: 30
+    
+    - name: Upload executable only
+      uses: actions/upload-artifact@v3
+      with:
+        name: executable-only
+        path: dist/n0name_trading_bot_distribution/n0name_trading_bot.exe
+        retention-days: 7
+
+  build-info:
+    runs-on: ubuntu-latest
+    needs: build-windows
+    
+    steps:
+    - name: Build Summary
+      run: |
+        echo "## 🎉 Build Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📁 Artifacts Created:" >> $GITHUB_STEP_SUMMARY
+        echo "- **n0name-trading-bot-windows**: Complete distribution package" >> $GITHUB_STEP_SUMMARY
+        echo "- **executable-only**: Just the .exe file" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📋 Next Steps:" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the artifacts from the Actions tab" >> $GITHUB_STEP_SUMMARY
+        echo "2. Test the executable on your local machine" >> $GITHUB_STEP_SUMMARY
+        echo "3. Configure API keys in config.yml" >> $GITHUB_STEP_SUMMARY
+        echo "4. Share with friends (without your API keys!)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### ⚠️ Important Reminders:" >> $GITHUB_STEP_SUMMARY
+        echo "- Never share your personal API keys" >> $GITHUB_STEP_SUMMARY
+        echo "- Recipients need to configure their own credentials" >> $GITHUB_STEP_SUMMARY
+        echo "- Test with small amounts first" >> $GITHUB_STEP_SUMMARY
+        echo "- Consider using testnet for initial testing" >> $GITHUB_STEP_SUMMARY
+
+  # Optional: Create a release on tag push
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    needs: build-windows
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-build.txt
+    
+    - name: Build release executable
+      run: |
+        python build_exe.py --clean
+    
+    - name: Create release archive
+      run: |
+        Compress-Archive -Path "dist\n0name_trading_bot_distribution\*" -DestinationPath "n0name_trading_bot_${{ github.ref_name }}_windows.zip"
+      shell: powershell
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          n0name_trading_bot_${{ github.ref_name }}_windows.zip
+        body: |
+          ## n0name Trading Bot ${{ github.ref_name }}
+          
+          ### 📦 What's Included
+          - Standalone Windows executable
+          - Configuration templates
+          - Documentation and setup instructions
+          - Easy startup script
+          
+          ### 🚀 Quick Start
+          1. Download and extract the zip file
+          2. Configure your API keys in `config.yml`
+          3. Run `start_trading_bot.bat`
+          
+          ### ⚠️ Important
+          - Configure your own Binance API keys
+          - Start with testnet for testing
+          - Never share your API credentials
+          - Review all settings before live trading
+          
+          ### 📋 System Requirements
+          - Windows 10 or later
+          - Internet connection
+          - Valid Binance account and API keys
+          
+          Happy trading! 🎯
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

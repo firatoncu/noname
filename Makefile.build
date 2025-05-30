@@ -1,0 +1,107 @@
+# n0name Trading Bot - Build Makefile
+# Provides convenient make commands for building the executable
+
+.PHONY: help install build build-debug build-onefile clean test-build dist
+
+# Default target
+help:
+	@echo "n0name Trading Bot - Build Commands"
+	@echo "=================================="
+	@echo ""
+	@echo "Available commands:"
+	@echo "  make install      - Install build dependencies"
+	@echo "  make build        - Build release executable"
+	@echo "  make build-debug  - Build debug executable"
+	@echo "  make build-onefile- Build single file executable"
+	@echo "  make clean        - Clean build directories"
+	@echo "  make test-build   - Test the built executable"
+	@echo "  make dist         - Create distribution package"
+	@echo "  make all          - Install deps, clean, and build"
+	@echo ""
+	@echo "Examples:"
+	@echo "  make all          # Complete build process"
+	@echo "  make clean build  # Clean and build"
+	@echo ""
+
+# Install build dependencies
+install:
+	@echo "Installing build dependencies..."
+	python -m pip install --upgrade pip
+	python -m pip install -r requirements-build.txt
+	@echo "Dependencies installed successfully!"
+
+# Build release version
+build:
+	@echo "Building release executable..."
+	python build_exe.py
+	@echo "Build completed!"
+
+# Build debug version
+build-debug:
+	@echo "Building debug executable..."
+	python build_exe.py --debug
+	@echo "Debug build completed!"
+
+# Build single file version
+build-onefile:
+	@echo "Building single file executable..."
+	python build_exe.py --onefile
+	@echo "Single file build completed!"
+
+# Clean build directories
+clean:
+	@echo "Cleaning build directories..."
+	python build_exe.py --clean
+	@echo "Clean completed!"
+
+# Test the built executable
+test-build:
+	@echo "Testing built executable..."
+	@if exist "dist\n0name_trading_bot_distribution\n0name_trading_bot.exe" ( \
+		echo "✓ Executable found" \
+	) else ( \
+		echo "✗ Executable not found - run 'make build' first" \
+	)
+	@if exist "dist\n0name_trading_bot_distribution\config.yml" ( \
+		echo "✓ Configuration file found" \
+	) else ( \
+		echo "✗ Configuration file not found" \
+	)
+	@echo "Test completed!"
+
+# Create distribution package (alias for build)
+dist: build
+	@echo "Distribution package created in dist/n0name_trading_bot_distribution/"
+
+# Complete build process
+all: install clean build
+	@echo ""
+	@echo "🎉 Complete build process finished!"
+	@echo "📁 Distribution package: dist/n0name_trading_bot_distribution/"
+	@echo ""
+	@echo "Next steps:"
+	@echo "1. Test the executable: make test-build"
+	@echo "2. Configure API keys in config.yml"
+	@echo "3. Share the distribution folder with friends"
+
+# Advanced builds
+build-all-variants:
+	@echo "Building all variants..."
+	$(MAKE) clean
+	$(MAKE) build
+	@echo "Release build completed"
+	$(MAKE) clean
+	$(MAKE) build-debug
+	@echo "Debug build completed"
+	$(MAKE) clean
+	$(MAKE) build-onefile
+	@echo "Single file build completed"
+	@echo "All variants built successfully!"
+
+# Quick development cycle
+dev: clean build-debug test-build
+	@echo "Development build cycle completed!"
+
+# Production build
+prod: clean build test-build
+	@echo "Production build completed and tested!" 

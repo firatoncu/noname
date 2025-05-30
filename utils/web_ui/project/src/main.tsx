@@ -9,6 +9,7 @@ import TradingConditionsPage from './pages/TradingConditionsPage';
 import TradingConditionChart from './pages/TradingConditionChart';
 import PositionAnalysis from './pages/PositionAnalysis';
 import Settings from './pages/Settings';
+import ConfigurationSetup from './pages/ConfigurationSetup';
 import './index.css';
 
 const router = createBrowserRouter([
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "/settings",
         element: <Settings />,
+      },
+      {
+        path: "/setup",
+        element: <ConfigurationSetup />,
       },
       {
         path: "/position/:id",

@@ -4,11 +4,10 @@ from utils.cursor_movement import logger_move_cursor_up, clean_line
 import asyncio
 from utils.enhanced_logging import get_logger
 
-logger = get_logger(__name__)
-
-init()
-
-async def current_status(symbols):   
+async def current_status(symbols, client):
+    # Initialize logger inside the function
+    logger = get_logger(__name__)
+    
     try:    
         status_lines_count = 0
         buy_status = ""
